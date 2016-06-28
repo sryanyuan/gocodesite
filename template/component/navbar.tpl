@@ -11,7 +11,7 @@
 		<ul class="nav navbar-nav navbar-left">
 		  <li>
 			<a href="/" class="navbar-brand">
-				<img width="100" height="30" src="/static/img/logo.png">
+				<img src="/static/img/logo.png" style="margin-top: -9px;">
 			</a>
 		  </li>
           <li {{if eq .active "home"}}class="active"{{end}}>
