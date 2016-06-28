@@ -9,6 +9,8 @@ type AppConfig struct {
 	Debug         bool
 	DBAddress     string
 	ListenAddress string
+	WeiboAddress  string
+	GithubAddress string
 }
 
 var (

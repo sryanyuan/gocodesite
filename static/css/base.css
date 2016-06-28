@@ -1,4 +1,25 @@
+body,button, input, select, textarea,h1 ,h2, h3, h4, h5, h6 { font-family: Microsoft YaHei,'宋体' , Tahoma, Helvetica, Arial, "\5b8b\4f53", sans-serif;}
+
 body {
   padding-top: 70px;
   padding-bottom: 30px;
+  background-color: #f2f2f2;
+  padding-bottom: 40px;
+}
+
+#id_footer {
+    border-top: 1px solid rgba(0, 0, 0, 0.22);
+    background-color: #fff;
+    text-align: center;
+    color: #999;
+    padding: 0px 10px 0px 10px;
+}
+
+.footer-links {
+	margin: 10px 0;
+    padding-left: 0;
+}
+.footer-links li {
+	display: inline;
+	padding: 0 2px;
 }

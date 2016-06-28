@@ -9,6 +9,12 @@ import (
 	"github.com/gorilla/mux"
 )
 
+var layoutFiles = []string{
+	"template/layout.tpl",
+	"template/component/navbar.tpl",
+	"template/component/footer.tpl",
+}
+
 func Start() error {
 	var err error
 	//	check db config

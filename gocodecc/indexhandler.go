@@ -1,5 +1,9 @@
 package gocodecc
 
 func indexHandler(ctx *RequestContext) {
-	ctx.w.Write([]byte("hello index"))
+	dataCtx := map[string]interface{}{
+		"active": "home",
+	}
+	dataHtml := renderTemplate(ctx, []string{"template/home.tpl"}, dataCtx)
+	ctx.w.Write(dataHtml)
 }

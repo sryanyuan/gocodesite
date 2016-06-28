@@ -6,4 +6,4 @@ import (
 
 const cookieKey = "gocodecc-session-store"
 
-var store = sessions.NewCookieStore(cookieKey)
+var store = sessions.NewCookieStore([]byte(cookieKey))
