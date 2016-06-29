@@ -94,6 +94,7 @@ func renderTemplate(rctx *RequestContext, fileNames []string, data map[string]in
 	data["goversion"] = goVersion
 	data["requesttime"] = rctx.tmRequest
 	data["config"] = &g_appConfig
+	data["imgPrefix"] = "/static/img"
 
 	//	get render data
 	return parseTemplate(fileNames, layoutFiles, data)

@@ -4,11 +4,16 @@ body {
   padding-top: 70px;
   padding-bottom: 30px;
   background-color: #f2f2f2;
-  padding-bottom: 40px;
+  padding-bottom: 0px;
+}
+
+#id-content {
+	padding-bottom: 70px;
 }
 
 #id_footer {
     border-top: 1px solid rgba(0, 0, 0, 0.22);
+	border-bottom: 1px solid rgba(0, 0, 0, 0.22);
     background-color: #fff;
     text-align: center;
     color: #999;
@@ -23,3 +28,43 @@ body {
 	display: inline;
 	padding: 0 2px;
 }
+
+#id-navbar-right {
+	margin: auto 10px;
+}
+
+#id-navbar-avatar {
+	padding-top: 9px;
+	padding-bottom:9px;
+}
+
+#id-footer-links {
+	margin-bottom: 0px;
+}
+
+/*#id-navbar-search{
+	height: 25px;
+	margin: 4px;
+}*/
+
+/*
+让navbar变矮？？
+
+.navbar-nav>li>a {
+padding-top: 10px;
+padding-bottom: 10px;
+}
+.navbar-brand {
+height: 40px;
+padding-top: 10px;
+}
+.navbar {
+min-height: 40px;
+}
+
+
+.navbar-toggle {
+margin-top: 4px;
+margin-bottom: 4px;
+}
+*/

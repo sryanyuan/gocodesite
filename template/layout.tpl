@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
-    <title>{{template "Title"}}</title>
+    <title>{{template "Title"}} - GoCode</title>
     <!-- Bootstrap -->
     <link href="/static/css/bootstrap.min.css" rel="stylesheet" />
     <!-- Bootstrap theme -->
@@ -31,5 +31,23 @@
   <script src="/static/js/bootstrap.min.js"></script>
   <!-- Custom js -->
   <script src="/static/js/base.js"></script>
+  <!-- Adjust footer -->
+  <!--script>
+	(function(){
+      if($(window).height()==$(document).height()){
+        $("#id_footer").addClass("navbar-fixed-bottom");
+      }
+      else{
+        $("#id_footer").removeClass("navbar-fixed-bottom");
+      }
+    })()
+  </script-->
+  <script>
+	(function(){
+      if($(window).height()!=$(document).height()){
+        $("#id_footer").removeClass("navbar-fixed-bottom");
+      }
+    })()
+  </script>
   </body>
 </html>

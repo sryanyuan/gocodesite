@@ -1,31 +1,47 @@
 {{define "navbar"}}
 <nav class="navbar navbar-default navbar-fixed-top" role="navigation" id="navbar">
-    <div class="container">
-      <!--div class="navbar-header">
-		<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse">
-			<span class="sr-only">Toggle navigation</span>
-		</button> 
-		<a class="navbar-brand" href="/">Project name</a>
-	  </div-->
-	  <div class="navbar-collapse collapse">
-		<ul class="nav navbar-nav navbar-left">
-		  <li>
-			<a href="/" class="navbar-brand">
-				<img src="/static/img/logo.png" style="margin-top: -9px;">
-			</a>
-		  </li>
+    <!--div class="container"-->
+	  <!--header-->
+	  <div class="navbar-header">
+		<a href="/" class="navbar-brand">
+			<img src="/static/img/logo.png" style="margin-top: -9px;">
+		</a>
+	  </div>
+	  
+	  <!--left bar-->
+	  <ul class="nav navbar-nav navbar-left">
           <li {{if eq .active "home"}}class="active"{{end}}>
             <a href="/">主页</a>
           </li>
-		</ul>
-		<ul class="nav navbar-nav navbar-right">
+	  </ul>
+	  
+	  <!--right bar-->
+	  <ul id="id-navbar-right" class="nav navbar-nav navbar-right">
           <li class="dropdown">
-			{{if eq .user.Uid 1}}
+			{{if eq .user.Uid 0}}
             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
-            aria-expanded="false"><i class="fa fa-user"></i> 请登录 <i class="fa fa-angle-down"></i></a>
+            aria-expanded="false"><i class="fa fa-user"></i> 游客 </i><i class="fa fa-caret-down"></i></a>
+			<ul class="dropdown-menu">
+			  <li>
+                <a href="/signin"><i class="fa fa-sign-in"></i>&nbsp;&nbsp;登陆</a>
+              </li>
+              <li>
+                <a href="/signup"><i class="fa fa-level-up"></i>&nbsp;&nbsp;注册</a>
+              </li>
+            </ul>
 			{{else}}
-			<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
-            aria-expanded="false">{{.user.UserName}} <i class="fa fa-caret-down"></i></a>
+			<a href="#" id="id-navbar-avatar" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
+            aria-expanded="false">
+			{{if eq .user.Sex 0}}
+				{{if eq .user.Avatar ""}}
+				<img alt="{{.user.UserName}}" class="avatar" height="32" src="{{.imgPrefix}}/male.png" width="32" />
+				{{end}}
+			{{else}}
+				{{if eq .user.Avatar ""}}
+				<img alt="{{.user.UserName}}" class="avatar" height="32" src="{{.imgPrefix}}/female.png" width="32" />
+				{{end}}
+			{{end}}
+			<i class="fa fa-caret-down"></i></a>
             <ul id="id_loginmenu" class="dropdown-menu">
 			  <li>
                 <a href="#"><i class="fa fa-cog"></i>&nbsp;&nbsp;用户中心</a>
@@ -35,9 +51,23 @@
               </li>
             </ul>
 			{{end}}
+        </li>
+      </ul>
+	  <!--form id="id-navbar-search" action="/search" class="navbar-form pull-right" method="get" role="search">
+			<div class="form-group">
+				<input name="q" type="text" class="form-control" placeholder="搜索">
+			</div>
+		</form-->
+		<ul class="nav navbar-nav navbar-right">
+          <li class="nav-search hidden-xs hidden-sm">
+            <form class="navbar-form form-search active" action="/search" method="GET">
+              <div class="form-group">
+                <input class="form-control" name="q" type="text" value="" placeholder="搜索" />
+              </div>
+              <i class="fa btn-search fa-search"></i>
+            </form>
           </li>
         </ul>
-      </div>
-    </div>
+    <!--/div-->
  </nav>
 {{end}}

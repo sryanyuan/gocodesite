@@ -1,5 +1,5 @@
-{{define "Title"}}首页 - GoCode{{end}}
+{{define "Title"}}首页{{end}}
 {{define "content"}}
-<div class="container theme-showcase" role="main">
+<div id="id-content" class="container theme-showcase" role="main">
 </div>
 {{end}}

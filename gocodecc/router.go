@@ -51,6 +51,10 @@ type RequestContext struct {
 }
 type HttpHandler func(*RequestContext)
 
+func (this *RequestContext) Redirect(url string, code int) {
+	http.Redirect(this.w, this.r, url, code)
+}
+
 /*
 	Handler warper
 */
@@ -60,14 +64,9 @@ func responseWithAccessDenied(w http.ResponseWriter) {
 
 func getUserFromRequest(r *http.Request) *WebUser {
 	//	get user
-	var user WebUser
+	user := defaultWebUser()
 
-	//	not found, initialize as a guest
-	user.Permission = kPermission_Guest
-	user.Uid = 0
-	user.UserName = "Guest"
-
-	return &user
+	return user
 }
 
 func wrapHandler(item *RouterItem) http.HandlerFunc {
@@ -104,6 +103,7 @@ type RouterItem struct {
 var routerItems = []RouterItem{
 	{"/", kPermission_Guest, indexHandler},
 	{"/about", kPermission_Guest, aboutHander},
+	{"/signup", kPermission_Guest, signupHandler},
 }
 
 func fileHandler(w http.ResponseWriter, r *http.Request) {

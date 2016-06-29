@@ -2,7 +2,13 @@
 <footer id="id_footer" class="footer navbar-fixed-bottom">
 	<div class="container">
 		<p>
-			<ul class="footer-links">
+			
+		</p>
+		<p>
+			Build with {{.goversion}} · Based on <a href="http://getbootstrap.com/" target="_blank">bootstrap</a> · {{getprocesstime .requesttime}}
+		</p>
+		<p>
+			<ul id="id-footer-links" class="footer-links">
 				<li><a href="/about"><i class="fa fa-question" aria-hidden="true"></i></a>
 				{{if ne .config.GithubAddress ""}}
 				<li class="muted">&middot;</li>
@@ -12,12 +18,10 @@
 				<li class="muted">&middot;</li>
 				<li><a href="{{.config.WeiboAddress}}" target="_blank"><i class="fa fa-weibo" aria-hidden="true"></i></a></li>
 				{{end}}
+				<li><i class="fa fa-smile-o"></i></li>
+				<li><i class="fa fa-copyright"></i>2016-2016 gocode.cc</li>
 			</ul>
 		</p>
-		<p>
-			Build with {{.goversion}} · Based on <a href="http://getbootstrap.com/" target="_blank">bootstrap</a> · {{getprocesstime .requesttime}}
-		</p>
-		<p><i class="fa fa-copyright"></i>2016-2016 gocode.cc</p>
 	</div>
 </footer>
 {{end}}
