@@ -23,10 +23,10 @@
             aria-expanded="false"><i class="fa fa-user"></i> 游客 </i><i class="fa fa-caret-down"></i></a>
 			<ul class="dropdown-menu">
 			  <li>
-                <a href="/signin"><i class="fa fa-sign-in"></i>&nbsp;&nbsp;登陆</a>
+                <a href="/account/signin"><i class="fa fa-sign-in"></i>&nbsp;&nbsp;登陆</a>
               </li>
               <li>
-                <a href="/signup"><i class="fa fa-level-up"></i>&nbsp;&nbsp;注册</a>
+                <a href="/account/signup"><i class="fa fa-level-up"></i>&nbsp;&nbsp;注册</a>
               </li>
             </ul>
 			{{else}}
@@ -34,11 +34,11 @@
             aria-expanded="false">
 			{{if eq .user.Sex 0}}
 				{{if eq .user.Avatar ""}}
-				<img alt="{{.user.UserName}}" class="avatar" height="32" src="{{.imgPrefix}}/male.png" width="32" />
+				<img alt="{{.user.UserName}}" class="avatar img-rounded" height="32" src="{{.imgPrefix}}/male.png" width="32" />
 				{{end}}
 			{{else}}
 				{{if eq .user.Avatar ""}}
-				<img alt="{{.user.UserName}}" class="avatar" height="32" src="{{.imgPrefix}}/female.png" width="32" />
+				<img alt="{{.user.UserName}}" class="avatar img-rounded" height="32" src="{{.imgPrefix}}/female.png" width="32" />
 				{{end}}
 			{{end}}
 			<i class="fa fa-caret-down"></i></a>

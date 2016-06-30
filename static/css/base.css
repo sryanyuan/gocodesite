@@ -20,6 +20,14 @@ body {
     padding: 0px 10px 0px 10px;
 }
 
+#id-form-submit {
+	text-align:center;
+}
+
+#id-form-signin {
+	text-align:center;
+}
+
 .footer-links {
 	margin: 10px 0;
     padding-left: 0;
@@ -40,6 +48,10 @@ body {
 
 #id-footer-links {
 	margin-bottom: 0px;
+}
+
+#id-about-textnoob {
+	color: #ff00ff;
 }
 
 /*#id-navbar-search{

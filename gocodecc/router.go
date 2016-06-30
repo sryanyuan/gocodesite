@@ -55,6 +55,18 @@ func (this *RequestContext) Redirect(url string, code int) {
 	http.Redirect(this.w, this.r, url, code)
 }
 
+func (this *RequestContext) RenderJson(js interface{}) {
+	renderJson(this, js)
+}
+
+func (this *RequestContext) WriteHeader(header int) {
+	this.w.WriteHeader(header)
+}
+
+func (this *RequestContext) WriteResponse(rsp []byte) (int, error) {
+	return this.w.Write(rsp)
+}
+
 /*
 	Handler warper
 */
@@ -103,7 +115,8 @@ type RouterItem struct {
 var routerItems = []RouterItem{
 	{"/", kPermission_Guest, indexHandler},
 	{"/about", kPermission_Guest, aboutHander},
-	{"/signup", kPermission_Guest, signupHandler},
+	{"/account/signup", kPermission_Guest, signupHandler},
+	{"/account/signin", kPermission_Guest, signinHandler},
 }
 
 func fileHandler(w http.ResponseWriter, r *http.Request) {
