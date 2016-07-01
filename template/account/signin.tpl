@@ -1,8 +1,11 @@
 {{define "Title"}}注册新用户{{end}}
+{{define "importcss"}}{{end}}
+{{define "importjs"}}
+<script src="/static/js/signin.js"></script>
+{{end}}
 {{define "content"}}
 <div id="id-content" class="row">
-  <div class="row">
-  <div class="col-md-4 col-md-offset-4">
+  <div class="col-sm-4 col-sm-offset-4">
     <div class="panel panel-default">
       <div class="panel-heading">登录</div>
       <div class="panel-body">
@@ -16,20 +19,22 @@
         <div class="form-group">
           <input type="password" class="form-control input-lg" placeholder="密码" name="user[password]" id="user_password" />
         </div>
-        <div class="form-group">
+        <div id="id-signin-captchaInputGroup" class="form-group">
           <div class="input-group">
-            <input class="form-control input-lg" placeholder="验证码" name="_rucaptcha" type="text" autocorrect="off" autocapitalize="off" pattern="[0-9a-z]*" maxlength="4" autocomplete="off" />
-            <span class="input-group-addon input-group-captcha"><a class="rucaptcha-image-box" href="#"><img class="rucaptcha-image" src="https://ruby-china.org/rucaptcha/" alt="Rucaptcha" /></a></span>
+			<input type="text" id="captchaSolution" name="captchaSolution" placeholder="请输入右侧验证码" />
+			<img id="id-signin-captchaimg" src="/captcha/{{.captchaid}}.png" alt="验证码" title="看不清，点击" />
+			<input type="hidden" id="id-signin-captchaIdHolder" name="captchaid" value="{{.captchaid}}">
           </div>
         </div>
 
         <div class="from-group checkbox">
             <label for="user_remember_me">
-              <input name="user[remember_me]" type="hidden" value="0" /><input type="checkbox" value="1" name="user[remember_me]" id="user_remember_me" /> 记住登录状态
+              <input name="user[remember_me]" type="hidden" value="0" />
+			  <input type="checkbox" value="1" name="user[remember_me]" id="user_remember_me" /> 记住登录状态
             </label>
         </div>
         <div class="form-group">
-            <input id="id-signin-submit" type="submit" name="commit" value="登录" class="btn btn-primary btn-lg btn-block" data-disable-with="正在登录" />
+            <input id="id-signin-submit" type="submit" name="commit" value="登录" class="btn btn-primary" data-disable-with="正在登录" />
         </div>
 </form>      </div>
       <div class="panel-footer">
@@ -51,6 +56,5 @@
       </ul>
     </div>
   </div-->
-</div>
 </div>
 {{end}}

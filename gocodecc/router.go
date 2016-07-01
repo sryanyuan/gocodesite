@@ -3,9 +3,14 @@ package gocodecc
 import (
 	"database/sql"
 	"net/http"
+	"strconv"
+	"strings"
 	"time"
 
+	"github.com/cihub/seelog"
+	"github.com/dchest/captcha"
 	"github.com/gorilla/mux"
+	"github.com/gorilla/sessions"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -67,18 +72,82 @@ func (this *RequestContext) WriteResponse(rsp []byte) (int, error) {
 	return this.w.Write(rsp)
 }
 
+func (this *RequestContext) GetSession(name string) (*sessions.Session, error) {
+	return store.Get(this.r, name)
+}
+
+func (this *RequestContext) GetWebUser() *WebUser {
+	user := modelWebUserNew()
+	session, err := this.GetSession("user")
+	if nil != err {
+		seelog.Debug("session error:", err)
+		return user
+	}
+
+	userinfokey, ok := session.Values["login-key"].(string)
+	if !ok {
+		seelog.Debug("Nil value", userinfokey)
+		return user
+	}
+
+	//	parse info
+	seelog.Debug("Get login-key ", userinfokey)
+	infoKeys := strings.Split(userinfokey, ":")
+	if nil == infoKeys ||
+		len(infoKeys) != 2 {
+		return user
+	}
+	uid, err := strconv.Atoi(infoKeys[0])
+	if nil != err ||
+		0 == uid {
+		return user
+	}
+
+	//	get user from db
+	seelog.Debug("Get user from uid ", uid)
+	dbuser := modelWebUserGetUserByUid(uint32(uid))
+	if dbuser.UserName != infoKeys[1] {
+		return user
+	}
+	return dbuser
+}
+
+func (this *RequestContext) SaveWebUser(user *WebUser, saveDays int) {
+	session, err := this.GetSession("user")
+	if nil != err {
+		return
+	}
+
+	if 0 == user.Uid {
+		return
+	}
+
+	userinfokey := strconv.Itoa(int(user.Uid)) + ":" + user.UserName
+	session.Values["login-key"] = userinfokey
+	if 0 != saveDays {
+		session.Options = &sessions.Options{
+			MaxAge: saveDays * 24 * 60 * 60,
+		}
+	}
+	session.Save(this.r, this.w)
+	seelog.Debug("save session:", user)
+}
+
+func (this *RequestContext) ClearWebUser() {
+	session, err := this.GetSession("user")
+	if nil != err {
+		return
+	}
+
+	session.Options = &sessions.Options{MaxAge: -1}
+	session.Save(this.r, this.w)
+}
+
 /*
 	Handler warper
 */
 func responseWithAccessDenied(w http.ResponseWriter) {
 	http.Error(w, "Access denied", http.StatusForbidden)
-}
-
-func getUserFromRequest(r *http.Request) *WebUser {
-	//	get user
-	user := defaultWebUser()
-
-	return user
 }
 
 func wrapHandler(item *RouterItem) http.HandlerFunc {
@@ -90,7 +159,8 @@ func wrapHandler(item *RouterItem) http.HandlerFunc {
 			tmRequest: time.Now(),
 		}
 
-		user := getUserFromRequest(r)
+		user := requestCtx.GetWebUser()
+		seelog.Debug("Login with role:", user.UserName)
 
 		//	check permission
 		if !checkPermission(user.Permission, item.Permission) {
@@ -117,6 +187,7 @@ var routerItems = []RouterItem{
 	{"/about", kPermission_Guest, aboutHander},
 	{"/account/signup", kPermission_Guest, signupHandler},
 	{"/account/signin", kPermission_Guest, signinHandler},
+	{"/account/signupsuccess", kPermission_Guest, signupSuccessHandler},
 }
 
 func fileHandler(w http.ResponseWriter, r *http.Request) {
@@ -130,6 +201,9 @@ func InitRouters(r *mux.Router) {
 	for i := 0; i < routersCount; i++ {
 		r.HandleFunc(routerItems[i].Url, wrapHandler(&routerItems[i]))
 	}
+	captchaStorage := captcha.NewMemoryStore(captcha.CollectNum, time.Minute*time.Duration(2))
+	captcha.SetCustomStore(captchaStorage)
+	http.Handle("/captcha/", captcha.Server(100, 40))
 
 	//	static file
 	http.Handle("/static/css/", http.FileServer(http.Dir(".")))

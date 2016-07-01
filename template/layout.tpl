@@ -14,6 +14,7 @@
 	<link href="/static/css/font-awesome.min.css" rel="stylesheet" />
 	<!-- Custom css -->
     <link href="/static/css/base.css" rel="stylesheet" />
+	{{template "importcss"}}
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
@@ -49,5 +50,6 @@
       }
     })()
   </script>
+  {{template "importjs"}}
   </body>
 </html>

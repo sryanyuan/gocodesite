@@ -1,8 +1,6 @@
 package gocodecc
 
 import (
-	"errors"
-
 	"net/http"
 
 	"github.com/cihub/seelog"
@@ -11,16 +9,17 @@ import (
 
 var layoutFiles = []string{
 	"template/layout.tpl",
-	"template/component/navbar.tpl",
+	"template/component/navbar_v2.tpl",
 	"template/component/footer.tpl",
 }
 
+const kErrMsg_InternalError = "内部错误，请重试"
+
 func Start() error {
 	var err error
-	//	check db config
-	if len(g_appConfig.DBAddress) == 0 {
-		seelog.Error("Invalid config")
-		return errors.New("Invalid config")
+	//	initialize model
+	if err = initModels(); nil != err {
+		panic(err)
 	}
 
 	//	initialize routers

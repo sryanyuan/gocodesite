@@ -1,4 +1,6 @@
 {{define "Title"}}关于{{end}}
+{{define "importcss"}}{{end}}
+{{define "importjs"}}{{end}}
 {{define "content"}}
 <div id="id-content" class="row">
 	<div class="col-md-8 col-md-offset-1">
