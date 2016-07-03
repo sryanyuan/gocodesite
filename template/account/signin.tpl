@@ -12,7 +12,7 @@
 		<div id="id-signin-hint" class="alert alert-danger hidden" role="alert">
           <strong>错误!</strong><span id="id-signin-hinttext">Nothing</span>
 		</div>
-        <form id="id-form-signin" class="simple_form " novalidate="novalidate" id="new_user" action="/account/signin" accept-charset="UTF-8" method="post"><input name="utf8" type="hidden" value="&#x2713;" /><input type="hidden" name="authenticity_token" value="hVFHgkLJmc9/lZRLf31GJ4pqNZ3rAaJL0AAQgc6/0zK2y4xx1UzC3HDPUTineI8+Ypre/ZK7Db64vYA5fRb6yQ==" />
+        <form id="id-form-signin" class="simple_form " novalidate="novalidate" id="new_user" action="/signin" accept-charset="UTF-8" method="post"><input name="utf8" type="hidden" value="&#x2713;" /><input type="hidden" name="authenticity_token" value="hVFHgkLJmc9/lZRLf31GJ4pqNZ3rAaJL0AAQgc6/0zK2y4xx1UzC3HDPUTineI8+Ypre/ZK7Db64vYA5fRb6yQ==" />
         <div class="form-group">
           <input type="email" class="form-control input-lg" placeholder="用户名 / Email" name="user[login]" id="user_login" />
         </div>

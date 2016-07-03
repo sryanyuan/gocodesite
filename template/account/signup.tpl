@@ -54,7 +54,7 @@
           <input type="submit" id="id-signup-submit" name="commit" value="提交注册信息" class="btn btn-primary" data-disable-with="正在提交" />
         </div>
 		
-		<p id="id-form-signin">已有账号？请<a class="btn btn-default_" href="/account/signin">登录</a><p>
+		<p id="id-form-signin">已有账号？请<a class="btn btn-default_" href="/signin">登录</a><p>
 		</form>
 	  </div>
     </div>

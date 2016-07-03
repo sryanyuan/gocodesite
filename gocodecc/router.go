@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cihub/seelog"
+	//"github.com/cihub/seelog"
 	"github.com/dchest/captcha"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
@@ -80,18 +80,15 @@ func (this *RequestContext) GetWebUser() *WebUser {
 	user := modelWebUserNew()
 	session, err := this.GetSession("user")
 	if nil != err {
-		seelog.Debug("session error:", err)
 		return user
 	}
 
 	userinfokey, ok := session.Values["login-key"].(string)
 	if !ok {
-		seelog.Debug("Nil value", userinfokey)
 		return user
 	}
 
 	//	parse info
-	seelog.Debug("Get login-key ", userinfokey)
 	infoKeys := strings.Split(userinfokey, ":")
 	if nil == infoKeys ||
 		len(infoKeys) != 2 {
@@ -104,7 +101,6 @@ func (this *RequestContext) GetWebUser() *WebUser {
 	}
 
 	//	get user from db
-	seelog.Debug("Get user from uid ", uid)
 	dbuser := modelWebUserGetUserByUid(uint32(uid))
 	if dbuser.UserName != infoKeys[1] {
 		return user
@@ -130,7 +126,6 @@ func (this *RequestContext) SaveWebUser(user *WebUser, saveDays int) {
 		}
 	}
 	session.Save(this.r, this.w)
-	seelog.Debug("save session:", user)
 }
 
 func (this *RequestContext) ClearWebUser() {
@@ -160,7 +155,6 @@ func wrapHandler(item *RouterItem) http.HandlerFunc {
 		}
 
 		user := requestCtx.GetWebUser()
-		seelog.Debug("Login with role:", user.UserName)
 
 		//	check permission
 		if !checkPermission(user.Permission, item.Permission) {
@@ -186,8 +180,10 @@ var routerItems = []RouterItem{
 	{"/", kPermission_Guest, indexHandler},
 	{"/about", kPermission_Guest, aboutHander},
 	{"/account/signup", kPermission_Guest, signupHandler},
-	{"/account/signin", kPermission_Guest, signinHandler},
+	{"/signin", kPermission_Guest, signinHandler},
+	{"/signout", kPermission_User, signOutHandler},
 	{"/account/signupsuccess", kPermission_Guest, signupSuccessHandler},
+	{"/member/{username}", kPermission_Guest, memberInfoHandler},
 }
 
 func fileHandler(w http.ResponseWriter, r *http.Request) {

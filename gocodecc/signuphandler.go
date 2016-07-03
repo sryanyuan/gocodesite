@@ -102,6 +102,7 @@ func signupHandler(ctx *RequestContext) {
 		newuser.CreateTime = time.Now().Unix()
 		newuser.UserName = userName
 		newuser.NickName = nickName
+		newuser.Permission = kPermission_User
 
 		md5calc := md5.New()
 		md5calc.Write([]byte(password))

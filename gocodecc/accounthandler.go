@@ -3,6 +3,7 @@ package gocodecc
 import (
 	"crypto/md5"
 	"encoding/hex"
+	"net/http"
 
 	"github.com/cihub/seelog"
 	"github.com/dchest/captcha"
@@ -31,10 +32,9 @@ func signinHandler(ctx *RequestContext) {
 			Result: 1,
 		}
 
-		seelog.Debug(ctx.r.Form)
-
 		username := ctx.r.Form.Get("user[login]")
 		password := ctx.r.Form.Get("user[password]")
+		rememberMe := "0"
 		url := ctx.r.Form.Get("url")
 		if len(url) == 0 {
 			url = "/"
@@ -77,7 +77,11 @@ func signinHandler(ctx *RequestContext) {
 			}
 
 			//	now ok
-			ctx.SaveWebUser(user, 5)
+			if "0" != rememberMe {
+				ctx.SaveWebUser(user, 5)
+			} else {
+				ctx.SaveWebUser(user, 0)
+			}
 			break
 		}
 
@@ -93,4 +97,16 @@ func signinHandler(ctx *RequestContext) {
 			seelog.Debug("User ", username, " login success")
 		}
 	}
+}
+
+func signOutHandler(ctx *RequestContext) {
+	//	already login
+	if ctx.user.Uid == 0 {
+		ctx.Redirect("/", http.StatusFound)
+		return
+	}
+
+	//	clear user in session
+	ctx.ClearWebUser()
+	ctx.Redirect("/signin", http.StatusFound)
 }

@@ -27,7 +27,7 @@
 					<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-user"></i> 游客 </i><i class="fa fa-caret-down"></i></a>
 					<ul class="dropdown-menu">
 						<li>
-							<a href="/account/signin"><i class="fa fa-sign-in"></i>&nbsp;&nbsp;登陆</a>
+							<a href="/signin"><i class="fa fa-sign-in"></i>&nbsp;&nbsp;登陆</a>
 						</li>
 						<li>
 							<a href="/account/signup"><i class="fa fa-level-up"></i>&nbsp;&nbsp;注册</a>
@@ -49,10 +49,10 @@
 							<li class="dropdown-header">欢迎 {{.user.UserName}}</li>
 							<li role="separator" class="divider"></li>
 							<li>
-								<a href="#"><i class="fa fa-cog"></i>&nbsp;&nbsp;用户中心</a>
+								<a href="/member/{{.user.UserName}}"><i class="fa fa-cog"></i>&nbsp;&nbsp;用户中心</a>
 							</li>
 							<li>
-								<a href="#"><i class="fa fa-sign-out"></i>&nbsp;&nbsp;登出</a>
+								<a href="/signout"><i class="fa fa-sign-out"></i>&nbsp;&nbsp;登出</a>
 							</li>
 						</ul>
 				{{end}}
