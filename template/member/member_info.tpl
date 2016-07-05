@@ -2,8 +2,9 @@
 {{define "importcss"}}{{end}}
 {{define "importjs"}}{{end}}
 {{define "content"}}
-<div id="id-content" class="row">
-	<div class="col-md-3 col-md-offset-1">
+<div id="id-content" class="container">
+	<div class="row">
+	<div class="sidebar col-md-4">
 		<div>
 		<div class="panel">
           <div class="panel panel-heading">
@@ -19,6 +20,7 @@
 		  </div>
 		</div>
 		</div>
+	</div>
 	</div>
 </div>
 {{end}}

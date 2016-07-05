@@ -2,3 +2,4 @@ gocodesite.exe
 gocodesite.exe~
 gocodecc.log
 gocodecc.log.*
+static/conf/app.conf
