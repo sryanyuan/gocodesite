@@ -1,8 +1,9 @@
 package gocodecc
 
 import (
-	"github.com/gorilla/mux"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 var memberInfoRenderTpls = []string{
@@ -28,6 +29,8 @@ func memberInfoHandler(ctx *RequestContext) {
 	tplData := make(map[string]interface{})
 	tplData["watchedUser"] = watchedUser
 	tplData["isSelf"] = (watchedUser.Uid == ctx.user.Uid)
+	tplData["replyCount"] = 0
+	tplData["postCount"] = 0
 	data := renderTemplate(ctx, memberInfoRenderTpls, tplData)
 	ctx.w.Write(data)
 }

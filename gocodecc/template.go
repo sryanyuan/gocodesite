@@ -17,7 +17,8 @@ var goVersion = runtime.Version()
 var tplBinaryDataMap map[string]string
 
 var tplFuncMap = template.FuncMap{
-	"getprocesstime": tplfn_getprocesstime,
+	"getProcessTime":    tplfn_getprocesstime,
+	"getUnixTimeString": tplfn_getUnixTimeString,
 }
 
 func init() {
@@ -26,6 +27,11 @@ func init() {
 
 func tplfn_getprocesstime(tm time.Time) string {
 	return strconv.Itoa((time.Now().Nanosecond()-tm.Nanosecond())/1e6) + " ms"
+}
+
+func tplfn_getUnixTimeString(utm int64) string {
+	tm := time.Unix(utm, 0)
+	return tm.Format("2006-01-02")
 }
 
 func getTplBinaryData(file string) string {

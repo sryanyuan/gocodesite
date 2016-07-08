@@ -5,7 +5,7 @@
 			
 		</p>
 		<p>
-			Build with {{.goversion}} · Based on <a href="http://getbootstrap.com/" target="_blank">bootstrap</a> · {{getprocesstime .requesttime}}
+			Build with {{.goversion}} · Based on <a href="http://getbootstrap.com/" target="_blank">bootstrap</a> · {{getProcessTime .requesttime}}
 		</p>
 		<p>
 			<ul id="id-footer-links" class="footer-links">
