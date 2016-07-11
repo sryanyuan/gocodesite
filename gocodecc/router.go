@@ -11,8 +11,6 @@ import (
 	"github.com/dchest/captcha"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
-
-	_ "github.com/go-sql-driver/mysql"
 )
 
 /*

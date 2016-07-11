@@ -22,10 +22,34 @@
 							发了 {{.postCount}} 贴  回了 {{.replyCount}} 贴
 						</div>
 						<div class="item social">
+							{{if ne .watchedSocialInfo.Weibo ""}}
+							<a href="{{.watchedSocialInfo.Weibo}}"><i class="fa fa-weibo"></i></a>
+							{{end}}
+							{{if ne .watchedSocialInfo.Github ""}}
+							<a href="{{.watchedSocialInfo.Github}}"><i class="fa fa-github"></i></a>
+							{{end}}
 						</div>
+					</div>
+					<div id="id-member-following">
+						111
 					</div>
 				</div>
 			  </div>
+			</div>
+		</div>
+		<div class="col-md-6">
+			<div class="panel panel-default">
+				<div id="id-member-intro" class="panel-heading">
+					个人介绍
+				</div>
+				<div class="panel-body">
+					123
+				</div>
+			</div>
+			<div class="panel panel-default">
+				<div class="panel-body">
+					123
+				</div>
 			</div>
 		</div>
 	</div>

@@ -67,3 +67,11 @@ body {
 	color: #999;
 	margin-top: 2px;
 }
+
+#id-member-following {
+	border-top: 1px solid #f0f0f0;
+}
+
+#id-member-intro {
+	text-align: center;
+}

@@ -26,11 +26,16 @@ func memberInfoHandler(ctx *RequestContext) {
 		}
 	}
 
+	socialInfo, _ := modelSocialInfoGet(watchedUser.Uid)
+	socialInfo.Weibo = "hh"
+	socialInfo.Github = "hh"
+
 	tplData := make(map[string]interface{})
 	tplData["watchedUser"] = watchedUser
 	tplData["isSelf"] = (watchedUser.Uid == ctx.user.Uid)
 	tplData["replyCount"] = 0
 	tplData["postCount"] = 0
+	tplData["watchedSocialInfo"] = socialInfo
 	data := renderTemplate(ctx, memberInfoRenderTpls, tplData)
 	ctx.w.Write(data)
 }

@@ -11,8 +11,8 @@ type WebUser struct {
 	Uid           uint32 `orm:"pk;auto;index"`
 	Permission    uint32
 	UserName      string `orm:"size(21);unique;index"`
-	PassToken     string `orm:size(32)`
-	Avatar        string `orm:size(32)`
+	PassToken     string `orm:"size(32)"`
+	Avatar        string `orm:"size(32)"`
 	Sex           int
 	NickName      string `orm:"size(20);unique"`
 	EMail         string `orm:"size(50)"`
