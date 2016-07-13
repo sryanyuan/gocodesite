@@ -182,6 +182,8 @@ var routerItems = []RouterItem{
 	{"/signout", kPermission_User, signOutHandler},
 	{"/account/signupsuccess", kPermission_Guest, signupSuccessHandler},
 	{"/member/{username}", kPermission_Guest, memberInfoHandler},
+	{"/project", kPermission_Guest, projectCategoryHandler},
+	{"/project/{projectname}", kPermission_Guest, projectContentHandler},
 }
 
 func fileHandler(w http.ResponseWriter, r *http.Request) {

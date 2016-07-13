@@ -1,6 +1,7 @@
 package gocodecc
 
 import (
+	"database/sql"
 	"strings"
 
 	"github.com/astaxie/beego/orm"
@@ -44,4 +45,9 @@ func initModels() error {
 	}
 
 	return nil
+}
+
+func getRawDB() (*sql.DB, error) {
+	db, err := orm.GetDB("default")
+	return db, err
 }

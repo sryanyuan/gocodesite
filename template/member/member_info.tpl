@@ -37,7 +37,7 @@
 			  </div>
 			</div>
 		</div>
-		<div class="col-md-6">
+		<div class="col-md-8">
 			<div class="panel panel-default">
 				<div id="id-member-intro" class="panel-heading">
 					个人介绍
@@ -46,9 +46,18 @@
 					123
 				</div>
 			</div>
-			<div class="panel panel-default">
-				<div class="panel-body">
-					123
+			<div>
+				<ul class="nav nav-tabs">
+					<li class="active"><a href="#id-member-tab-post" data-toggle="tab">最近主题</a></li>
+					<li><a href="#id-member-tab-reply" data-toggle="tab">最近回复</a></li>
+				</ul>
+				<div class="tab-content">
+					<div class="tab-pane active post fade in" id="id-member-tab-post">
+						<p>111</p>
+					</div>
+					<div class="tab-pane fade" id="id-member-tab-reply">
+						<p>222</p>
+					</div>
 				</div>
 			</div>
 		</div>

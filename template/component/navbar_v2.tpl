@@ -18,6 +18,9 @@
                 <li {{if eq .active "home"}}class="active"{{end}}>
 					<a href="/">主页</a>
 				</li>
+				<li {{if eq .active "project"}}class="active"{{end}}>
+					<a href="/project">项目</a>
+				</li>
             </ul>
             
             <!--right bar-->
