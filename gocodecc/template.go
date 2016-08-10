@@ -3,6 +3,7 @@ package gocodecc
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"html/template"
 	"io/ioutil"
 	"runtime"
@@ -19,6 +20,8 @@ var tplBinaryDataMap map[string]string
 var tplFuncMap = template.FuncMap{
 	"getProcessTime":    tplfn_getprocesstime,
 	"getUnixTimeString": tplfn_getUnixTimeString,
+	"getMemberAvatar":   tplfn_getMemberAvatar,
+	"getTimeGapString":  tplfn_getTimeGapString,
 }
 
 func init() {
@@ -32,6 +35,54 @@ func tplfn_getprocesstime(tm time.Time) string {
 func tplfn_getUnixTimeString(utm int64) string {
 	tm := time.Unix(utm, 0)
 	return tm.Format("2006-01-02")
+}
+
+func tplfn_getMemberAvatar(username string) string {
+	user := modelWebUserGetUserByUserName(username)
+	if nil == user {
+		return "male.png"
+	}
+
+	if user.Sex == 0 {
+		return "male.png"
+	} else {
+		return "female.png"
+	}
+}
+
+func tplfn_getTimeGapString(tm int64) string {
+	now := time.Now().Unix()
+	gap := now - tm
+	if gap < 0 {
+		return "undefined"
+	}
+
+	year := gap / (365 * 30 * 24 * 60 * 60)
+	if year > 0 {
+		return fmt.Sprintf("%d 年前", year)
+	}
+
+	month := gap / (30 * 24 * 60 * 60)
+	if month > 0 {
+		return fmt.Sprintf("%d 月前", month)
+	}
+
+	day := gap / (24 * 60 * 60)
+	if day > 0 {
+		return fmt.Sprintf("%d 天前", day)
+	}
+
+	hour := gap / (60 * 60)
+	if hour > 0 {
+		return fmt.Sprintf("%d 小时前", hour)
+	}
+
+	minute := gap / 60
+	if minute > 0 {
+		return fmt.Sprintf("%d 分钟前", minute)
+	}
+
+	return fmt.Sprintf("%d 秒前", gap)
 }
 
 func getTplBinaryData(file string) string {

@@ -2,12 +2,17 @@ package gocodecc
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/mux"
 )
 
 var projectCategoryRenderTpls = []string{
 	"template/project/category.tpl",
+}
+
+var projectArticlesRenderTpls = []string{
+	"template/project/articles.tpl",
 }
 
 func projectHandler(ctx *RequestContext) {
@@ -28,9 +33,37 @@ func projectCategoryHandler(ctx *RequestContext) {
 	ctx.w.Write(data)
 }
 
-func projectContentHandler(ctx *RequestContext) {
+func projectArticlesHandler(ctx *RequestContext) {
 	//	search all project
 	vars := mux.Vars(ctx.r)
-	member := vars["projectname"]
-	ctx.WriteResponse([]byte(member))
+	projectName := vars["projectname"]
+	page, err := strconv.Atoi(vars["page"])
+	if nil != err {
+		ctx.Redirect("/", http.StatusNotFound)
+		return
+	}
+	if page <= 0 {
+		page = 1
+	}
+
+	articles, pages, err := modelProjectArticleGetArticles(projectName, page-1, 10)
+	if nil != err {
+		panic(err)
+	}
+
+	tplData := make(map[string]interface{})
+	tplData["articles"] = articles
+	tplData["active"] = "project"
+	tplData["project"] = projectName
+	tplData["pages"] = pages
+	tplData["page"] = page
+	data := renderTemplate(ctx, projectArticlesRenderTpls, tplData)
+	ctx.w.Write(data)
+}
+
+func projectArticleCmdHandler(ctx *RequestContext) {
+	vars := mux.Vars(ctx.r)
+	cmd := vars["cmd"]
+
+	ctx.w.Write([]byte(cmd))
 }
