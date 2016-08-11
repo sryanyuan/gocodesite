@@ -22,6 +22,7 @@ var tplFuncMap = template.FuncMap{
 	"getUnixTimeString": tplfn_getUnixTimeString,
 	"getMemberAvatar":   tplfn_getMemberAvatar,
 	"getTimeGapString":  tplfn_getTimeGapString,
+	"articleEditable":   tplfn_articleEditable,
 }
 
 func init() {
@@ -48,6 +49,16 @@ func tplfn_getMemberAvatar(username string) string {
 	} else {
 		return "female.png"
 	}
+}
+
+func tplfn_articleEditable(user *WebUser, article *ProjectArticleItem) bool {
+	if user.Permission > kPermission_Admin ||
+		user.NickName == article.ArticleAuthor {
+		if user.Uid != 0 {
+			return true
+		}
+	}
+	return false
 }
 
 func tplfn_getTimeGapString(tm int64) string {
@@ -151,7 +162,7 @@ func renderTemplate(rctx *RequestContext, fileNames []string, data map[string]in
 	data["goversion"] = goVersion
 	data["requesttime"] = rctx.tmRequest
 	data["config"] = &g_appConfig
-	data["imgPrefix"] = "/static/img"
+	data["imgPrefix"] = "/static/images"
 
 	//	get render data
 	return parseTemplate(fileNames, layoutFiles, data)

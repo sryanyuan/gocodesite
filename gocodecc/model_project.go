@@ -17,6 +17,7 @@ type ProjectCategoryItem struct {
 	Image           string `orm:"size(256)"`
 	Author          string `orm:"size(50)"`
 	ItemCount       int
+	PostPriv        uint32
 }
 
 func (this *ProjectCategoryItem) TableName() string {
@@ -28,15 +29,20 @@ var (
 )
 
 type ProjectArticleItem struct {
-	Id             int    `orm:"pk;auto;index"`
-	ProjectName    string `orm:"size(128)"`
-	ArticleTitle   string `orm:"size(128)"`
-	ArticleContent string `orm:"size(12800)"`
-	ArticleAuthor  string `orm:"size(50)"`
-	PostTime       int64
-	Fixed          int
-	ActiveTime     int64
-	ReplyAuthor    string `orm:"size(50)"`
+	Id                     int    `orm:"pk;auto;index"`
+	ProjectName            string `orm:"size(128)"`
+	ArticleTitle           string `orm:"size(128)"`
+	ArticleContentHtml     string `orm:"size(12800)"`
+	ArticleContentMarkdown string `orm:"size(12800)"`
+	ArticleAuthor          string `orm:"size(50)"`
+	Like                   int
+	PostTime               int64
+	EditTime               int64
+	Look                   int
+	ReplyAuthor            string `orm:"size(50)"`
+	ReplyTime              int64
+	ActiveTime             int64
+	Click                  int
 }
 
 func (this *ProjectArticleItem) TableName() string {
@@ -66,7 +72,13 @@ func modelProjectCategoryGetAll() ([]*ProjectCategoryItem, error) {
 	resultSet := make([]*ProjectCategoryItem, 0, 10)
 	for rows.Next() {
 		item := &ProjectCategoryItem{}
-		if err = rows.Scan(&item.Id, &item.ProjectName, &item.ProjectDescribe, &item.Image, &item.Author, &item.ItemCount); nil != err {
+		if err = rows.Scan(&item.Id,
+			&item.ProjectName,
+			&item.ProjectDescribe,
+			&item.Image,
+			&item.Author,
+			&item.ItemCount,
+			&item.PostPriv); nil != err {
 			return nil, err
 		}
 		resultSet = append(resultSet, item)
@@ -107,8 +119,14 @@ func modelProjectCategoryGetByProjectName(projectName string, prj *ProjectCatego
 		return err
 	}
 
-	err = db.QueryRow("SELECT * FROM "+projectCategoryItemTableName+" WHERE project_name = ?", projectName).Scan(&prj.Id, &prj.ProjectName, &prj.ProjectDescribe,
-		&prj.Image, &prj.Author, &prj.ItemCount)
+	err = db.QueryRow("SELECT * FROM "+projectCategoryItemTableName+" WHERE project_name = ?", projectName).Scan(
+		&prj.Id,
+		&prj.ProjectName,
+		&prj.ProjectDescribe,
+		&prj.Image,
+		&prj.Author,
+		&prj.ItemCount,
+		&prj.PostPriv)
 	if nil != err {
 		return err
 	}
@@ -124,6 +142,22 @@ func modelProjectCategoryUpdateProject(prj *ProjectCategoryItem) error {
 /*
 	Project article
 */
+func modelProjectArticleNewArticle(article *ProjectArticleItem) (int64, error) {
+	o := orm.NewOrm()
+	return o.Insert(article)
+}
+
+func modelProjectArticleGet(articleId int) (*ProjectArticleItem, error) {
+	o := orm.NewOrm()
+	var article ProjectArticleItem
+	article.Id = articleId
+	err := o.Read(&article)
+	if nil != err {
+		return nil, err
+	}
+	return &article, nil
+}
+
 //	items, total page count
 func modelProjectArticleGetArticles(project string, page int, limit int) ([]*ProjectArticleItem, int, error) {
 	db, err := getRawDB()
@@ -132,7 +166,8 @@ func modelProjectArticleGetArticles(project string, page int, limit int) ([]*Pro
 	}
 
 	var rows *sql.Rows
-	if rows, err = db.Query("SELECT id,article_title,article_author,post_time,fixed,active_time,reply_author FROM "+projectArticleItemTableName+" WHERE project_name = ? ORDER BY active_time LIMIT ? OFFSET ?", project, limit, page*limit); nil != err {
+	if rows, err = db.Query("SELECT id,article_title,article_author,post_time,reply_author,reply_time,active_time FROM "+projectArticleItemTableName+
+		" WHERE project_name = ? ORDER BY active_time LIMIT ? OFFSET ?", project, limit, page*limit); nil != err {
 		return nil, 0, err
 	}
 
@@ -143,7 +178,14 @@ func modelProjectArticleGetArticles(project string, page int, limit int) ([]*Pro
 	resultSet := make([]*ProjectArticleItem, 0, limit)
 	for rows.Next() {
 		item := &ProjectArticleItem{}
-		if err = rows.Scan(&item.Id, &item.ArticleTitle, &item.ArticleAuthor, &item.PostTime, &item.Fixed, &item.ActiveTime, &item.ReplyAuthor); nil != err {
+		if err = rows.Scan(
+			&item.Id,
+			&item.ArticleTitle,
+			&item.ArticleAuthor,
+			&item.PostTime,
+			&item.ReplyAuthor,
+			&item.ReplyTime,
+			&item.ActiveTime); nil != err {
 			return nil, 0, err
 		}
 		item.ProjectName = project

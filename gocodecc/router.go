@@ -62,6 +62,10 @@ func (this *RequestContext) RenderJson(js interface{}) {
 	renderJson(this, js)
 }
 
+func (this *RequestContext) RenderString(str string) {
+	this.w.Write([]byte(str))
+}
+
 func (this *RequestContext) WriteHeader(header int) {
 	this.w.WriteHeader(header)
 }
@@ -183,8 +187,9 @@ var routerItems = []RouterItem{
 	{"/account/signupsuccess", kPermission_Guest, signupSuccessHandler},
 	{"/member/{username}", kPermission_Guest, memberInfoHandler},
 	{"/project", kPermission_Guest, projectCategoryHandler},
-	{"/project/{projectname}/{page:[0-9]*}", kPermission_Guest, projectArticlesHandler},
-	{"/project/{projectname}/{cmd:[a-z]*}", kPermission_SuperAdmin, projectArticleCmdHandler},
+	{"/project/{projectname}/page/{page:[0-9]*}", kPermission_Guest, projectArticlesHandler},
+	{"/project/{projectname}/cmd/{cmd}", kPermission_SuperAdmin, projectArticleCmdHandler},
+	{"/project/{projectname}/article/{articleid:[0-9]*}", kPermission_Guest, projectArticleHandler},
 	{"/ajax/{action}", kPermission_Guest, ajaxHandler},
 }
 
@@ -206,6 +211,7 @@ func InitRouters(r *mux.Router) {
 	//	static file
 	http.Handle("/static/css/", http.FileServer(http.Dir(".")))
 	http.Handle("/static/js/", http.FileServer(http.Dir(".")))
-	http.Handle("/static/img/", http.FileServer(http.Dir(".")))
+	//http.Handle("/static/img/", http.FileServer(http.Dir(".")))
+	http.Handle("/static/images/", http.FileServer(http.Dir(".")))
 	http.Handle("/static/fonts/", http.FileServer(http.Dir(".")))
 }

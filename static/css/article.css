@@ -1,0 +1,21 @@
+.content {
+	margin-bottom:20px;
+	padding:8px;
+	background-color:white;
+	border:1px solid #DDD;
+	border-radius:4px;
+	-webkit-border-radius:4px;
+	-moz-border-radius:4px;
+	-o-border-radius:4px;
+	khtml-border-radius:4px;
+}
+
+.content div.page-header {
+	margin-top:0;
+	margin-bottom:0;
+}
+
+.page-header h1 {
+	font-size: 24px;
+	inline-height: 150%;
+}

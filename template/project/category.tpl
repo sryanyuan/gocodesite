@@ -98,7 +98,7 @@
 			{{range .category}}
 			<div id="id-div-{{.ProjectName}}" class="panel panel-default">
 				<div class="panel-heading" style="text-align:center;">
-					<a href="/project/{{.ProjectName}}/1">{{.ProjectName}}</a>
+					<a href="/project/{{.ProjectName}}/page/1">{{.ProjectName}}</a>
 					{{if gt $.user.Permission 3}}
 					<div style="float:right;margin-bottom:2px">
 						<button id="id-project-modify-{{.ProjectName}}" onclick="onEditProject(this)" type="button" project="{{.ProjectName}}" class="btn btn-sm btn-primary">编辑项目</button>

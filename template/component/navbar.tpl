@@ -4,7 +4,7 @@
 	  <!--header-->
 	  <div class="navbar-header">
 		<a href="/" class="navbar-brand">
-			<img src="/static/img/logo.png" style="margin-top: -9px;">
+			<img src="{{.imgPrefix}}/logo.png" style="margin-top: -9px;">
 		</a>
 	  </div>
 	  

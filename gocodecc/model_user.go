@@ -21,6 +21,7 @@ type WebUser struct {
 	LastLoginTime int64
 	MailVerified  bool
 	LastLoginIp   string `orm:"size(15)"`
+	Mood          string `orm:"size(128)"`
 }
 
 func (this *WebUser) TableName() string {

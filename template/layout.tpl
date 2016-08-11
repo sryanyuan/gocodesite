@@ -50,6 +50,6 @@
       }
     })()
   </script>
-  {{template "importjs"}}
+  {{template "importjs" .}}
   </body>
 </html>

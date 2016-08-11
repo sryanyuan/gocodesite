@@ -12,8 +12,9 @@
 			{{if gt .user.Permission 3}}
 			<!--Administrator panel-->
 			<p>
-				<a href="/project/{{.project}}/new_article"><button type="button" class="btn btn-sm btn-primary">添加文章</button></a>
+				<a href="/project/{{.project}}/cmd/new_article"><button type="button" class="btn btn-sm btn-success">添加文章</button></a>
 			</p>
+			<hr/>
 			{{end}}
 			<div class="articles-container">
 				<dl>

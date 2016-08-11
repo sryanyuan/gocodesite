@@ -3,6 +3,7 @@ package gocodecc
 import (
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gorilla/mux"
 )
@@ -13,6 +14,18 @@ var projectCategoryRenderTpls = []string{
 
 var projectArticlesRenderTpls = []string{
 	"template/project/articles.tpl",
+}
+
+var projectArticleNewArticleTpls = []string{
+	"template/project/new_article.tpl",
+}
+
+var projectArticleRenderTpls = []string{
+	"template/project/article.tpl",
+}
+
+var projectArticleEditArticleRenderTpls = []string{
+	"template/project/edit_article.tpl",
 }
 
 func projectHandler(ctx *RequestContext) {
@@ -61,9 +74,83 @@ func projectArticlesHandler(ctx *RequestContext) {
 	ctx.w.Write(data)
 }
 
+func projectArticleHandler(ctx *RequestContext) {
+	vars := mux.Vars(ctx.r)
+	articleId, err := strconv.Atoi(vars["articleid"])
+
+	if nil != err {
+		ctx.Redirect("/", http.StatusNotFound)
+		return
+	}
+
+	article, err := modelProjectArticleGet(articleId)
+	if nil != err {
+		ctx.Redirect("/", http.StatusNotFound)
+		return
+	}
+
+	//	get author
+	author := modelWebUserGetUserByUserName(article.ArticleAuthor)
+	if nil == author {
+		ctx.Redirect("/", http.StatusNotFound)
+		return
+	}
+
+	tplData := make(map[string]interface{})
+	tplData["active"] = "project"
+	tplData["article"] = article
+	tplData["author"] = author
+	data := renderTemplate(ctx, projectArticleRenderTpls, tplData)
+	ctx.w.Write(data)
+}
+
 func projectArticleCmdHandler(ctx *RequestContext) {
 	vars := mux.Vars(ctx.r)
 	cmd := vars["cmd"]
+	project := vars["projectname"]
+	cmd = strings.ToLower(cmd)
 
-	ctx.w.Write([]byte(cmd))
+	switch cmd {
+	case "new_article":
+		{
+			_newProjectArticle(ctx, project)
+		}
+	case "edit_article":
+		{
+			ctx.r.ParseForm()
+			articleId, err := strconv.Atoi(ctx.r.Form.Get("articleId"))
+			if nil != err {
+				ctx.Redirect("/", http.StatusNotFound)
+				return
+			}
+
+			_editProjectArticle(ctx, articleId)
+		}
+	default:
+		{
+			ctx.RenderString("invalid cmd")
+		}
+	}
+}
+
+func _newProjectArticle(ctx *RequestContext, project string) {
+	tplData := make(map[string]interface{})
+	tplData["active"] = "project"
+	tplData["project"] = project
+	data := renderTemplate(ctx, projectArticleNewArticleTpls, tplData)
+	ctx.w.Write(data)
+}
+
+func _editProjectArticle(ctx *RequestContext, articleId int) {
+	article, err := modelProjectArticleGet(articleId)
+	if err != nil {
+		ctx.Redirect("/", http.StatusNotFound)
+		return
+	}
+
+	tplData := make(map[string]interface{})
+	tplData["active"] = "project"
+	tplData["article"] = article
+	data := renderTemplate(ctx, projectArticleEditArticleRenderTpls, tplData)
+	ctx.w.Write(data)
 }
