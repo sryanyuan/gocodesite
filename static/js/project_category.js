@@ -13,10 +13,11 @@ function showAlert(text) {
 	$("#modalAlert").modal({backdrop:"static"});
 }
 
-function onEditProject(obj) {
+function onEditProject(obj, projectName) {
 	var project = $(obj).attr("project");
 	//	get content
 	var desc = $("#id-div-"+project).find("p").html();
+	$("#input-oldprojectname").val(projectName);
 	
 	//	show modal
 	$("#editproject_name").val(project);

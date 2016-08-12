@@ -6,11 +6,13 @@
 {{define "importjs"}}
 <script src="/static/js/editormd.min.js"></script>
 <script src="/static/js/editor.js"></script>
-<script src="/static/js/edit_article.js"></script>
+<script src="/static/js/new_article.js"></script>
 <script type="text/javascript">
-	var editor = editormd("editormd", {
+var editor = null;
+$(document).ready(function(){
+	editor = editormd("editormd", {
 		height: 400,
-		markdown: null,
+		markdown: {{.article.ArticleContentMarkdown}},
 		autoFocus: false,
 		//path: "/static/js/editor.md-1.5.0/lib/",
 		path: "../../../static/js/editor.md-1.5.0/lib/",
@@ -26,25 +28,37 @@
 		  $("#article-submit").attr('disabled', this.getMarkdown().trim() == "");
 		}
 	});
-	$(document).ready(function(){
-		$("#text-title").html({{.article.ProjectName}});
-		editor.getMarkdown().val({{.article.ArticleContentMarkdown}});
-	});
+	$("#text-title").html({{.article.ArticleTitle}});
+});
 </script>
 {{end}}
 {{define "content"}}
 <div id="id-content" class="container">
 	<div class="row">
 		<div class="col-md-8 col-md-offset-2">
-			<div class="alert alert-success" role="alert">
-				当前文章所属目录 <a href="/project/{{.article.ProjectName}}/page/1"><strong>{{.article.ProjectName}}</strong></a>
+			<div class="breadcrumb">
+				<li>
+					<a href="/">
+						<i class="fa fa-home"></i>首页
+					</a>
+				</li>
+				<li>
+					<a href="/project">
+						项目
+					</a>
+				</li>
+				<li>
+					<a href="/project/{{.project}}/page/1">
+						{{.project}}
+					</a>
+				</li>
 			</div>
 			<div id="article-tip" class="alert alert-danger hide" role="alert">
 				<span id="article-tip-text">ERROR</span>
 				<a class="close" data-dismiss="modal" onclick="$('#article-tip').addClass('hide');">×</a>
 			</div>
 			<div class="reply-container">
-				<form id="postarticle-form" action="/ajax/article_submit" method="post" role="form">
+				<form id="postarticle-form" action="/ajax/article_edit" method="post" role="form">
 					<fieldset>
 						<div class="from-group">
 							<label for="title">文章标题</label>

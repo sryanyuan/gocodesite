@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"net/http"
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/dchest/captcha"
@@ -52,6 +53,10 @@ func signupHandler(ctx *RequestContext) {
 				break
 			}
 			if matched, _ := regexp.Match("^[a-zA-Z0-9_]{5,20}$", []byte(userName)); !matched {
+				failedMsg = "非法的用户名"
+				break
+			}
+			if strings.ToLower(userName) == "guest" {
 				failedMsg = "非法的用户名"
 				break
 			}

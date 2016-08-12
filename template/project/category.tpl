@@ -78,6 +78,7 @@
 						<div class="form-group">
 						  <input type="input" class="form-control input-lg" placeholder="项目封面" name="project[image]" id="editproject_image" />
 						</div>
+						<input id="input-oldprojectname" type="hidden" name="project[oldname]" value="" />
 					</form>
 				</div>
 				<div class="modal-footer">
@@ -101,7 +102,7 @@
 					<a href="/project/{{.ProjectName}}/page/1">{{.ProjectName}}</a>
 					{{if gt $.user.Permission 3}}
 					<div style="float:right;margin-bottom:2px">
-						<button id="id-project-modify-{{.ProjectName}}" onclick="onEditProject(this)" type="button" project="{{.ProjectName}}" class="btn btn-sm btn-primary">编辑项目</button>
+						<button id="id-project-modify-{{.ProjectName}}" onclick="onEditProject(this,{{.ProjectName}})" type="button" project="{{.ProjectName}}" class="btn btn-sm btn-primary">编辑项目</button>
 						<button id="id-project-del-{{.ProjectName}}" onclick="onDelProject(this)" type="button" project="{{.ProjectName}}" class="btn btn-sm btn-danger">删除项目</button>
 					</div>
 					{{end}}

@@ -32,8 +32,22 @@
 <div id="id-content" class="container">
 	<div class="row">
 		<div class="col-md-8 col-md-offset-2">
-			<div class="alert alert-success" role="alert">
-				当前文章所属目录 <a href="/project/{{.project}}/page/1"><strong>{{.project}}</strong></a>
+			<div class="breadcrumb">
+				<li>
+					<a href="/">
+						<i class="fa fa-home"></i>首页
+					</a>
+				</li>
+				<li>
+					<a href="/project">
+						项目
+					</a>
+				</li>
+				<li>
+					<a href="/project/{{.project}}/page/1">
+						{{.project}}
+					</a>
+				</li>
 			</div>
 			<div id="article-tip" class="alert alert-danger hide" role="alert">
 				<span id="article-tip-text">ERROR</span>

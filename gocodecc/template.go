@@ -23,6 +23,10 @@ var tplFuncMap = template.FuncMap{
 	"getMemberAvatar":   tplfn_getMemberAvatar,
 	"getTimeGapString":  tplfn_getTimeGapString,
 	"articleEditable":   tplfn_articleEditable,
+	"convertToHtml":     tplfn_convertToHtml,
+	"getPageRange":      tplfn_getPageRange,
+	"minusInt":          tplfn_minusInt,
+	"addInt":            tplfn_addInt,
 }
 
 func init() {
@@ -96,6 +100,44 @@ func tplfn_getTimeGapString(tm int64) string {
 	return fmt.Sprintf("%d 秒前", gap)
 }
 
+func tplfn_convertToHtml(str string) template.HTML {
+	return template.HTML(str)
+}
+
+func tplfn_getPageStart(page int, showPage int) int {
+	pageStart := page - showPage/2
+	if pageStart <= 0 {
+		pageStart = 1
+	}
+	return pageStart
+}
+
+func tplfn_getPageEnd(page int, showPage int) int {
+	pageEnd := tplfn_getPageStart(page, showPage)
+	pageEnd += showPage - 1
+	return pageEnd
+}
+
+func tplfn_getPageRange(page int, showPage int) []int {
+	pageB := tplfn_getPageStart(page, showPage)
+	pageE := tplfn_getPageEnd(page, showPage)
+	size := pageE - pageB + 1
+
+	pages := make([]int, size, size)
+	for i := 0; i < size; i++ {
+		pages[i] = pageB + i
+	}
+	return pages
+}
+
+func tplfn_minusInt(val int) int {
+	return val - 1
+}
+
+func tplfn_addInt(val int) int {
+	return val + 1
+}
+
 func getTplBinaryData(file string) string {
 	data, ok := tplBinaryDataMap[file]
 	if ok {
@@ -163,6 +205,7 @@ func renderTemplate(rctx *RequestContext, fileNames []string, data map[string]in
 	data["requesttime"] = rctx.tmRequest
 	data["config"] = &g_appConfig
 	data["imgPrefix"] = "/static/images"
+	data["url"] = rctx.r.URL.Path
 
 	//	get render data
 	return parseTemplate(fileNames, layoutFiles, data)

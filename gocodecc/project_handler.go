@@ -5,6 +5,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/cihub/seelog"
+
 	"github.com/gorilla/mux"
 )
 
@@ -22,6 +24,7 @@ var projectArticleNewArticleTpls = []string{
 
 var projectArticleRenderTpls = []string{
 	"template/project/article.tpl",
+	"template/component/comment.tpl",
 }
 
 var projectArticleEditArticleRenderTpls = []string{
@@ -59,7 +62,9 @@ func projectArticlesHandler(ctx *RequestContext) {
 		page = 1
 	}
 
-	articles, pages, err := modelProjectArticleGetArticles(projectName, page-1, 10)
+	pageItems := 10
+	showPages := 5
+	articles, pages, err := modelProjectArticleGetArticles(projectName, page-1, pageItems)
 	if nil != err {
 		panic(err)
 	}
@@ -70,6 +75,8 @@ func projectArticlesHandler(ctx *RequestContext) {
 	tplData["project"] = projectName
 	tplData["pages"] = pages
 	tplData["page"] = page
+	tplData["pageItems"] = pageItems
+	tplData["showPages"] = showPages
 	data := renderTemplate(ctx, projectArticlesRenderTpls, tplData)
 	ctx.w.Write(data)
 }
@@ -95,6 +102,13 @@ func projectArticleHandler(ctx *RequestContext) {
 		ctx.Redirect("/", http.StatusNotFound)
 		return
 	}
+
+	//	increase click count
+	if err = modelProjectArticleIncClick(articleId); nil != err {
+		seelog.Error(err)
+		return
+	}
+	article.Click = article.Click + 1
 
 	tplData := make(map[string]interface{})
 	tplData["active"] = "project"

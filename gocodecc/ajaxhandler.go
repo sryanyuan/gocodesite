@@ -2,6 +2,8 @@ package gocodecc
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -41,7 +43,9 @@ func ajaxHandler(ctx *RequestContext) {
 			ctx.r.Body.Close()
 
 			if len(projectName) == 0 ||
-				len(projectDescribe) == 0 {
+				len(projectDescribe) == 0 ||
+				len(projectName) >= kCategoryNameLimit ||
+				len(projectDescribe) >= kCategoryDescribeLimit {
 				result.Msg = "invalid project name or project describe"
 				return
 			}
@@ -76,28 +80,40 @@ func ajaxHandler(ctx *RequestContext) {
 			//	check project name and project describe
 			ctx.r.ParseForm()
 			var err error
+			projectOldName := ctx.r.Form.Get("project[oldname]")
 			projectName := ctx.r.Form.Get("project[name]")
 			projectDescribe := ctx.r.Form.Get("project[describe]")
 			projectImage := ctx.r.Form.Get("project[image]")
 			ctx.r.Body.Close()
 
 			if len(projectName) == 0 ||
-				len(projectDescribe) == 0 {
+				len(projectDescribe) == 0 ||
+				len(projectOldName) == 0 ||
+				len(projectName) >= kCategoryNameLimit ||
+				len(projectDescribe) >= kCategoryDescribeLimit {
 				result.Msg = "invalid project name or project describe"
 				return
 			}
 
 			//	get the original item
 			var originPrj ProjectCategoryItem
-			if err := modelProjectCategoryGetByProjectName(projectName, &originPrj); nil != err {
+			if err := modelProjectCategoryGetByProjectName(projectOldName, &originPrj); nil != err {
 				result.Msg = err.Error()
 				return
 			}
 
-			originPrj.ProjectName = projectName
-			originPrj.ProjectDescribe = projectDescribe
-			originPrj.Image = projectImage
-			err = modelProjectCategoryUpdateProject(&originPrj)
+			if originPrj.ProjectName == projectName &&
+				originPrj.ProjectDescribe == projectDescribe &&
+				originPrj.Image == projectImage {
+				return
+			}
+
+			var newPrj ProjectCategoryItem
+			newPrj = originPrj
+			newPrj.ProjectName = projectName
+			newPrj.ProjectDescribe = projectDescribe
+			newPrj.Image = projectImage
+			err = modelProjectCategoryUpdateProject(&originPrj, &newPrj)
 			if nil != err {
 				result.Msg = err.Error()
 				return
@@ -164,7 +180,7 @@ func ajaxHandler(ctx *RequestContext) {
 			}
 			//	check valid
 			title := ctx.r.Form.Get("title")
-			if len(title) >= 128 {
+			if len(title) >= kArticleTitleLimit {
 				result.Msg = "标题长度太长了"
 				return
 			}
@@ -173,11 +189,13 @@ func ajaxHandler(ctx *RequestContext) {
 				return
 			}
 			contentHtml := ctx.r.Form.Get("editormd-html-code")
+			contentHtml = strings.Replace(contentHtml, "<pre>", "", -1)
+			contentHtml = strings.Replace(contentHtml, "</pre>", "", -1)
 			if len(contentHtml) == 0 {
 				result.Msg = "请输入内容"
 				return
 			}
-			if len(contentHtml) >= 12800 {
+			if len(contentHtml) >= kArticleContentLimit {
 				result.Msg = "内容太长了"
 				return
 			}
@@ -186,7 +204,7 @@ func ajaxHandler(ctx *RequestContext) {
 				result.Msg = "请输入内容"
 				return
 			}
-			if len(contentMarkdown) >= 12800 {
+			if len(contentMarkdown) >= kArticleContentLimit {
 				result.Msg = "内容太长了"
 				return
 			}
@@ -199,6 +217,7 @@ func ajaxHandler(ctx *RequestContext) {
 			postArticle.ArticleContentHtml = contentHtml
 			postArticle.ArticleContentMarkdown = contentMarkdown
 			postArticle.ProjectName = projectName
+			postArticle.ProjectId = prj.Id
 			articleId, err := modelProjectArticleNewArticle(&postArticle)
 			if nil != err {
 				result.Msg = err.Error()
@@ -207,6 +226,165 @@ func ajaxHandler(ctx *RequestContext) {
 			//	done
 			result.Result = 0
 			result.Msg = fmt.Sprintf("/project/%s/article/%d", projectName, articleId)
+		}
+	case "article_edit":
+		{
+			if ctx.r.Method != "POST" {
+				result.Msg = "invalid method"
+				return
+			}
+
+			ctx.r.ParseForm()
+			projectName := ctx.r.Form.Get("project")
+			if len(projectName) == 0 {
+				result.Msg = "invalid project"
+				return
+			}
+			articleId, _ := strconv.Atoi(ctx.r.Form.Get("articleId"))
+			if 0 == articleId {
+				result.Msg = "invalid articleId"
+				return
+			}
+			ctx.r.Body.Close()
+			//	check auth
+			article, err := modelProjectArticleGet(articleId)
+			if nil != err {
+				result.Msg = err.Error()
+				return
+			}
+			if article.ArticleAuthor != ctx.user.NickName {
+				if ctx.user.Permission < kPermission_SuperAdmin {
+					result.Msg = "access denied"
+					return
+				}
+			}
+			//	check valid
+			title := ctx.r.Form.Get("title")
+			if len(title) >= kArticleTitleLimit {
+				result.Msg = "标题长度太长了"
+				return
+			}
+			if len(title) == 0 {
+				result.Msg = "请输入标题"
+				return
+			}
+			contentHtml := ctx.r.Form.Get("editormd-html-code")
+			contentHtml = strings.Replace(contentHtml, "<pre>", "", -1)
+			contentHtml = strings.Replace(contentHtml, "</pre>", "", -1)
+			if len(contentHtml) == 0 {
+				result.Msg = "请输入内容"
+				return
+			}
+			if len(contentHtml) >= kArticleContentLimit {
+				result.Msg = "内容太长了"
+				return
+			}
+			contentMarkdown := ctx.r.Form.Get("editormd-markdown-doc")
+			if len(contentMarkdown) == 0 {
+				result.Msg = "请输入内容"
+				return
+			}
+			if len(contentMarkdown) >= kArticleContentLimit {
+				result.Msg = "内容太长了"
+				return
+			}
+			//	do post
+			colsEdit := []string{"active_time", "edit_time"}
+			article.ActiveTime = time.Now().Unix()
+			article.EditTime = time.Now().Unix()
+			if article.ArticleTitle != title {
+				article.ArticleTitle = title
+				colsEdit = append(colsEdit, "article_title")
+			}
+			if article.ArticleContentHtml != contentHtml {
+				article.ArticleContentHtml = contentHtml
+				article.ArticleContentMarkdown = contentMarkdown
+				colsEdit = append(colsEdit, "article_content_html")
+				colsEdit = append(colsEdit, "article_content_markdown")
+			}
+			_, err = modelProjectArticleEditArticle(article, colsEdit)
+			if nil != err {
+				result.Msg = err.Error()
+				return
+			}
+			//	done
+			result.Result = 0
+			result.Msg = fmt.Sprintf("/project/%s/article/%d", projectName, articleId)
+		}
+	case "article_delete":
+		{
+			if ctx.r.Method != "POST" {
+				result.Msg = "invalid method"
+				return
+			}
+
+			ctx.r.ParseForm()
+			articleId, err := strconv.Atoi(ctx.r.Form.Get("articleId"))
+			ctx.r.Body.Close()
+			if err != nil ||
+				0 == articleId {
+				result.Msg = "invalid articleId"
+				return
+			}
+
+			//	get article
+			article, err := modelProjectArticleGet(articleId)
+			if nil != err {
+				result.Msg = "invalid article"
+				return
+			}
+
+			//	must be superadmin
+			if ctx.user.Permission <= kPermission_Admin {
+				result.Msg = "access denied"
+				return
+			}
+
+			err = modelProjectArticleDelete(articleId)
+			if nil != err {
+				result.Msg = "delete article failed"
+				return
+			}
+
+			//	done
+			result.Result = 0
+			result.Msg = fmt.Sprintf("/project/%s/page/1", article.ProjectName)
+		}
+	case "article_top":
+		{
+			if ctx.r.Method != "POST" {
+				result.Msg = "invalid method"
+				return
+			}
+
+			ctx.r.ParseForm()
+			fmt.Println(ctx.r.Form)
+			defer ctx.r.Body.Close()
+			articleId, err := strconv.Atoi(ctx.r.Form.Get("articleId"))
+			if err != nil ||
+				0 == articleId {
+				result.Msg = "invalid articleId"
+				return
+			}
+			top, err := strconv.Atoi(ctx.r.Form.Get("top"))
+			if err != nil {
+				result.Msg = "invalid top"
+				return
+			}
+
+			doTop := true
+			if 0 == top {
+				doTop = false
+			}
+
+			err = modelProjectArticleSetTop(articleId, doTop)
+			if nil != err {
+				result.Msg = "set top failed"
+				return
+			}
+
+			//	done
+			result.Result = 0
 		}
 	default:
 		{

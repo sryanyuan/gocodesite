@@ -7,6 +7,10 @@ import (
 	//"github.com/cihub/seelog"
 )
 
+const (
+	kUserNickNameLimit = 20
+)
+
 type WebUser struct {
 	Uid           uint32 `orm:"pk;auto;index"`
 	Permission    uint32
