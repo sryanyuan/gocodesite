@@ -65,7 +65,7 @@
 				</li>
 				<li>
 					<a href="/project">
-						项目
+						分类
 					</a>
 				</li>
 				<li>
@@ -95,7 +95,7 @@
 					{{convertToHtml $content}}
 				</div>
 			</div>
-			{{template "comment"}}
+			{{template "comment_article_html" .}}
 		</div>
 		<div class="col-md-4">
 			<div class="panel panel-default">

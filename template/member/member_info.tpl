@@ -1,6 +1,10 @@
 {{define "Title"}}会员 {{.watchedUser.UserName}}{{end}}
-{{define "importcss"}}{{end}}
-{{define "importjs"}}{{end}}
+{{define "importcss"}}
+<link href="/static/css/member_info.css" rel="stylesheet" />
+{{end}}
+{{define "importjs"}}
+<script src="/static/js/member_info.js"></script>
+{{end}}
 {{define "content"}}
 <div id="id-content" class="container">
 	<div class="row">
@@ -11,7 +15,7 @@
 					<div class="media-left">
 						<img alt="{{.user.UserName}}" class="media-object avatar-120 img-circle" width="72" height="72" src="{{.imgPrefix}}/male.png" />
 					</div>
-					<div class="media-body">
+					<div id="member-baseinfo" class="media-body">
 						<div class="item username">
 							{{.watchedUser.UserName}}(<span id="id-meminfo-nickname">{{.watchedUser.NickName}})
 						</div>
@@ -31,21 +35,25 @@
 						</div>
 					</div>
 					<div id="id-member-following">
-						111
+						<div id="member-mood">
+							{{.watchedUser.Mood}}
+						</div>
 					</div>
 				</div>
 			  </div>
 			</div>
 		</div>
 		<div class="col-md-8">
-			<div class="panel panel-default">
+			<!--div class="panel panel-default">
 				<div id="id-member-intro" class="panel-heading">
 					个人介绍
 				</div>
 				<div class="panel-body">
-					123
+					<div>
+						
+					</div>
 				</div>
-			</div>
+			</div!-->
 			<div>
 				<ul class="nav nav-tabs">
 					<li class="active"><a href="#id-member-tab-post" data-toggle="tab">最近主题</a></li>
@@ -53,10 +61,24 @@
 				</ul>
 				<div class="tab-content">
 					<div class="tab-pane active post fade in" id="id-member-tab-post">
-						<p>111</p>
+						<div class="panel panel-default">
+							<ul id="member-post-list-group" class="list-group" articleCount="{{len .articles}}">
+								{{range $i, $v := .articles}}
+								<li class="list-group-item">
+									<div class="title">
+										<a href="/project/{{$v.ProjectName}}/article/{{$v.Id}}">{{$v.ArticleTitle}}</a>
+									</div>
+									<div class="info">
+										<span class="member-post-info">发表于 {{getTimeGapString $v.PostTime}}</span>
+										   • <span class="member-post-reply-count" id="member-post-reply-count-{{$v.Id}}" articleId="{{$v.Id}}">0</span> 个回复
+									</div>
+								</li>
+								{{end}}
+							</ul>
+						</div>
 					</div>
 					<div class="tab-pane fade" id="id-member-tab-reply">
-						<p>222</p>
+						<p>Nothing</p>
 					</div>
 				</div>
 			</div>

@@ -27,15 +27,30 @@ func memberInfoHandler(ctx *RequestContext) {
 	}
 
 	socialInfo, _ := modelSocialInfoGet(watchedUser.Uid)
-	socialInfo.Weibo = "hh"
-	socialInfo.Github = "hh"
+	//socialInfo.Weibo = "hh"
+	//socialInfo.Github = "hh"
+
+	//	get articles
+	articles, err := modelProjectArticleGetByAuthor(watchedUser.NickName, 20)
+	if nil != err {
+		ctx.Redirect("/", http.StatusInternalServerError)
+		return
+	}
+
+	//	get article count
+	articleCount, err := modelProjectArticleGetArticleCountByAuthor(watchedUser.NickName)
+	if nil != err {
+		ctx.Redirect("/", http.StatusInternalServerError)
+		return
+	}
 
 	tplData := make(map[string]interface{})
 	tplData["watchedUser"] = watchedUser
 	tplData["isSelf"] = (watchedUser.Uid == ctx.user.Uid)
 	tplData["replyCount"] = 0
-	tplData["postCount"] = 0
+	tplData["postCount"] = articleCount
 	tplData["watchedSocialInfo"] = socialInfo
+	tplData["articles"] = articles
 	data := renderTemplate(ctx, memberInfoRenderTpls, tplData)
 	ctx.w.Write(data)
 }

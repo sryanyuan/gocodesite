@@ -19,7 +19,7 @@
 					<a href="/">主页</a>
 				</li>
 				<li {{if eq .active "project"}}class="active"{{end}}>
-					<a href="/project">项目</a>
+					<a href="/project">分类</a>
 				</li>
             </ul>
             

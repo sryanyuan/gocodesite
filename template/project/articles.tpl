@@ -3,7 +3,7 @@
 <link href="/static/css/articles.css" rel="stylesheet" />
 {{end}}
 {{define "importjs"}}
-<!--script src="/static/js/project_category.js"></script-->
+<script src="/static/js/articles.js"></script>
 {{end}}
 {{define "content"}}
 <div id="id-content" class="container">
@@ -24,11 +24,11 @@
 				</li>
 				<li>
 					<a href="/project">
-						项目
+						分类
 					</a>
 				</li>
 			</div>
-			<div class="articles-container">
+			<div id="articles" articleCount="{{len .articles}}" class="articles-container">
 				<dl>
 				{{range .articles}}
 					<dd>
@@ -37,10 +37,10 @@
 						</a>
 						<a href="/project/{{.ProjectName}}/article/{{.Id}}" class="title">
 							{{.ArticleTitle}}
-							{{if eq .Top 1}}
-							<i class="fa fa-angle-up" style="margin-left:25px;"></i>
-							{{end}}
 						</a>
+						{{if eq .Top 1}}
+						<span style="color:red;margin-left:10px;">[置顶]</span>
+						{{end}}
 						<div class="space"></div>
 						<div class="info" style="margin-left:55px">
 							<!--name-->
@@ -51,6 +51,8 @@
 							{{if ne .ReplyAuthor ""}}
 								• 最后回复来自 <a href="/member/{{.ReplyAuthor}}">{{.ReplyAuthor}}</a>
 							{{end}}
+							• {{.Click}} 次点击
+							• <span id="id-article-last-reply-{{.Id}}" class="article-last-reply" articleId="{{.Id}}">0</span> 次回复
 						</div>
 					</dd>
 				{{end}}

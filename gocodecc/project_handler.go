@@ -24,7 +24,7 @@ var projectArticleNewArticleTpls = []string{
 
 var projectArticleRenderTpls = []string{
 	"template/project/article.tpl",
-	"template/component/comment.tpl",
+	"template/component/comment_article_html.tpl",
 }
 
 var projectArticleEditArticleRenderTpls = []string{

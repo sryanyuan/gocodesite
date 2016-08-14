@@ -340,7 +340,7 @@ func ajaxHandler(ctx *RequestContext) {
 				return
 			}
 
-			err = modelProjectArticleDelete(articleId)
+			err = modelProjectArticleDelete(articleId, article.ProjectId)
 			if nil != err {
 				result.Msg = "delete article failed"
 				return
@@ -380,6 +380,41 @@ func ajaxHandler(ctx *RequestContext) {
 			err = modelProjectArticleSetTop(articleId, doTop)
 			if nil != err {
 				result.Msg = "set top failed"
+				return
+			}
+
+			//	done
+			result.Result = 0
+		}
+	case "account_verify":
+		{
+			if ctx.r.Method != "GET" {
+				result.Msg = "invalid method"
+				return
+			}
+
+			ctx.r.ParseForm()
+			account := ctx.r.Form.Get("account")
+			password := ctx.r.Form.Get("password")
+
+			if len(account) == 0 ||
+				len(password) == 0 ||
+				len(account) > 20 ||
+				len(password) > 100 {
+				result.Msg = "invalid input"
+				return
+			}
+
+			user := modelWebUserGetUserByUserName(account)
+			if nil == user {
+				result.Msg = "user not exists"
+				result.Result = -2
+				return
+			}
+
+			if password != user.PassToken {
+				result.Msg = "invalid password"
+				result.Result = -3
 				return
 			}
 
