@@ -52,7 +52,12 @@ func projectCategoryHandler(ctx *RequestContext) {
 func projectArticlesHandler(ctx *RequestContext) {
 	//	search all project
 	vars := mux.Vars(ctx.r)
-	projectName := vars["projectname"]
+	projectId, err := strconv.Atoi(vars["projectid"])
+	if nil != err ||
+		0 == projectId {
+		ctx.Redirect("/", http.StatusNotFound)
+		return
+	}
 	page, err := strconv.Atoi(vars["page"])
 	if nil != err {
 		ctx.Redirect("/", http.StatusNotFound)
@@ -62,9 +67,16 @@ func projectArticlesHandler(ctx *RequestContext) {
 		page = 1
 	}
 
+	var category ProjectCategoryItem
+	err = modelProjectCategoryGetByProjectId(projectId, &category)
+	if nil != err {
+		ctx.Redirect("/", http.StatusNotFound)
+		return
+	}
+
 	pageItems := 10
 	showPages := 5
-	articles, pages, err := modelProjectArticleGetArticles(projectName, page-1, pageItems)
+	articles, pages, err := modelProjectArticleGetArticles(projectId, page-1, pageItems)
 	if nil != err {
 		panic(err)
 	}
@@ -72,11 +84,12 @@ func projectArticlesHandler(ctx *RequestContext) {
 	tplData := make(map[string]interface{})
 	tplData["articles"] = articles
 	tplData["active"] = "project"
-	tplData["project"] = projectName
+	tplData["project"] = projectId
 	tplData["pages"] = pages
 	tplData["page"] = page
 	tplData["pageItems"] = pageItems
 	tplData["showPages"] = showPages
+	tplData["category"] = &category
 	data := renderTemplate(ctx, projectArticlesRenderTpls, tplData)
 	ctx.w.Write(data)
 }
@@ -121,13 +134,19 @@ func projectArticleHandler(ctx *RequestContext) {
 func projectArticleCmdHandler(ctx *RequestContext) {
 	vars := mux.Vars(ctx.r)
 	cmd := vars["cmd"]
-	project := vars["projectname"]
+	projectId, err := strconv.Atoi(vars["projectid"])
 	cmd = strings.ToLower(cmd)
+
+	if nil != err ||
+		0 == projectId {
+		ctx.Redirect("/", http.StatusNotFound)
+		return
+	}
 
 	switch cmd {
 	case "new_article":
 		{
-			_newProjectArticle(ctx, project)
+			_newProjectArticle(ctx, projectId)
 		}
 	case "edit_article":
 		{
@@ -147,10 +166,18 @@ func projectArticleCmdHandler(ctx *RequestContext) {
 	}
 }
 
-func _newProjectArticle(ctx *RequestContext, project string) {
+func _newProjectArticle(ctx *RequestContext, projectId int) {
+	//	get category
+	var category ProjectCategoryItem
+	err := modelProjectCategoryGetByProjectId(projectId, &category)
+	if nil != err {
+		ctx.Redirect("/", http.StatusNotFound)
+		return
+	}
+
 	tplData := make(map[string]interface{})
 	tplData["active"] = "project"
-	tplData["project"] = project
+	tplData["project"] = &category
 	data := renderTemplate(ctx, projectArticleNewArticleTpls, tplData)
 	ctx.w.Write(data)
 }

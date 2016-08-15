@@ -175,6 +175,26 @@ func modelProjectCategoryGetByProjectName(projectName string, prj *ProjectCatego
 	return nil
 }
 
+func modelProjectCategoryGetByProjectId(projectId int, prj *ProjectCategoryItem) error {
+	db, err := getRawDB()
+	if nil != err {
+		return err
+	}
+
+	err = db.QueryRow("SELECT * FROM "+projectCategoryItemTableName+" WHERE id = ?", projectId).Scan(
+		&prj.Id,
+		&prj.ProjectName,
+		&prj.ProjectDescribe,
+		&prj.Image,
+		&prj.Author,
+		&prj.ItemCount,
+		&prj.PostPriv)
+	if nil != err {
+		return err
+	}
+	return nil
+}
+
 func modelProjectCategoryUpdateProject(old *ProjectCategoryItem, prj *ProjectCategoryItem) error {
 	//	o := orm.NewOrm()
 	//	_, err := o.Update(prj, cols...)
@@ -229,7 +249,7 @@ func modelProjectArticleNewArticle(article *ProjectArticleItem) (int64, error) {
 		return 0, err
 	}
 
-	_, err = o.Insert(article)
+	insertId, err := o.Insert(article)
 	if nil != err {
 		o.Rollback()
 		return 0, err
@@ -245,7 +265,7 @@ func modelProjectArticleNewArticle(article *ProjectArticleItem) (int64, error) {
 	}
 
 	o.Commit()
-	return 0, nil
+	return insertId, nil
 }
 
 func modelProjectArticleEditArticle(article *ProjectArticleItem, cols []string) (int64, error) {
@@ -317,7 +337,8 @@ func modelProjectArticleGetByAuthor(author string, limit int) ([]*ProjectArticle
 	article_title,
 	post_time,
 	reply_author,
-	reply_time
+	reply_time,
+	project_id 
 	FROM `+projectArticleItemTableName+" WHERE article_author = ? ORDER BY post_time DESC LIMIT ?",
 		author,
 		limit); nil != err {
@@ -337,7 +358,8 @@ func modelProjectArticleGetByAuthor(author string, limit int) ([]*ProjectArticle
 			&item.ArticleTitle,
 			&item.PostTime,
 			&item.ReplyAuthor,
-			&item.ReplyTime); nil != err {
+			&item.ReplyTime,
+			&item.ProjectId); nil != err {
 			return nil, err
 		}
 		item.ArticleAuthor = author
@@ -381,7 +403,7 @@ func modelProjectArticleDelete(articleId, projectId int) error {
 }
 
 //	items, total page count
-func modelProjectArticleGetTopArticles(project string, page int, limit int) ([]*ProjectArticleItem, error) {
+func modelProjectArticleGetTopArticlesByProjectName(project string, page int, limit int) ([]*ProjectArticleItem, error) {
 	db, err := getRawDB()
 	if nil != err {
 		return nil, err
@@ -428,7 +450,7 @@ func modelProjectArticleGetTopArticles(project string, page int, limit int) ([]*
 	return resultSet, nil
 }
 
-func modelProjectArticleGetTopArticleCount(project string) (int, error) {
+func modelProjectArticleGetTopArticleCountByProjectName(project string) (int, error) {
 	db, err := getRawDB()
 	if nil != err {
 		return 0, err
@@ -445,8 +467,8 @@ func modelProjectArticleGetTopArticleCount(project string) (int, error) {
 
 //	first, get top articles
 //	second, get the left articles if necessary
-func modelProjectArticleGetArticles(project string, page int, limit int) ([]*ProjectArticleItem, int, error) {
-	topArticles, err := modelProjectArticleGetTopArticles(project, page, limit)
+func modelProjectArticleGetArticlesByProjectName(project string, page int, limit int) ([]*ProjectArticleItem, int, error) {
+	topArticles, err := modelProjectArticleGetTopArticlesByProjectName(project, page, limit)
 	if nil != err {
 		return nil, 0, err
 	}
@@ -461,7 +483,7 @@ func modelProjectArticleGetArticles(project string, page int, limit int) ([]*Pro
 		if leftCount < limit {
 			offset = 0
 		} else {
-			topArticleCount, err := modelProjectArticleGetTopArticleCount(project)
+			topArticleCount, err := modelProjectArticleGetTopArticleCountByProjectName(project)
 			if err != nil {
 				return nil, 0, err
 			}
@@ -523,6 +545,163 @@ func modelProjectArticleGetArticles(project string, page int, limit int) ([]*Pro
 	//	get page count
 	articleCount := 0
 	err = db.QueryRow("SELECT COUNT(*) FROM "+projectArticleItemTableName+" WHERE project_name = ?", project).Scan(&articleCount)
+	if nil != err {
+		return nil, 0, err
+	}
+
+	pages := (int(articleCount) + limit - 1) / limit
+
+	return topArticles, pages, nil
+}
+
+//	using project id
+//	items, total page count
+func modelProjectArticleGetTopArticles(projectId int, page int, limit int) ([]*ProjectArticleItem, error) {
+	db, err := getRawDB()
+	if nil != err {
+		return nil, err
+	}
+
+	var rows *sql.Rows
+	if rows, err = db.Query(`
+	SELECT id,
+	project_name,
+	article_title,
+	article_author,
+	post_time,
+	top,
+	reply_author,
+	reply_time,
+	active_time,
+	click FROM `+projectArticleItemTableName+
+		" WHERE project_id = ? AND top = 1 ORDER BY active_time DESC LIMIT ? OFFSET ?", projectId, limit, page*limit); nil != err {
+		return nil, err
+	}
+
+	//	free the conn
+	defer rows.Close()
+
+	//	get all item
+	resultSet := make([]*ProjectArticleItem, 0, limit)
+	for rows.Next() {
+		item := &ProjectArticleItem{}
+		if err = rows.Scan(
+			&item.Id,
+			&item.ProjectName,
+			&item.ArticleTitle,
+			&item.ArticleAuthor,
+			&item.PostTime,
+			&item.Top,
+			&item.ReplyAuthor,
+			&item.ReplyTime,
+			&item.ActiveTime,
+			&item.Click); nil != err {
+			return nil, err
+		}
+		item.ProjectId = projectId
+		resultSet = append(resultSet, item)
+	}
+
+	return resultSet, nil
+}
+
+func modelProjectArticleGetTopArticleCount(projectId int) (int, error) {
+	db, err := getRawDB()
+	if nil != err {
+		return 0, err
+	}
+
+	articleCount := 0
+	err = db.QueryRow("SELECT COUNT(*) FROM "+projectArticleItemTableName+" WHERE project_id = ? AND top = 1", projectId).Scan(&articleCount)
+	if nil != err {
+		return 0, err
+	}
+
+	return articleCount, nil
+}
+
+//	first, get top articles
+//	second, get the left articles if necessary
+func modelProjectArticleGetArticles(projectId int, page int, limit int) ([]*ProjectArticleItem, int, error) {
+	topArticles, err := modelProjectArticleGetTopArticles(projectId, page, limit)
+	if nil != err {
+		return nil, 0, err
+	}
+
+	leftCount := limit - len(topArticles)
+	db, err := getRawDB()
+	if nil != err {
+		return nil, 0, err
+	}
+	if leftCount > 0 {
+		offset := 0
+		if leftCount < limit {
+			offset = 0
+		} else {
+			topArticleCount, err := modelProjectArticleGetTopArticleCount(projectId)
+			if err != nil {
+				return nil, 0, err
+			}
+
+			if topArticleCount == 0 {
+				//	no top article
+				offset = page * limit
+			} else {
+				//	how many pages?
+				topArticlePages := (topArticleCount + limit - 1) / limit
+				topOffset := topArticlePages*limit - topArticleCount
+				offset = topOffset
+				topArticlePagesIndex := topArticlePages - 1
+
+				if page > topArticlePagesIndex+1 {
+					offset += (page - (topArticlePagesIndex + 1)) * limit
+				}
+			}
+		}
+
+		var rows *sql.Rows
+		if rows, err = db.Query(`
+		SELECT id,
+		project_name,
+		article_title,
+		article_author,
+		post_time,
+		top,
+		reply_author,
+		reply_time,
+		active_time,
+		click FROM `+projectArticleItemTableName+
+			" WHERE project_id = ? AND top = 0 ORDER BY active_time DESC LIMIT ? OFFSET ?", projectId, leftCount, offset); nil != err {
+			return nil, 0, err
+		}
+
+		//	free the conn
+		defer rows.Close()
+
+		//	get all item
+		for rows.Next() {
+			item := &ProjectArticleItem{}
+			if err = rows.Scan(
+				&item.Id,
+				&item.ProjectName,
+				&item.ArticleTitle,
+				&item.ArticleAuthor,
+				&item.PostTime,
+				&item.Top,
+				&item.ReplyAuthor,
+				&item.ReplyTime,
+				&item.ActiveTime,
+				&item.Click); nil != err {
+				return nil, 0, err
+			}
+			item.ProjectId = projectId
+			topArticles = append(topArticles, item)
+		}
+	}
+
+	//	get page count
+	articleCount := 0
+	err = db.QueryRow("SELECT COUNT(*) FROM "+projectArticleItemTableName+" WHERE project_id = ?", projectId).Scan(&articleCount)
 	if nil != err {
 		return nil, 0, err
 	}

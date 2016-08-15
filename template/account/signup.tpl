@@ -18,13 +18,13 @@
 			  <input type="hidden" name="authenticity_token" value="+/wrGAYYuda+veh7jrtK1yKRW1Rt7eSjnoD7IXmxdsrIZuDrkZ3ixbHnLQhWvoPOymGwNBRXS1b2PWuZyhhfMQ==" />
 			
 			<div class="form-group">
-			  <input type="email" class="form-control input-lg" placeholder="用户名(数字字母下划线，5-20字符)" name="user[login]" id="user_login" />
+			  <input type="email" class="form-control input-md" placeholder="用户名(数字字母下划线，5-20字符)" name="user[login]" id="user_login" />
 			</div>
 			<div class="form-group">
-			  <input class="form-control input-lg" placeholder="名字(中文数字字母下划线，4-10字符)" type="text" name="user[name]" id="user_name" />
+			  <input class="form-control input-md" placeholder="名字(中文数字字母下划线，4-10字符)" type="text" name="user[name]" id="user_name" />
 			</div>
 			<div class="form-group">
-			  <input type="email" class="form-control input-lg" placeholder="Email" name="user[email]" id="user_email" />
+			  <input type="email" class="form-control input-md" placeholder="Email" name="user[email]" id="user_email" />
 			</div>
 			<!--div class="form-group">
 			  <div class="checkbox">
@@ -32,10 +32,10 @@
 			  </div>
 			</div-->
 			<div class="form-group">
-			<input class="form-control input-lg" placeholder="密码(数字字母常用符号，5-20字符)" type="password" name="user[password]" id="user_password" />
+			<input class="form-control input-md" placeholder="密码(数字字母常用符号，5-20字符)" type="password" name="user[password]" id="user_password" />
 			</div>
 			<div class="form-group">
-			<input class="form-control input-lg" placeholder="确认密码" type="password" name="user[password_confirm]" id="user_password_confirmation" />
+			<input class="form-control input-md" placeholder="确认密码" type="password" name="user[password_confirm]" id="user_password_confirmation" />
 			</div>
 			<!--div class="form-group">
 			  <div class="input-group">

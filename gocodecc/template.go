@@ -118,9 +118,12 @@ func tplfn_getPageEnd(page int, showPage int) int {
 	return pageEnd
 }
 
-func tplfn_getPageRange(page int, showPage int) []int {
+func tplfn_getPageRange(page int, showPage int, totalPage int) []int {
 	pageB := tplfn_getPageStart(page, showPage)
 	pageE := tplfn_getPageEnd(page, showPage)
+	if pageE > totalPage {
+		pageE = totalPage
+	}
 	size := pageE - pageB + 1
 
 	pages := make([]int, size, size)

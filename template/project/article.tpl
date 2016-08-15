@@ -1,4 +1,4 @@
-{{define "Title"}}文章{{end}}
+{{define "Title"}}{{.article.ArticleTitle}}{{end}}
 {{define "importcss"}}
 <link href="/static/css/editormd.min.css" rel="stylesheet" />
 <link href="/static/css/article.css" rel="stylesheet" />
@@ -42,7 +42,7 @@
 			<!--Administrator panel-->
 			{{if gt .user.Permission 3}}
 			<p>
-				<a href="/project/{{.article.ProjectName}}/cmd/edit_article?articleId={{.article.Id}}"><button type="button" class="btn btn-sm btn-success">编辑文章</button></a>
+				<a href="/project/{{.article.ProjectId}}/cmd/edit_article?articleId={{.article.Id}}"><button type="button" class="btn btn-sm btn-success">编辑文章</button></a>
 				{{if eq .article.Top 0}}
 				<button id="id-article-top" type="button" articleId="{{.article.Id}}" articleTitle="{{.article.ArticleTitle}}" onclick="topArticle(this, true, {{.article.Id}})" class="btn btn-sm btn-success">置顶文章</button>
 				{{else}}
@@ -69,7 +69,7 @@
 					</a>
 				</li>
 				<li>
-					<a href="/project/{{.article.ProjectName}}/page/1">
+					<a href="/project/{{.article.ProjectId}}/page/1">
 						{{.article.ProjectName}}
 					</a>
 				</li>

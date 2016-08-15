@@ -1,4 +1,4 @@
-{{define "Title"}}会员 {{.watchedUser.UserName}}{{end}}
+{{define "Title"}}分类{{end}}
 {{define "importcss"}}{{end}}
 {{define "importjs"}}
 <script src="/static/js/project_category.js"></script>
@@ -78,7 +78,7 @@
 						<div class="form-group">
 						  <input type="input" class="form-control input-lg" placeholder="项目封面" name="project[image]" id="editproject_image" />
 						</div>
-						<input id="input-oldprojectname" type="hidden" name="project[oldname]" value="" />
+						<input id="input-projectid" type="hidden" name="project[id]" value="" />
 					</form>
 				</div>
 				<div class="modal-footer">
@@ -97,13 +97,13 @@
 			</p>
 			{{end}}
 			{{range .category}}
-			<div id="id-div-{{.ProjectName}}" class="panel panel-default">
+			<div id="id-div-{{.Id}}" class="panel panel-default">
 				<div class="panel-heading" style="text-align:center;">
-					<a href="/project/{{.ProjectName}}/page/1">{{.ProjectName}}</a>
+					<a href="/project/{{.Id}}/page/1">{{.ProjectName}}</a>
 					{{if gt $.user.Permission 3}}
 					<div style="float:right;margin-bottom:2px">
-						<button id="id-project-modify-{{.ProjectName}}" onclick="onEditProject(this,{{.ProjectName}})" type="button" project="{{.ProjectName}}" class="btn btn-sm btn-primary">编辑项目</button>
-						<button id="id-project-del-{{.ProjectName}}" onclick="onDelProject(this)" type="button" project="{{.ProjectName}}" class="btn btn-sm btn-danger">删除项目</button>
+						<button id="id-project-modify-{{.Id}}" onclick="onEditProject(this,{{.Id}})" type="button" projectId="{{.Id}}" project="{{.ProjectName}}" class="btn btn-sm btn-primary">编辑项目</button>
+						<button id="id-project-del-{{.Id}}" onclick="onDelProject(this)" type="button" project="{{.ProjectName}}" projectId="{{.Id}}" class="btn btn-sm btn-danger">删除项目</button>
 					</div>
 					{{end}}
 				</div>

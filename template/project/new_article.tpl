@@ -44,8 +44,8 @@
 					</a>
 				</li>
 				<li>
-					<a href="/project/{{.project}}/page/1">
-						{{.project}}
+					<a href="/project/{{.project.Id}}/page/1">
+						{{.project.ProjectName}}
 					</a>
 				</li>
 			</div>
@@ -62,7 +62,7 @@
 								onchange="this.value=this.value.substring(0, 64)" 
 								onkeydown="this.value=this.value.substring(0, 64)" 
 								onkeyup="this.value=this.value.substring(0, 64)"></textarea>
-							<input type="hidden" name="project" value="{{.project}}" />
+							<input type="hidden" name="projectid" value="{{.project.Id}}" />
 						</div>
 						<hr/>
 						<div class="form-group">

@@ -15,9 +15,10 @@ function showAlert(text) {
 
 function onEditProject(obj, projectName) {
 	var project = $(obj).attr("project");
+	var projectId = $(obj).attr("projectId");
 	//	get content
-	var desc = $("#id-div-"+project).find("p").html();
-	$("#input-oldprojectname").val(projectName);
+	var desc = $("#id-div-"+projectId).find("p").html();
+	$("#input-projectid").val(projectId);
 	
 	//	show modal
 	$("#editproject_name").val(project);
@@ -27,10 +28,11 @@ function onEditProject(obj, projectName) {
 
 function onDelProject(obj) {
 	var project = $(obj).attr("project");
+	var projectId = $(obj).attr("projectId");
 	
 	//	show modal
 	$("#id-modaldeleteconfirm-text").html("您确认要删除项目["+project+"] ?");
-	$("#id-modaldeleteconfirm-text").attr("prject", project);
+	$("#id-modaldeleteconfirm-text").attr("projectId", projectId);
 	$("#modalDeleteConfirm").modal({backdrop:"static"});
 }
 
@@ -56,8 +58,8 @@ function submitCreateProject(obj) {
 }
 
 function submitDeleteProject(obj, action) {
-	var project = $("#id-modaldeleteconfirm-text").attr("prject");
-	var postData = 'project[name]='+project;
+	var projectId = $("#id-modaldeleteconfirm-text").attr("projectId");
+	var postData = 'project[id]='+projectId;
 
 	$.post(action, postData, function(ret){
 		if (ret.Result == 0) {

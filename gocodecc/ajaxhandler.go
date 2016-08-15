@@ -2,6 +2,9 @@ package gocodecc
 
 import (
 	"fmt"
+	"io"
+	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -19,7 +22,21 @@ func ajaxHandler(ctx *RequestContext) {
 	action := vars["action"]
 	var result AjaxResult
 	result.Result = -1
-	defer renderJson(ctx, &result)
+
+	defer func() {
+		if action == "upload" {
+			//	need present result
+			redirectUrl := ""
+			if 0 == result.Result {
+				redirectUrl = fmt.Sprintf("/common/message?text=&result=&title=上传成功")
+			} else {
+				redirectUrl = fmt.Sprintf("/common/message?text=%s&result=1&title=上传失败", result.Msg)
+			}
+			ctx.Redirect(redirectUrl, http.StatusFound)
+		} else {
+			renderJson(ctx, &result)
+		}
+	}()
 
 	switch action {
 	case "project_create":
@@ -80,24 +97,25 @@ func ajaxHandler(ctx *RequestContext) {
 			//	check project name and project describe
 			ctx.r.ParseForm()
 			var err error
-			projectOldName := ctx.r.Form.Get("project[oldname]")
 			projectName := ctx.r.Form.Get("project[name]")
 			projectDescribe := ctx.r.Form.Get("project[describe]")
 			projectImage := ctx.r.Form.Get("project[image]")
+			projectId, err := strconv.Atoi(ctx.r.Form.Get("project[id]"))
 			ctx.r.Body.Close()
 
 			if len(projectName) == 0 ||
 				len(projectDescribe) == 0 ||
-				len(projectOldName) == 0 ||
 				len(projectName) >= kCategoryNameLimit ||
-				len(projectDescribe) >= kCategoryDescribeLimit {
+				len(projectDescribe) >= kCategoryDescribeLimit ||
+				nil != err ||
+				0 == projectId {
 				result.Msg = "invalid project name or project describe"
 				return
 			}
 
 			//	get the original item
 			var originPrj ProjectCategoryItem
-			if err := modelProjectCategoryGetByProjectName(projectOldName, &originPrj); nil != err {
+			if err := modelProjectCategoryGetByProjectId(projectId, &originPrj); nil != err {
 				result.Msg = err.Error()
 				return
 			}
@@ -136,15 +154,16 @@ func ajaxHandler(ctx *RequestContext) {
 			}
 
 			ctx.r.ParseForm()
-			projectName := ctx.r.Form.Get("project[name]")
+			projectId, err := strconv.Atoi(ctx.r.Form.Get("project[id]"))
 			ctx.r.Body.Close()
 
-			if len(projectName) == 0 {
+			if projectId == 0 ||
+				nil != err {
 				result.Msg = "invalid project name"
 				return
 			}
 
-			err := modelProjectCategoryRemoveByProjectName(projectName)
+			err = modelProjectCategoryRemove(projectId)
 			if nil != err {
 				result.Msg = err.Error()
 				return
@@ -161,15 +180,16 @@ func ajaxHandler(ctx *RequestContext) {
 			}
 
 			ctx.r.ParseForm()
-			projectName := ctx.r.Form.Get("project")
-			if len(projectName) == 0 {
+			projectId, err := strconv.Atoi(ctx.r.Form.Get("projectid"))
+			ctx.r.Body.Close()
+			if projectId == 0 ||
+				nil != err {
 				result.Msg = "invalid project"
 				return
 			}
-			ctx.r.Body.Close()
 			//	check auth
 			var prj ProjectCategoryItem
-			if err := modelProjectCategoryGetByProjectName(projectName, &prj); nil != err {
+			if err := modelProjectCategoryGetByProjectId(projectId, &prj); nil != err {
 				result.Msg = err.Error()
 				return
 			}
@@ -216,7 +236,7 @@ func ajaxHandler(ctx *RequestContext) {
 			postArticle.ArticleAuthor = ctx.user.NickName
 			postArticle.ArticleContentHtml = contentHtml
 			postArticle.ArticleContentMarkdown = contentMarkdown
-			postArticle.ProjectName = projectName
+			postArticle.ProjectName = prj.ProjectName
 			postArticle.ProjectId = prj.Id
 			articleId, err := modelProjectArticleNewArticle(&postArticle)
 			if nil != err {
@@ -225,7 +245,7 @@ func ajaxHandler(ctx *RequestContext) {
 			}
 			//	done
 			result.Result = 0
-			result.Msg = fmt.Sprintf("/project/%s/article/%d", projectName, articleId)
+			result.Msg = fmt.Sprintf("/project/%d/article/%d", projectId, articleId)
 		}
 	case "article_edit":
 		{
@@ -235,8 +255,10 @@ func ajaxHandler(ctx *RequestContext) {
 			}
 
 			ctx.r.ParseForm()
-			projectName := ctx.r.Form.Get("project")
-			if len(projectName) == 0 {
+			defer ctx.r.Body.Close()
+
+			projectId, _ := strconv.Atoi(ctx.r.Form.Get("projectId"))
+			if projectId == 0 {
 				result.Msg = "invalid project"
 				return
 			}
@@ -245,7 +267,7 @@ func ajaxHandler(ctx *RequestContext) {
 				result.Msg = "invalid articleId"
 				return
 			}
-			ctx.r.Body.Close()
+
 			//	check auth
 			article, err := modelProjectArticleGet(articleId)
 			if nil != err {
@@ -309,7 +331,7 @@ func ajaxHandler(ctx *RequestContext) {
 			}
 			//	done
 			result.Result = 0
-			result.Msg = fmt.Sprintf("/project/%s/article/%d", projectName, articleId)
+			result.Msg = fmt.Sprintf("/project/%d/article/%d", projectId, articleId)
 		}
 	case "article_delete":
 		{
@@ -348,7 +370,7 @@ func ajaxHandler(ctx *RequestContext) {
 
 			//	done
 			result.Result = 0
-			result.Msg = fmt.Sprintf("/project/%s/page/1", article.ProjectName)
+			result.Msg = fmt.Sprintf("/project/%d/page/1", article.ProjectId)
 		}
 	case "article_top":
 		{
@@ -419,6 +441,68 @@ func ajaxHandler(ctx *RequestContext) {
 			}
 
 			//	done
+			result.Result = 0
+		}
+	case "upload":
+		{
+			if ctx.r.Method != "POST" {
+				result.Msg = "Invalid method"
+				return
+			}
+			if ctx.user.Permission < kPermission_SuperAdmin {
+				result.Msg = "access denied"
+				return
+			}
+
+			//	1 MB
+			var fileSizeLimit int64 = 1 * 1024 * 1024
+			ctx.r.ParseMultipartForm(fileSizeLimit)
+			file, handler, err := ctx.r.FormFile("uploadfile")
+			path := strings.Trim(ctx.r.Form.Get("path"), "/")
+			path = strings.Trim(path, "\\")
+			if len(path) != 0 {
+				path += "/"
+			}
+			if nil != err {
+				result.Msg = err.Error()
+				return
+			}
+			defer file.Close()
+
+			fileSize := int64(0)
+			if statInterface, ok := file.(FileStat); ok {
+				fileInfo, _ := statInterface.Stat()
+				fileSize = fileInfo.Size()
+			}
+			if 0 == fileSize {
+				if sizeInterface, ok := file.(FileSize); ok {
+					fileSize = sizeInterface.Size()
+				}
+			}
+
+			if fileSize > fileSizeLimit {
+				result.Msg = "文件大小超过限制"
+				return
+			}
+
+			//	check with path
+			pathSel := ctx.r.Form.Get("dst")
+			if pathSel == "js" {
+				pathSel = "./static/js/"
+			} else if pathSel == "tpl" {
+				pathSel = "./template/"
+			} else {
+				result.Msg = "Invalid file type"
+				return
+			}
+
+			f, err := os.OpenFile(pathSel+path+handler.Filename, os.O_WRONLY|os.O_CREATE, 0666)
+			if err != nil {
+				result.Msg = err.Error()
+				return
+			}
+			defer f.Close()
+			io.Copy(f, file)
 			result.Result = 0
 		}
 	default:

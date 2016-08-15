@@ -187,10 +187,12 @@ var routerItems = []RouterItem{
 	{"/account/signupsuccess", kPermission_Guest, signupSuccessHandler},
 	{"/member/{username}", kPermission_Guest, memberInfoHandler},
 	{"/project", kPermission_Guest, projectCategoryHandler},
-	{"/project/{projectname}/page/{page:[0-9]*}", kPermission_Guest, projectArticlesHandler},
-	{"/project/{projectname}/cmd/{cmd}", kPermission_SuperAdmin, projectArticleCmdHandler},
-	{"/project/{projectname}/article/{articleid:[0-9]*}", kPermission_Guest, projectArticleHandler},
+	{"/project/{projectid:[0-9]*}/page/{page:[0-9]*}", kPermission_Guest, projectArticlesHandler},
+	{"/project/{projectid:[0-9]*}/cmd/{cmd}", kPermission_SuperAdmin, projectArticleCmdHandler},
+	{"/project/{projectid:[0-9]*}/article/{articleid:[0-9]*}", kPermission_Guest, projectArticleHandler},
 	{"/ajax/{action}", kPermission_Guest, ajaxHandler},
+	{"/admin/{action}", kPermission_SuperAdmin, adminHandler},
+	{"/common/{action}", kPermission_Guest, commonHandler},
 }
 
 func fileHandler(w http.ResponseWriter, r *http.Request) {

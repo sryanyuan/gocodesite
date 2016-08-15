@@ -23,7 +23,7 @@
 							第 {{.watchedUser.Uid}} 位会员 / {{getUnixTimeString .watchedUser.CreateTime}}
 						</div>
 						<div class="item" id="id-meminfo-postinfo">
-							发了 {{.postCount}} 贴  回了 {{.replyCount}} 贴
+							发了 {{.postCount}} 贴 • 回了 {{.replyCount}} 贴
 						</div>
 						<div class="item social">
 							{{if ne .watchedSocialInfo.Weibo ""}}
@@ -36,12 +36,31 @@
 					</div>
 					<div id="id-member-following">
 						<div id="member-mood">
+							{{$moodLen := len .watchedUser.Mood}}
+							{{if ne $moodLen 0}}
 							{{.watchedUser.Mood}}
+							{{else}}
+							该用户很懒，没有设置签名
+							{{end}}
 						</div>
 					</div>
 				</div>
 			  </div>
 			</div>
+			{{if eq .watchedUser.Uid .user.Uid}}
+			{{if gt .user.Permission 3}}
+			<div class="panel panel-default">
+				<div class="panel-heading" style="text-align:center;">
+					<h3 class="panel-title">管理面板</h3>
+				</div>
+				<div class="panel-body">
+					<div>
+						<a href="/admin/upload" class="btn btn-sm btn-success">上传静态文件</a>
+					</div>
+				</div>
+			</div>
+			{{end}}
+			{{end}}
 		</div>
 		<div class="col-md-8">
 			<!--div class="panel panel-default">
@@ -66,7 +85,7 @@
 								{{range $i, $v := .articles}}
 								<li class="list-group-item">
 									<div class="title">
-										<a href="/project/{{$v.ProjectName}}/article/{{$v.Id}}">{{$v.ArticleTitle}}</a>
+										<a href="/project/{{$v.ProjectId}}/article/{{$v.Id}}">{{$v.ArticleTitle}}</a>
 									</div>
 									<div class="info">
 										<span class="member-post-info">发表于 {{getTimeGapString $v.PostTime}}</span>

@@ -48,8 +48,8 @@ $(document).ready(function(){
 					</a>
 				</li>
 				<li>
-					<a href="/project/{{.project}}/page/1">
-						{{.project}}
+					<a href="/project/{{.article.ProjectId}}/page/1">
+						{{.article.ProjectName}}
 					</a>
 				</li>
 			</div>
@@ -66,7 +66,7 @@ $(document).ready(function(){
 								onchange="this.value=this.value.substring(0, 64)" 
 								onkeydown="this.value=this.value.substring(0, 64)" 
 								onkeyup="this.value=this.value.substring(0, 64)"></textarea>
-							<input type="hidden" name="project" value="{{.article.ProjectName}}" />
+							<input type="hidden" name="projectId" value="{{.article.ProjectId}}" />
 							<input type="hidden" name="articleId" value="{{.article.Id}}" />
 						</div>
 						<hr/>

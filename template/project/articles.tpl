@@ -1,4 +1,4 @@
-{{define "Title"}}文章{{end}}
+{{define "Title"}}{{.category.ProjectName}}{{end}}
 {{define "importcss"}}
 <link href="/static/css/articles.css" rel="stylesheet" />
 {{end}}
@@ -35,7 +35,7 @@
 						<a href="/member/{{.ArticleAuthor}}" class="pull-left" style="margin-right:10px;">
 							<img class="img-rounded" src="{{$.imgPrefix}}/{{getMemberAvatar .ArticleAuthor}}" width="45" height="45" alt="{{.ArticleAuthor}}" >
 						</a>
-						<a href="/project/{{.ProjectName}}/article/{{.Id}}" class="title">
+						<a href="/project/{{.ProjectId}}/article/{{.Id}}" class="title">
 							{{.ArticleTitle}}
 						</a>
 						{{if eq .Top 1}}
@@ -70,7 +70,7 @@
 						<li class="disabled"><a href="javascript:void(0);" aria-lable="Previous"><span aria-hidden="true">&laquo;</span></a></li>
 						{{end}}
 						<!--fill pages-->
-						{{$pageRange := getPageRange .page .showPages}}
+						{{$pageRange := getPageRange .page .showPages .pages}}
 						{{range $i, $v := $pageRange}}
 							{{if eq $v $.page}}
 							<li class="active"><a href="javascript:void(0);">{{$v}}</a></li>

@@ -15,10 +15,10 @@
 			</div>
 			<form id="id-form-signin" class="simple_form " novalidate="novalidate" id="new_user" action="/signin" accept-charset="UTF-8" method="post"><input name="utf8" type="hidden" value="&#x2713;" /><input type="hidden" name="authenticity_token" value="hVFHgkLJmc9/lZRLf31GJ4pqNZ3rAaJL0AAQgc6/0zK2y4xx1UzC3HDPUTineI8+Ypre/ZK7Db64vYA5fRb6yQ==" />
 			<div class="form-group">
-			  <input type="email" class="form-control input-lg" placeholder="用户名 / Email" name="user[login]" id="user_login" />
+			  <input type="email" class="form-control input-md" placeholder="用户名 / Email" name="user[login]" id="user_login" />
 			</div>
 			<div class="form-group">
-			  <input type="password" class="form-control input-lg" placeholder="密码" name="user[password]" id="user_password" />
+			  <input type="password" class="form-control input-md" placeholder="密码" name="user[password]" id="user_password" />
 			</div>
 			<div id="id-signin-captchaInputGroup" class="form-group">
 			  <div class="input-group">
