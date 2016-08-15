@@ -19,10 +19,13 @@ function onEditProject(obj, projectName) {
 	//	get content
 	var desc = $("#id-div-"+projectId).find("p").html();
 	$("#input-projectid").val(projectId);
+	//	get image
+	var image = $(obj).attr("projectImage");
 	
 	//	show modal
 	$("#editproject_name").val(project);
 	$("#editproject_describe").val(desc);
+	$("#editproject_image").val(image);
 	$("#modalProjectEdit").modal({backdrop:"static"});
 }
 

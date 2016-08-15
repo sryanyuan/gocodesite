@@ -66,6 +66,11 @@
 						</div>
 						<hr/>
 						<div class="form-group">
+							<label for="title">文章封面</label>
+							<input type="cover" class="form-control input-md" placeholder="封面路径" name="coverImage" />
+						</div>
+						<hr/>
+						<div class="form-group">
 							<label for="title">文章内容</label>
 						</div>
 						<div class="form-group">

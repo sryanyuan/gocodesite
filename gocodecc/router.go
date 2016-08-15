@@ -213,7 +213,6 @@ func InitRouters(r *mux.Router) {
 	//	static file
 	http.Handle("/static/css/", http.FileServer(http.Dir(".")))
 	http.Handle("/static/js/", http.FileServer(http.Dir(".")))
-	//http.Handle("/static/img/", http.FileServer(http.Dir(".")))
 	http.Handle("/static/images/", http.FileServer(http.Dir(".")))
 	http.Handle("/static/fonts/", http.FileServer(http.Dir(".")))
 }

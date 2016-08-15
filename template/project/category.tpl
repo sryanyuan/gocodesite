@@ -70,13 +70,13 @@
 				<div class="modal-body">
 					<form id="id-form-editproject" class="form " novalidate="novalidate" id="new_user" action="/ajax/project_edit" accept-charset="UTF-8" method="post">
 						<div class="form-group">
-						  <input type="input" class="form-control input-lg" placeholder="项目名称" name="project[name]" id="editproject_name" />
+						  <input type="input" class="form-control input-md" placeholder="项目名称" name="project[name]" id="editproject_name" />
 						</div>
 						<div class="form-group">
-						  <input type="input" class="form-control input-lg" placeholder="项目简介" name="project[describe]" id="editproject_describe" />
+						  <input type="input" class="form-control input-md" placeholder="项目简介" name="project[describe]" id="editproject_describe" />
 						</div>
 						<div class="form-group">
-						  <input type="input" class="form-control input-lg" placeholder="项目封面" name="project[image]" id="editproject_image" />
+						  <input type="input" class="form-control input-md" placeholder="项目封面" name="project[image]" id="editproject_image" />
 						</div>
 						<input id="input-projectid" type="hidden" name="project[id]" value="" />
 					</form>
@@ -102,10 +102,11 @@
 					<a href="/project/{{.Id}}/page/1">{{.ProjectName}}</a>
 					{{if gt $.user.Permission 3}}
 					<div style="float:right;margin-bottom:2px">
-						<button id="id-project-modify-{{.Id}}" onclick="onEditProject(this,{{.Id}})" type="button" projectId="{{.Id}}" project="{{.ProjectName}}" class="btn btn-sm btn-primary">编辑项目</button>
+						<button id="id-project-modify-{{.Id}}" onclick="onEditProject(this,{{.Id}})" type="button" projectId="{{.Id}}" projectImage="{{.Image}}" project="{{.ProjectName}}" class="btn btn-sm btn-primary">编辑项目</button>
 						<button id="id-project-del-{{.Id}}" onclick="onDelProject(this)" type="button" project="{{.ProjectName}}" projectId="{{.Id}}" class="btn btn-sm btn-danger">删除项目</button>
 					</div>
 					{{end}}
+					<span style="float:right;">{{.ItemCount}} 篇主题</span>
 				</div>
 			  <div class="panel-body">
 				<p>{{.ProjectDescribe}}</p>

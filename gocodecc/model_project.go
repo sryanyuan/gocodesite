@@ -56,6 +56,7 @@ type ProjectArticleItem struct {
 	ActiveTime             int64
 	Click                  int
 	ProjectId              int
+	CoverImage             string `orm:"size(128)"`
 }
 
 func (this *ProjectArticleItem) TableName() string {
@@ -210,9 +211,11 @@ func modelProjectCategoryUpdateProject(old *ProjectCategoryItem, prj *ProjectCat
 		return err
 	}
 
-	_, err = tx.Exec("UPDATE "+projectCategoryItemTableName+" SET project_name = ? , project_describe = ? WHERE id = ?",
+	_, err = tx.Exec("UPDATE "+projectCategoryItemTableName+
+		" SET project_name = ? , project_describe = ?, image = ? WHERE id = ?",
 		prj.ProjectName,
 		prj.ProjectDescribe,
+		prj.Image,
 		prj.Id)
 	if nil != err {
 		tx.Rollback()
@@ -266,6 +269,71 @@ func modelProjectArticleNewArticle(article *ProjectArticleItem) (int64, error) {
 
 	o.Commit()
 	return insertId, nil
+	/*db, err := getRawDB()
+	if nil != err {
+		return 0, err
+	}
+
+	tx, err := db.Begin()
+	if nil != err {
+		return 0, err
+	}
+
+	insertRet, err := tx.Exec("INSERT INTO "+projectArticleItemTableName+` (
+		project_name,
+		article_title,
+		article_content_html,
+		article_content_markdown,
+		article_author,
+		like,
+		post_time,
+		edit_time,
+		top,
+		reply_author,
+		reply_time,
+		active_time,
+		click,
+		project_id
+	)
+	 VALUES (
+		?,?,?,?,?,?,?,?,?,?,?,?,?,?
+	)
+	`,
+		article.ProjectName,
+		article.ArticleTitle,
+		article.ArticleContentHtml,
+		article.ArticleContentMarkdown,
+		article.ArticleAuthor,
+		article.Like,
+		article.PostTime,
+		article.EditTime,
+		article.Top,
+		article.ReplyAuthor,
+		article.ReplyTime,
+		article.ActiveTime,
+		article.Click,
+		article.ProjectId)
+
+	if nil != err {
+		tx.Rollback()
+		return 0, err
+	}
+
+	insertId, err := insertRet.LastInsertId()
+	if err != nil {
+		tx.Rollback()
+		return 0, err
+	}
+
+	//	inc article count
+	_, err = tx.Exec("UPDATE "+projectCategoryItemTableName+" SET item_count = item_count + 1 WHERE id = ?", article.ProjectId)
+	if nil != err {
+		tx.Rollback()
+		return 0, err
+	}
+
+	tx.Commit()
+	return insertId, nil*/
 }
 
 func modelProjectArticleEditArticle(article *ProjectArticleItem, cols []string) (int64, error) {
@@ -338,8 +406,9 @@ func modelProjectArticleGetByAuthor(author string, limit int) ([]*ProjectArticle
 	post_time,
 	reply_author,
 	reply_time,
-	project_id 
-	FROM `+projectArticleItemTableName+" WHERE article_author = ? ORDER BY post_time DESC LIMIT ?",
+	project_id,
+	cover_image
+	 FROM `+projectArticleItemTableName+" WHERE article_author = ? ORDER BY post_time DESC LIMIT ?",
 		author,
 		limit); nil != err {
 		return nil, err
@@ -359,7 +428,8 @@ func modelProjectArticleGetByAuthor(author string, limit int) ([]*ProjectArticle
 			&item.PostTime,
 			&item.ReplyAuthor,
 			&item.ReplyTime,
-			&item.ProjectId); nil != err {
+			&item.ProjectId,
+			&item.CoverImage); nil != err {
 			return nil, err
 		}
 		item.ArticleAuthor = author
@@ -419,7 +489,8 @@ func modelProjectArticleGetTopArticlesByProjectName(project string, page int, li
 	reply_author,
 	reply_time,
 	active_time,
-	click FROM `+projectArticleItemTableName+
+	click,
+	cover_image FROM `+projectArticleItemTableName+
 		" WHERE project_name = ? AND top = 1 ORDER BY active_time DESC LIMIT ? OFFSET ?", project, limit, page*limit); nil != err {
 		return nil, err
 	}
@@ -440,7 +511,8 @@ func modelProjectArticleGetTopArticlesByProjectName(project string, page int, li
 			&item.ReplyAuthor,
 			&item.ReplyTime,
 			&item.ActiveTime,
-			&item.Click); nil != err {
+			&item.Click,
+			&item.CoverImage); nil != err {
 			return nil, err
 		}
 		item.ProjectName = project
@@ -514,7 +586,8 @@ func modelProjectArticleGetArticlesByProjectName(project string, page int, limit
 		reply_author,
 		reply_time,
 		active_time,
-		click FROM `+projectArticleItemTableName+
+		click,
+		cover_iamge FROM `+projectArticleItemTableName+
 			" WHERE project_name = ? AND top = 0 ORDER BY active_time DESC LIMIT ? OFFSET ?", project, leftCount, offset); nil != err {
 			return nil, 0, err
 		}
@@ -534,7 +607,8 @@ func modelProjectArticleGetArticlesByProjectName(project string, page int, limit
 				&item.ReplyAuthor,
 				&item.ReplyTime,
 				&item.ActiveTime,
-				&item.Click); nil != err {
+				&item.Click,
+				&item.CoverImage); nil != err {
 				return nil, 0, err
 			}
 			item.ProjectName = project
@@ -573,7 +647,8 @@ func modelProjectArticleGetTopArticles(projectId int, page int, limit int) ([]*P
 	reply_author,
 	reply_time,
 	active_time,
-	click FROM `+projectArticleItemTableName+
+	click,
+	cover_image FROM `+projectArticleItemTableName+
 		" WHERE project_id = ? AND top = 1 ORDER BY active_time DESC LIMIT ? OFFSET ?", projectId, limit, page*limit); nil != err {
 		return nil, err
 	}
@@ -595,7 +670,8 @@ func modelProjectArticleGetTopArticles(projectId int, page int, limit int) ([]*P
 			&item.ReplyAuthor,
 			&item.ReplyTime,
 			&item.ActiveTime,
-			&item.Click); nil != err {
+			&item.Click,
+			&item.CoverImage); nil != err {
 			return nil, err
 		}
 		item.ProjectId = projectId
@@ -670,7 +746,8 @@ func modelProjectArticleGetArticles(projectId int, page int, limit int) ([]*Proj
 		reply_author,
 		reply_time,
 		active_time,
-		click FROM `+projectArticleItemTableName+
+		click,
+		cover_image FROM `+projectArticleItemTableName+
 			" WHERE project_id = ? AND top = 0 ORDER BY active_time DESC LIMIT ? OFFSET ?", projectId, leftCount, offset); nil != err {
 			return nil, 0, err
 		}
@@ -691,7 +768,8 @@ func modelProjectArticleGetArticles(projectId int, page int, limit int) ([]*Proj
 				&item.ReplyAuthor,
 				&item.ReplyTime,
 				&item.ActiveTime,
-				&item.Click); nil != err {
+				&item.Click,
+				&item.CoverImage); nil != err {
 				return nil, 0, err
 			}
 			item.ProjectId = projectId

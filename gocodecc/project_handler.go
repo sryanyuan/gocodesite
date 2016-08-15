@@ -1,6 +1,7 @@
 package gocodecc
 
 import (
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -192,6 +193,7 @@ func _editProjectArticle(ctx *RequestContext, articleId int) {
 	tplData := make(map[string]interface{})
 	tplData["active"] = "project"
 	tplData["article"] = article
+	log.Println(article.CoverImage)
 	data := renderTemplate(ctx, projectArticleEditArticleRenderTpls, tplData)
 	ctx.w.Write(data)
 }

@@ -29,6 +29,7 @@ $(document).ready(function(){
 		}
 	});
 	$("#text-title").html({{.article.ArticleTitle}});
+	$("#article-cover").val({{.article.CoverImage}});
 });
 </script>
 {{end}}
@@ -70,6 +71,11 @@ $(document).ready(function(){
 							<input type="hidden" name="articleId" value="{{.article.Id}}" />
 						</div>
 						<hr/>
+						<div class="form-group">
+							<label for="title">文章封面</label>
+							<input id="article-cover" type="cover" class="form-control input-md" placeholder="封面路径" name="coverImage" />
+						</div>
+						</div>
 						<div class="form-group">
 							<label for="title">文章内容</label>
 						</div>
