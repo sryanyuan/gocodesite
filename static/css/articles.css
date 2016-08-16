@@ -36,7 +36,11 @@ dd {
 	padding-left:5px;
 }
 
-.category-body h3 {
+.category-body h3{
+	margin-top:0px;
+}
+
+.category-body h4{
 	margin-top:0px;
 }
 

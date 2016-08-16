@@ -17,11 +17,6 @@
 			</div>
 		</div>
 		<div class="col-md-3 col-md-offset-0">
-			<h2 class="section-title-s2">统计</h2>
-			<div class="section-statistics">
-				<p>主题数：{{.articleCount}}</p>
-			</div>
-			<div style="height:25px;"></div>
 			<h2 class="section-title-s2"><a href="/project">主题目录</a></h2>
 			<div class="section-category">
 				<ul class="posts" style="list-style:none;">
@@ -32,6 +27,11 @@
 					</li>
 					{{end}}
 				</ul>
+			</div>
+			<div style="height:25px;"></div>
+			<h2 class="section-title-s2">统计</h2>
+			<div class="section-statistics">
+				<p>主题数：{{.articleCount}}</p>
 			</div>
 		</div>
 	</div>
