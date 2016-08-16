@@ -194,7 +194,8 @@ func ajaxHandler(ctx *RequestContext) {
 				return
 			}
 			//	check auth
-			if ctx.user.Permission < prj.PostPriv {
+			if ctx.user.Permission < prj.PostPriv &&
+				ctx.user.NickName != prj.Author {
 				result.Msg = "permission denied"
 				return
 			}
@@ -228,6 +229,8 @@ func ajaxHandler(ctx *RequestContext) {
 				result.Msg = "内容太长了"
 				return
 			}
+			coverImage := ctx.r.Form.Get("coverImage")
+
 			//	do post
 			var postArticle ProjectArticleItem
 			postArticle.ActiveTime = time.Now().Unix()
@@ -238,6 +241,7 @@ func ajaxHandler(ctx *RequestContext) {
 			postArticle.ArticleContentMarkdown = contentMarkdown
 			postArticle.ProjectName = prj.ProjectName
 			postArticle.ProjectId = prj.Id
+			postArticle.CoverImage = coverImage
 			articleId, err := modelProjectArticleNewArticle(&postArticle)
 			if nil != err {
 				result.Msg = err.Error()
@@ -267,6 +271,7 @@ func ajaxHandler(ctx *RequestContext) {
 				result.Msg = "invalid articleId"
 				return
 			}
+			coverImage := ctx.r.Form.Get("coverImage")
 
 			//	check auth
 			article, err := modelProjectArticleGet(articleId)
@@ -323,6 +328,10 @@ func ajaxHandler(ctx *RequestContext) {
 				article.ArticleContentMarkdown = contentMarkdown
 				colsEdit = append(colsEdit, "article_content_html")
 				colsEdit = append(colsEdit, "article_content_markdown")
+			}
+			if article.CoverImage != coverImage {
+				article.CoverImage = coverImage
+				colsEdit = append(colsEdit, "cover_image")
 			}
 			_, err = modelProjectArticleEditArticle(article, colsEdit)
 			if nil != err {

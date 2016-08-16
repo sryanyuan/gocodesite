@@ -188,7 +188,7 @@ var routerItems = []RouterItem{
 	{"/member/{username}", kPermission_Guest, memberInfoHandler},
 	{"/project", kPermission_Guest, projectCategoryHandler},
 	{"/project/{projectid:[0-9]*}/page/{page:[0-9]*}", kPermission_Guest, projectArticlesHandler},
-	{"/project/{projectid:[0-9]*}/cmd/{cmd}", kPermission_SuperAdmin, projectArticleCmdHandler},
+	{"/project/{projectid:[0-9]*}/cmd/{cmd}", kPermission_Guest, projectArticleCmdHandler},
 	{"/project/{projectid:[0-9]*}/article/{articleid:[0-9]*}", kPermission_Guest, projectArticleHandler},
 	{"/ajax/{action}", kPermission_Guest, ajaxHandler},
 	{"/admin/{action}", kPermission_SuperAdmin, adminHandler},

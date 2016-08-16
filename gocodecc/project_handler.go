@@ -1,12 +1,9 @@
 package gocodecc
 
 import (
-	"log"
 	"net/http"
 	"strconv"
 	"strings"
-
-	"github.com/cihub/seelog"
 
 	"github.com/gorilla/mux"
 )
@@ -17,6 +14,7 @@ var projectCategoryRenderTpls = []string{
 
 var projectArticlesRenderTpls = []string{
 	"template/project/articles.tpl",
+	"template/component/article_detail_display.tpl",
 }
 
 var projectArticleNewArticleTpls = []string{
@@ -119,7 +117,6 @@ func projectArticleHandler(ctx *RequestContext) {
 
 	//	increase click count
 	if err = modelProjectArticleIncClick(articleId); nil != err {
-		seelog.Error(err)
 		return
 	}
 	article.Click = article.Click + 1
@@ -176,6 +173,19 @@ func _newProjectArticle(ctx *RequestContext, projectId int) {
 		return
 	}
 
+	//	check auth
+	if ctx.user.Uid == 0 {
+		ctx.RenderString("acess denied")
+		return
+	}
+	if ctx.user.NickName == category.Author ||
+		ctx.user.Permission >= category.PostPriv {
+		//	nothing
+	} else {
+		ctx.RenderString("access denied")
+		return
+	}
+
 	tplData := make(map[string]interface{})
 	tplData["active"] = "project"
 	tplData["project"] = &category
@@ -193,7 +203,6 @@ func _editProjectArticle(ctx *RequestContext, articleId int) {
 	tplData := make(map[string]interface{})
 	tplData["active"] = "project"
 	tplData["article"] = article
-	log.Println(article.CoverImage)
 	data := renderTemplate(ctx, projectArticleEditArticleRenderTpls, tplData)
 	ctx.w.Write(data)
 }

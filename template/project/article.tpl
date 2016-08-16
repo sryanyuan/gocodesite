@@ -53,7 +53,7 @@
 			<hr/>
 			{{else if eq .user.NickName .article.ArticleAuthor}}
 			<p>
-				<button id="id-article-edit" type="button" class="btn btn-sm btn-success">编辑文章</button>
+				<a href="/project/{{.article.ProjectId}}/cmd/edit_article?articleId={{.article.Id}}"><button type="button" class="btn btn-sm btn-success">编辑文章</button></a>
 			</p>
 			<hr/>
 			{{end}}
@@ -78,16 +78,16 @@
 				<div class="page-header">
 					<div style="text-align:center;"><h1>{{.article.ArticleTitle}}</h1></div>
 					<div class="btn-group btn-group-sm pull-right">
-						<a href="/ajax/article_like/{{.article.Id}}" class="btn btn-default" title="{{.article.Like}} 赞">
+						<!--a href="/ajax/article_like/{{.article.Id}}" class="btn btn-default" title="{{.article.Like}} 赞">
 							<i class="fa fa-heart"></i>
 							{{.article.Like}}
-						</a>
+						</a-->
 						<a href="/ajax/article_fav/{{.article.Id}}" class="btn btn-default" title="收藏">
 							<i class="fa fa-star"></i>
 						</a>
 					</div>
 					<div style="padding-bottom:5px;">
-						<span style="margin-bottom:5px;">由 <a href="/member/{{.article.ArticleAuthor}}">{{.article.ArticleAuthor}}</a> 在 {{getTimeGapString .article.PostTime}} 发布 {{.article.Click}} 次点击</span>
+						<span style="margin-bottom:5px;">由 <a href="/member/{{.article.ArticleAuthor}}">{{.article.ArticleAuthor}}</a> 在 {{getTimeGapString .article.PostTime}} 发布</span>
 					</div>
 				</div>
 				<div class="body editormd-preview-container">
@@ -95,7 +95,7 @@
 					{{convertToHtml $content}}
 				</div>
 			</div>
-			{{template "comment_article_html" .}}
+			{{template "comment_article_html" . $.}}
 		</div>
 		<div class="col-md-4">
 			<div class="panel panel-default">

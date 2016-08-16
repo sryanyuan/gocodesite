@@ -1,0 +1,20 @@
+.category-box {
+	padding:20px 20px 20px 20px;
+	background-color:white;
+	border-bottom:3px solid #DDDDDD;
+}
+
+.media-body h3 {
+	margin-top:0px;
+	margin-left:5px;
+}
+
+.category-info {
+	margin-left:5px;
+}
+
+.category-desc {
+	margin-left:5px;
+	margin-top:10px;
+	color:#666666;
+}

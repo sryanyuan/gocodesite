@@ -642,6 +642,7 @@ func modelProjectArticleGetTopArticles(projectId int, page int, limit int) ([]*P
 	project_name,
 	article_title,
 	article_author,
+	article_content_html,
 	post_time,
 	top,
 	reply_author,
@@ -665,6 +666,7 @@ func modelProjectArticleGetTopArticles(projectId int, page int, limit int) ([]*P
 			&item.ProjectName,
 			&item.ArticleTitle,
 			&item.ArticleAuthor,
+			&item.ArticleContentHtml,
 			&item.PostTime,
 			&item.Top,
 			&item.ReplyAuthor,
@@ -741,6 +743,7 @@ func modelProjectArticleGetArticles(projectId int, page int, limit int) ([]*Proj
 		project_name,
 		article_title,
 		article_author,
+		article_content_html,
 		post_time,
 		top,
 		reply_author,
@@ -763,6 +766,7 @@ func modelProjectArticleGetArticles(projectId int, page int, limit int) ([]*Proj
 				&item.ProjectName,
 				&item.ArticleTitle,
 				&item.ArticleAuthor,
+				&item.ArticleContentHtml,
 				&item.PostTime,
 				&item.Top,
 				&item.ReplyAuthor,
@@ -787,4 +791,58 @@ func modelProjectArticleGetArticles(projectId int, page int, limit int) ([]*Proj
 	pages := (int(articleCount) + limit - 1) / limit
 
 	return topArticles, pages, nil
+}
+
+func modelProjectArticleGetRecentArticles(limit int) ([]*ProjectArticleItem, error) {
+	db, err := getRawDB()
+	if nil != err {
+		return nil, err
+	}
+
+	var rows *sql.Rows
+	if rows, err = db.Query(`
+		SELECT id,
+		project_name,
+		article_title,
+		article_author,
+		article_content_html,
+		post_time,
+		top,
+		reply_author,
+		reply_time,
+		active_time,
+		click,
+		project_id,
+		cover_image FROM `+projectArticleItemTableName+
+		" ORDER BY post_time DESC LIMIT ?", limit); nil != err {
+		return nil, err
+	}
+
+	//	free the conn
+	defer rows.Close()
+
+	//	get all item
+	articles := make([]*ProjectArticleItem, 0, 10)
+	for rows.Next() {
+		item := &ProjectArticleItem{}
+		if err = rows.Scan(
+			&item.Id,
+			&item.ProjectName,
+			&item.ArticleTitle,
+			&item.ArticleAuthor,
+			&item.ArticleContentHtml,
+			&item.PostTime,
+			&item.Top,
+			&item.ReplyAuthor,
+			&item.ReplyTime,
+			&item.ActiveTime,
+			&item.Click,
+			&item.ProjectId,
+			&item.CoverImage); nil != err {
+			return nil, err
+		}
+		articles = append(articles, item)
+	}
+
+	return articles, nil
 }

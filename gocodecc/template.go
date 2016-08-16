@@ -8,9 +8,8 @@ import (
 	"io/ioutil"
 	"runtime"
 	"strconv"
+	"strings"
 	"time"
-
-	//"github.com/cihub/seelog"
 )
 
 var goVersion = runtime.Version()
@@ -27,6 +26,9 @@ var tplFuncMap = template.FuncMap{
 	"getPageRange":      tplfn_getPageRange,
 	"minusInt":          tplfn_minusInt,
 	"addInt":            tplfn_addInt,
+	"canPost":           tplfn_canPost,
+	"getThumb":          tplfn_getThumb,
+	"getImagePath":      tplfn_getImagePath,
 }
 
 func init() {
@@ -104,41 +106,80 @@ func tplfn_convertToHtml(str string) template.HTML {
 	return template.HTML(str)
 }
 
-func tplfn_getPageStart(page int, showPage int) int {
+func tplfn_getPageRange(page int, showPage int, totalPage int) []int {
 	pageStart := page - showPage/2
 	if pageStart <= 0 {
 		pageStart = 1
 	}
-	return pageStart
-}
+	pageEnd := pageStart + showPage - 1
 
-func tplfn_getPageEnd(page int, showPage int) int {
-	pageEnd := tplfn_getPageStart(page, showPage)
-	pageEnd += showPage - 1
-	return pageEnd
-}
-
-func tplfn_getPageRange(page int, showPage int, totalPage int) []int {
-	pageB := tplfn_getPageStart(page, showPage)
-	pageE := tplfn_getPageEnd(page, showPage)
-	if pageE > totalPage {
-		pageE = totalPage
+	pages := make([]int, 0, pageEnd-pageStart)
+	for i := pageStart; i <= pageEnd; i++ {
+		if i > totalPage {
+			break
+		}
+		pages = append(pages, i)
 	}
-	size := pageE - pageB + 1
 
-	pages := make([]int, size, size)
-	for i := 0; i < size; i++ {
-		pages[i] = pageB + i
+	pageCount := len(pages)
+	if pageCount <= 0 {
+		return pages
 	}
+
+	if pageCount < showPage &&
+		pages[0] != 1 {
+		//	need move
+		offset := showPage - pageCount
+		if pages[0]-offset >= 1 {
+			prevPageBegin := pages[0] - offset
+			prevPageEnd := pages[pageCount-1]
+			pages = make([]int, 0, totalPage)
+			for i := prevPageBegin; i <= prevPageEnd; i++ {
+				pages = append(pages, i)
+			}
+		}
+	}
+
 	return pages
 }
 
-func tplfn_minusInt(val int) int {
-	return val - 1
+func tplfn_minusInt(val int, step int) int {
+	return val - step
 }
 
-func tplfn_addInt(val int) int {
-	return val + 1
+func tplfn_addInt(val int, step int) int {
+	return val + step
+}
+
+func tplfn_getThumb(str string, charCount int) string {
+	text := trimHtmlLabel(str)
+	text = strings.TrimSpace(text)
+	if len(text) > charCount {
+		text = string(([]rune(text))[:charCount])
+		text += "..."
+	}
+	return text
+}
+
+func tplfn_canPost(cat *ProjectCategoryItem, user *WebUser) bool {
+	if user.Uid == 0 {
+		return false
+	}
+
+	if cat.Author == user.NickName {
+		return true
+	}
+
+	if user.Permission >= cat.PostPriv {
+		return true
+	}
+	return false
+}
+
+func tplfn_getImagePath(path string) string {
+	path = strings.Trim(path, "/")
+	path = strings.Trim(path, "\\")
+	return kPrefixImagePath + "/" + path
 }
 
 func getTplBinaryData(file string) string {
@@ -207,7 +248,7 @@ func renderTemplate(rctx *RequestContext, fileNames []string, data map[string]in
 	data["goversion"] = goVersion
 	data["requesttime"] = rctx.tmRequest
 	data["config"] = &g_appConfig
-	data["imgPrefix"] = "/static/images"
+	data["imgPrefix"] = kPrefixImagePath
 	data["url"] = rctx.r.URL.Path
 
 	//	get render data

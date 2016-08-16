@@ -17,7 +17,7 @@ function onEditProject(obj, projectName) {
 	var project = $(obj).attr("project");
 	var projectId = $(obj).attr("projectId");
 	//	get content
-	var desc = $("#id-div-"+projectId).find("p").html();
+	var desc = $("#category-desc-"+projectId).html().trim(" ");
 	$("#input-projectid").val(projectId);
 	//	get image
 	var image = $(obj).attr("projectImage");

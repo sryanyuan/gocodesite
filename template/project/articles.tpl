@@ -9,7 +9,7 @@
 <div id="id-content" class="container">
 	<div class="row">
 		<div class="col-md-8 col-md-offset-2">
-			{{if gt .user.Permission 3}}
+			{{if canPost .category .user}}
 			<!--Administrator panel-->
 			<p>
 				<a href="/project/{{.project}}/cmd/new_article"><button type="button" class="btn btn-sm btn-success">添加文章</button></a>
@@ -29,49 +29,33 @@
 				</li>
 			</div>
 			<div id="articles" articleCount="{{len .articles}}" class="articles-container">
-				<dl>
 				{{range .articles}}
-					<dd>
-						<a href="/member/{{.ArticleAuthor}}" class="pull-left" style="margin-right:10px;">
-							<img class="img-rounded" src="{{$.imgPrefix}}/{{getMemberAvatar .ArticleAuthor}}" width="45" height="45" alt="{{.ArticleAuthor}}" >
-						</a>
-						<a href="/project/{{.ProjectId}}/article/{{.Id}}" class="title">
-							{{.ArticleTitle}}
-						</a>
-						{{if eq .Top 1}}
-						<span style="color:red;margin-left:10px;">[置顶]</span>
-						{{end}}
-						<div class="space"></div>
-						<div class="info" style="margin-left:55px">
-							<!--name-->
-							<a href="/member/{{.ArticleAuthor}}">
-								<strong>{{.ArticleAuthor}}</strong>
-							</a>
-							• {{getTimeGapString .ActiveTime}}
-							{{if ne .ReplyAuthor ""}}
-								• 最后回复来自 <a href="/member/{{.ReplyAuthor}}">{{.ReplyAuthor}}</a>
-							{{end}}
-							• {{.Click}} 次点击
-							• <span id="id-article-last-reply-{{.Id}}" class="article-last-reply" articleId="{{.Id}}">0</span> 次回复
-						</div>
-					</dd>
+				{{template "article_detail_display" .}}
 				{{end}}
-				</dl>
 			</div>
+			
 			<div style="text-align:center;">
 				<nav>
 					<ul class="pagination">
 						<!--have more than 1 page-->
-						{{if gt .pages 1}}
+						{{if gt .pages 0}}
 						<!--previous page-->
 						{{if gt .page 1}}
-						<li><a href="/project/{{.project}}/page/{{minusInt .page}}" aria-lable="Previous"><span aria-hidden="true">&laquo;</span></a></li>
+						<li><a href="/project/{{.project}}/page/{{minusInt .page 1}}" aria-lable="Previous"><span aria-hidden="true">&laquo;</span></a></li>
 						{{else}}
-						<li class="disabled"><a href="javascript:void(0);" aria-lable="Previous"><span aria-hidden="true">&laquo;</span></a></li>
+						<li class="disabled"><a href="javascript:void(0);" aria-lable="Previous" style="background-color:#F2F2F2"><span aria-hidden="true">&laquo;</span></a></li>
 						{{end}}
 						<!--fill pages-->
 						{{$pageRange := getPageRange .page .showPages .pages}}
 						{{range $i, $v := $pageRange}}
+							<!--first page-->
+							{{if eq $i 0}}
+							{{if gt $v 2}}
+							<li><a href="/project/{{$.project}}/page/1">1</a></li>
+							<li class="disabled"><a href="javascript:void(0)" style="background-color:#F2F2F2">...</a></li>
+							{{end}}
+							{{end}}
+							
 							{{if eq $v $.page}}
 							<li class="active"><a href="javascript:void(0);">{{$v}}</a></li>
 							{{else}}
@@ -81,12 +65,23 @@
 									<li><a href="/project/{{$.project}}/page/{{$v}}">{{$v}}</a></li>
 								{{end}}
 							{{end}}
+							
+							<!--last page-->
+							{{$lastPageIndex := len $pageRange}}
+							{{$lastPageIndex := minusInt $lastPageIndex 1}}
+							{{$lastPage := minusInt $.pages 1}}
+							{{if eq $i $lastPageIndex}}
+							{{if lt $v $lastPage}}
+							<li class="disabled"><a href="javascript:void(0)"  style="background-color:#F2F2F2">...</a></li>
+							<li><a href="/project/{{$.project}}/page/{{$.pages}}">{{$.pages}}</a></li>
+							{{end}}
+							{{end}}
 						{{end}}
 						<!--next page-->
 						{{if lt .page .pages}}
-						<li><a href="/project/{{.project}}/page/{{addInt .page}}" aria-lable="Next"><span aria-hidden="true">&raquo;</span></a></li>
+						<li><a href="/project/{{.project}}/page/{{addInt .page 1}}" aria-lable="Next"><span aria-hidden="true">&raquo;</span></a></li>
 						{{else}}
-						<li class="disabled"><a href="javascript:void(0);" aria-lable="Next"><span aria-hidden="true">&raquo;</span></a></li>
+						<li class="disabled"><a href="javascript:void(0);" aria-lable="Next" style="background-color:#F2F2F2"><span aria-hidden="true">&raquo;</span></a></li>
 						{{end}}
 						
 						{{end}}

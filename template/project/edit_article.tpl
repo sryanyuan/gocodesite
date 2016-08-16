@@ -8,9 +8,7 @@
 <script src="/static/js/editor.js"></script>
 <script src="/static/js/new_article.js"></script>
 <script type="text/javascript">
-var editor = null;
-$(document).ready(function(){
-	editor = editormd("editormd", {
+	var editor = editormd("editormd", {
 		height: 400,
 		markdown: {{.article.ArticleContentMarkdown}},
 		autoFocus: false,
@@ -30,7 +28,6 @@ $(document).ready(function(){
 	});
 	$("#text-title").html({{.article.ArticleTitle}});
 	$("#article-cover").val({{.article.CoverImage}});
-});
 </script>
 {{end}}
 {{define "content"}}
@@ -74,7 +71,6 @@ $(document).ready(function(){
 						<div class="form-group">
 							<label for="title">文章封面</label>
 							<input id="article-cover" type="cover" class="form-control input-md" placeholder="封面路径" name="coverImage" />
-						</div>
 						</div>
 						<div class="form-group">
 							<label for="title">文章内容</label>
