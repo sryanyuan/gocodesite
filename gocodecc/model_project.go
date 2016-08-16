@@ -68,6 +68,35 @@ func init() {
 	orm.RegisterModel(new(ProjectArticleItem))
 }
 
+func modelProjectCategoryGetAllSimple() ([]*ProjectCategoryItem, error) {
+	db, err := getRawDB()
+	if nil != err {
+		return nil, err
+	}
+
+	var rows *sql.Rows
+	if rows, err = db.Query("SELECT id, project_name, item_count FROM " + projectCategoryItemTableName); nil != err {
+		return nil, err
+	}
+
+	//	free the conn
+	defer rows.Close()
+
+	//	get all item
+	resultSet := make([]*ProjectCategoryItem, 0, 10)
+	for rows.Next() {
+		item := &ProjectCategoryItem{}
+		if err = rows.Scan(&item.Id,
+			&item.ProjectName,
+			&item.ItemCount); nil != err {
+			return nil, err
+		}
+		resultSet = append(resultSet, item)
+	}
+
+	return resultSet, nil
+}
+
 func modelProjectCategoryGetAll() ([]*ProjectCategoryItem, error) {
 	db, err := getRawDB()
 	if nil != err {
@@ -212,10 +241,11 @@ func modelProjectCategoryUpdateProject(old *ProjectCategoryItem, prj *ProjectCat
 	}
 
 	_, err = tx.Exec("UPDATE "+projectCategoryItemTableName+
-		" SET project_name = ? , project_describe = ?, image = ? WHERE id = ?",
+		" SET project_name = ? , project_describe = ?, image = ?, post_priv = ? WHERE id = ?",
 		prj.ProjectName,
 		prj.ProjectDescribe,
 		prj.Image,
+		prj.PostPriv,
 		prj.Id)
 	if nil != err {
 		tx.Rollback()
@@ -388,6 +418,18 @@ func modelProjectArticleGetArticleCountByAuthor(author string) (int, error) {
 
 	counter := 0
 	err = db.QueryRow("SELECT COUNT(*) FROM "+projectArticleItemTableName+" WHERE article_author = ?", author).Scan(&counter)
+
+	return counter, err
+}
+
+func modelProjectArticleGetArticleCountAll() (int, error) {
+	db, err := getRawDB()
+	if nil != err {
+		return 0, err
+	}
+
+	counter := 0
+	err = db.QueryRow("SELECT COUNT(*) FROM " + projectArticleItemTableName).Scan(&counter)
 
 	return counter, err
 }

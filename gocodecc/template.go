@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"html/template"
 	"io/ioutil"
+	"net/http"
 	"runtime"
 	"strconv"
 	"strings"
@@ -262,4 +263,12 @@ func renderJson(ctx *RequestContext, js interface{}) {
 		ctx.w.Header().Set("Content-Type", "application/json")
 		ctx.w.Write(data)
 	}
+}
+
+func renderMessage(ctx *RequestContext, title string, text string, ret bool) {
+	result := ""
+	if !ret {
+		result = "1"
+	}
+	ctx.Redirect(fmt.Sprintf("/common/message?title=%s&text=%s&result=%s", title, text, result), http.StatusOK)
 }

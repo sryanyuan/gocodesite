@@ -21,11 +21,14 @@ function onEditProject(obj, projectName) {
 	$("#input-projectid").val(projectId);
 	//	get image
 	var image = $(obj).attr("projectImage");
+	//	get post priv
+	var postPriv = $(obj).attr("postPriv");
 	
 	//	show modal
 	$("#editproject_name").val(project);
 	$("#editproject_describe").val(desc);
 	$("#editproject_image").val(image);
+	$("#radio-post-priv-"+postPriv).attr("checked", true);
 	$("#modalProjectEdit").modal({backdrop:"static"});
 }
 

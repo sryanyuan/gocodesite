@@ -54,10 +54,21 @@ func ajaxHandler(ctx *RequestContext) {
 
 			//	check project name and project describe
 			ctx.r.ParseForm()
+			defer ctx.r.Body.Close()
 			projectName := ctx.r.Form.Get("project[name]")
 			projectDescribe := ctx.r.Form.Get("project[describe]")
 			projectImage := ctx.r.Form.Get("project[image]")
-			ctx.r.Body.Close()
+			//	check with auth
+			auth, err := strconv.Atoi(ctx.r.Form.Get("dst"))
+			if nil != err {
+				result.Msg = "Invalid auth select"
+				return
+			}
+			if auth != 1 &&
+				auth != 4 {
+				result.Msg = "Invalid auth select"
+				return
+			}
 
 			if len(projectName) == 0 ||
 				len(projectDescribe) == 0 ||
@@ -72,7 +83,8 @@ func ajaxHandler(ctx *RequestContext) {
 			project.Image = projectImage
 			project.ProjectName = projectName
 			project.ProjectDescribe = projectDescribe
-			err := modelProjectCategoryAdd(&project)
+			project.PostPriv = uint32(auth)
+			err = modelProjectCategoryAdd(&project)
 			if nil != err {
 				result.Msg = err.Error()
 				return
@@ -96,12 +108,24 @@ func ajaxHandler(ctx *RequestContext) {
 
 			//	check project name and project describe
 			ctx.r.ParseForm()
+			defer ctx.r.Body.Close()
+
 			var err error
 			projectName := ctx.r.Form.Get("project[name]")
 			projectDescribe := ctx.r.Form.Get("project[describe]")
 			projectImage := ctx.r.Form.Get("project[image]")
 			projectId, err := strconv.Atoi(ctx.r.Form.Get("project[id]"))
-			ctx.r.Body.Close()
+			//	check with auth
+			auth, err := strconv.Atoi(ctx.r.Form.Get("dst"))
+			if nil != err {
+				result.Msg = "Invalid auth select"
+				return
+			}
+			if auth != 1 &&
+				auth != 4 {
+				result.Msg = "Invalid auth select"
+				return
+			}
 
 			if len(projectName) == 0 ||
 				len(projectDescribe) == 0 ||
@@ -122,7 +146,8 @@ func ajaxHandler(ctx *RequestContext) {
 
 			if originPrj.ProjectName == projectName &&
 				originPrj.ProjectDescribe == projectDescribe &&
-				originPrj.Image == projectImage {
+				originPrj.Image == projectImage &&
+				originPrj.PostPriv == uint32(auth) {
 				return
 			}
 
@@ -131,6 +156,7 @@ func ajaxHandler(ctx *RequestContext) {
 			newPrj.ProjectName = projectName
 			newPrj.ProjectDescribe = projectDescribe
 			newPrj.Image = projectImage
+			newPrj.PostPriv = uint32(auth)
 			err = modelProjectCategoryUpdateProject(&originPrj, &newPrj)
 			if nil != err {
 				result.Msg = err.Error()

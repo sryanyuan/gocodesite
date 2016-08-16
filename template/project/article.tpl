@@ -95,7 +95,7 @@
 					{{convertToHtml $content}}
 				</div>
 			</div>
-			{{template "comment_article_html" . $.}}
+			{{template "comment_article_html" .}}
 		</div>
 		<div class="col-md-4">
 			<div class="panel panel-default">

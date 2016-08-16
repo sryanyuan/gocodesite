@@ -53,6 +53,11 @@
 						<div class="form-group">
 						  <input type="input" class="form-control input-lg" placeholder="项目封面" name="project[image]" id="newproject_image" />
 						</div>
+						<label>发帖权限：</label>
+						<div class="form-group">
+							<input type="radio" name="dst" value="1" checked>普通用户</input>
+							<input type="radio" name="dst" value="4">超级管理员</input>
+						</div>
 					</form>
 				</div>
 				<div class="modal-footer">
@@ -80,6 +85,11 @@
 						<div class="form-group">
 						  <input type="input" class="form-control input-md" placeholder="项目封面" name="project[image]" id="editproject_image" />
 						</div>
+						<label>发帖权限：</label>
+						<div class="form-group">
+							<input id="radio-post-priv-1" type="radio" name="dst" value="1" checked>普通用户</input>
+							<input id="radio-post-priv-4" type="radio" name="dst" value="4">超级管理员</input>
+						</div>
 						<input id="input-projectid" type="hidden" name="project[id]" value="" />
 					</form>
 				</div>
@@ -102,18 +112,18 @@
 			<div id="category-container">
 				{{range .category}}
 				<div class="media category-box">
-					<a class="pull-left" href="/project/{{.Id}}/page/1" target="_blank">
+					<a class="pull-left" href="/project/{{.Id}}/page/1">
 						<img class="media-object" src="
 						{{if eq .Image ""}}
-						{{$.imgPrefix}}/category_cover.png
+						{{getImagePath "category_cover.png"}}
 						{{else}}
-						{{$.imgPrefix}}/{{.Image}}
+						{{getImagePath .Image}}
 						{{end}}"
-						width="215" height="144" />
+						width="219" height="148" style="border:1px solid #EEEEEE;padding:2px 2px 2px 2px;"/>
 					</a>
 					<div class="media-body">
 						<h3>
-							<a href="/project/{{.Id}}/page/1" target="_blank">{{.ProjectName}}</a>
+							<a href="/project/{{.Id}}/page/1">{{.ProjectName}}</a>
 						</h3>
 						<div class="category-info">
 							<i class="fa fa-smile-o"></i> 创建者：<a href="/member/{{.Author}}" target="_blank">{{.Author}}</a>
@@ -133,7 +143,7 @@
 					</div>
 					{{if gt $.user.Permission 3}}
 					<div style="float:right;margin-bottom:2px">
-						<button id="id-project-modify-{{.Id}}" onclick="onEditProject(this,{{.Id}})" type="button" projectId="{{.Id}}" projectImage="{{.Image}}" project="{{.ProjectName}}" class="btn btn-sm btn-primary">编辑项目</button>
+						<button id="id-project-modify-{{.Id}}" onclick="onEditProject(this,{{.Id}})" type="button" projectId="{{.Id}}" projectImage="{{.Image}}" project="{{.ProjectName}}" postPriv="{{.PostPriv}}" class="btn btn-sm btn-primary">编辑项目</button>
 						<button id="id-project-del-{{.Id}}" onclick="onDelProject(this)" type="button" project="{{.ProjectName}}" projectId="{{.Id}}" class="btn btn-sm btn-danger">删除项目</button>
 					</div>
 					{{end}}

@@ -14,9 +14,32 @@
 
 .section-title-s2 {
 	font-size:16px;
-	font-weight:400;
+	font:weight:500;
 	color:#333;
 	padding:2px 0px 2px 10px;
 	border-left:2px solid #3472ef;
 	margin:0 0 20px 2px;
+}
+
+.section-statistics {
+	padding:5px 5px 5px 10px;
+	border-left:3px solid #DDDDDD;
+	border-bottom:3px solid #DDDDDD;
+	background-color:white;
+}
+
+.section-category {
+	padding:5px 5px 5px 5px;
+	border-left:3px solid #DDDDDD;
+	border-bottom:3px solid #DDDDDD;
+	background-color:white;
+}
+
+.posts {
+	padding-left: 10px;
+}
+
+.post-item {
+	margin-bottom:4px;
+	border-bottom: dotted 1px rgba(160,160,160,.3);
 }

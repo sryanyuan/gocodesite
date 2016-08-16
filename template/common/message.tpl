@@ -1,4 +1,4 @@
-{{define "Title"}}上传静态文件{{end}}
+{{define "Title"}}消息{{end}}
 {{define "importcss"}}{{end}}
 {{define "importjs"}}{{end}}
 {{define "content"}}

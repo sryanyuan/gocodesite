@@ -7,7 +7,7 @@
 		{{else}}
 		{{getImagePath .CoverImage}}
 		{{end}}"
-		width="215" height="144" />
+		width="219" height="148" style="border:1px solid #EEEEEE;padding:2px 2px 2px 2px;" />
 	</a>
 	<div class="media-body category-body">
 		<h3>
@@ -16,7 +16,7 @@
 			<span style="color:red;margin-left:10px;">[置顶]</span>
 			{{end}}
 		</h3>
-		<div class="category-base-info">
+		<div class="category-base-info" style="padding-left:5px;border-left:2px solid #3472ef;">
 			<i class="fa fa-smile-o"></i> 作者：<a href="/member/{{.ArticleAuthor}}" target="_blank">{{.ArticleAuthor}}</a>
 			<span style="margin-left:8px;"><i class="fa fa-clock-o"></i> 更新时间：{{getTimeGapString .ActiveTime}}<span>
 			<span style="margin-left:8px;"><i class="fa fa-server"></i> 分类：<a href="/project/{{.ProjectId}}/page/1" target="_blank">{{.ProjectName}}</a><span>

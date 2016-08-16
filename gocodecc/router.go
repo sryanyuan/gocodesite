@@ -62,6 +62,10 @@ func (this *RequestContext) RenderJson(js interface{}) {
 	renderJson(this, js)
 }
 
+func (this *RequestContext) RenderMessagePage(title string, text string, result bool) {
+	renderMessage(this, title, text, result)
+}
+
 func (this *RequestContext) RenderString(str string) {
 	this.w.Write([]byte(str))
 }
