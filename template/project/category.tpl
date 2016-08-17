@@ -55,7 +55,7 @@
 						</div>
 						<label>发帖权限：</label>
 						<div class="form-group">
-							<input type="radio" name="dst" value="1" checked>普通用户</input>
+							<input type="radio" name="dst" value="2" checked>普通用户</input>
 							<input type="radio" name="dst" value="4">超级管理员</input>
 						</div>
 					</form>
@@ -87,7 +87,7 @@
 						</div>
 						<label>发帖权限：</label>
 						<div class="form-group">
-							<input id="radio-post-priv-1" type="radio" name="dst" value="1" checked>普通用户</input>
+							<input id="radio-post-priv-2" type="radio" name="dst" value="2" checked>普通用户</input>
 							<input id="radio-post-priv-4" type="radio" name="dst" value="4">超级管理员</input>
 						</div>
 						<input id="input-projectid" type="hidden" name="project[id]" value="" />
@@ -102,6 +102,14 @@
 	</div>
 	<div class="row">
 		<div class="col-md-8 col-md-offset-2">
+			<div class="breadcrumb">
+				<li>
+					<a href="/">
+						<i class="fa fa-home"></i>首页
+					</a>
+				</li>
+				<li>分类</li>
+			</div>
 			<!--Administrator panel-->
 			{{if gt .user.Permission 3}}
 			<p>
@@ -110,6 +118,10 @@
 			{{end}}
 			
 			<div id="category-container">
+				{{$categoryCount := len .category}}
+				{{if eq $categoryCount 0}}
+				<h3 class="section-title-s1" style="max-width:none;">当前还有没有创建任何目录噢！</h3>
+				{{else}}
 				{{range .category}}
 				<div class="media category-box shadow-box">
 					<a class="pull-left" href="/project/{{.Id}}/page/1">
@@ -148,6 +160,7 @@
 					</div>
 					{{end}}
 				</div>
+				{{end}}
 				{{end}}
 			</div>
 		</div>

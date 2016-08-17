@@ -891,3 +891,18 @@ func modelProjectArticleGetRecentArticles(limit int) ([]*ProjectArticleItem, err
 
 	return articles, nil
 }
+
+func modelProjectArticleGetLastPostTime(author string) int64 {
+	db, err := getRawDB()
+	if nil != err {
+		return 0xffffffff
+	}
+
+	var lastPostTime int64
+	err = db.QueryRow("SELECT MAX(post_time) FROM "+projectArticleItemTableName+" WHERE article_author = ?", author).Scan(&lastPostTime)
+	if nil != err {
+		return 0
+	}
+
+	return lastPostTime
+}

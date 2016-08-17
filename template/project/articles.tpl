@@ -30,8 +30,13 @@
 				<li>{{.category.ProjectName}}</li>
 			</div>
 			<div id="articles" articleCount="{{len .articles}}" class="articles-container">
+				{{$articleCount := len .articles}}
+				{{if eq $articleCount 0}}
+				<h3 class="section-title-s1" style="max-width:none;">当前还有没有创建任何主题噢！</h3>
+				{{else}}
 				{{range .articles}}
 				{{template "article_detail_display" .}}
+				{{end}}
 				{{end}}
 			</div>
 			

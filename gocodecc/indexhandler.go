@@ -7,7 +7,7 @@ var homeRenderTpls []string = []string{
 
 func indexHandler(ctx *RequestContext) {
 	//	get recent articles
-	recentArticles, err := modelProjectArticleGetRecentArticles(8)
+	recentArticles, err := modelProjectArticleGetRecentArticles(5)
 	if nil != err {
 		ctx.RenderMessagePage("错误", err.Error(), false)
 		return

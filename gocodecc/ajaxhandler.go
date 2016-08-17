@@ -73,8 +73,8 @@ func ajaxHandler(ctx *RequestContext) {
 				result.Msg = "Invalid auth select"
 				return
 			}
-			if auth != 1 &&
-				auth != 4 {
+			if auth != kPermission_User &&
+				auth != kPermission_SuperAdmin {
 				result.Msg = "Invalid auth select"
 				return
 			}
@@ -130,8 +130,8 @@ func ajaxHandler(ctx *RequestContext) {
 				result.Msg = "Invalid auth select"
 				return
 			}
-			if auth != 1 &&
-				auth != 4 {
+			if auth != kPermission_User &&
+				auth != kPermission_SuperAdmin {
 				result.Msg = "Invalid auth select"
 				return
 			}
@@ -238,6 +238,16 @@ func ajaxHandler(ctx *RequestContext) {
 				ctx.user.NickName != prj.Author {
 				result.Msg = "permission denied"
 				return
+			}
+			//	check post time
+			if ctx.user.Permission < kPermission_Admin {
+				lastPostTime := modelProjectArticleGetLastPostTime(ctx.user.UserName)
+				tmNow := time.Now().Unix()
+				if tmNow-lastPostTime < kMemberPostInterval {
+					nextPostTime := lastPostTime + kMemberPostInterval - tmNow
+					result.Msg = "离下一次发帖时间还有" + strconv.FormatInt(nextPostTime, 10) + "秒"
+					return
+				}
 			}
 			//	check valid
 			title := ctx.r.Form.Get("title")
