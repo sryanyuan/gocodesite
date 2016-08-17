@@ -111,7 +111,7 @@
 			
 			<div id="category-container">
 				{{range .category}}
-				<div class="media category-box">
+				<div class="media category-box shadow-box">
 					<a class="pull-left" href="/project/{{.Id}}/page/1">
 						<img class="media-object" src="
 						{{if eq .Image ""}}

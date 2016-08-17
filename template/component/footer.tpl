@@ -1,5 +1,5 @@
 {{define "footer"}}
-<footer id="id_footer" class="footer navbar-fixed-bottom">
+<footer id="id_footer" class="footer navbar-fixed-bottom1">
 	<div class="container">
 		<p>
 			

@@ -434,7 +434,7 @@ func modelProjectArticleGetArticleCountAll() (int, error) {
 	return counter, err
 }
 
-func modelProjectArticleGetByAuthor(author string, limit int) ([]*ProjectArticleItem, error) {
+func modelProjectArticleGetByAuthor(author string, page int, limit int) ([]*ProjectArticleItem, error) {
 	db, err := getRawDB()
 	if nil != err {
 		return nil, err
@@ -449,10 +449,13 @@ func modelProjectArticleGetByAuthor(author string, limit int) ([]*ProjectArticle
 	reply_author,
 	reply_time,
 	project_id,
+	active_time,
+	click,
 	cover_image
-	 FROM `+projectArticleItemTableName+" WHERE article_author = ? ORDER BY post_time DESC LIMIT ?",
+	 FROM `+projectArticleItemTableName+" WHERE article_author = ? ORDER BY post_time DESC LIMIT ? OFFSET ?",
 		author,
-		limit); nil != err {
+		limit,
+		page*limit); nil != err {
 		return nil, err
 	}
 
@@ -471,6 +474,8 @@ func modelProjectArticleGetByAuthor(author string, limit int) ([]*ProjectArticle
 			&item.ReplyAuthor,
 			&item.ReplyTime,
 			&item.ProjectId,
+			&item.ActiveTime,
+			&item.Click,
 			&item.CoverImage); nil != err {
 			return nil, err
 		}

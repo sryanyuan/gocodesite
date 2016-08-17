@@ -104,3 +104,17 @@ func modelWebUserGetUserByUserName(userName string) *WebUser {
 	}
 	return &user
 }
+
+func modelWebUserGetCount() (int, error) {
+	db, err := getRawDB()
+	if nil != err {
+		return 0, err
+	}
+
+	var count int
+	err = db.QueryRow("SELECT COUNT(*) FROM web_user").Scan(&count)
+	if nil != err {
+		return 0, err
+	}
+	return count, nil
+}

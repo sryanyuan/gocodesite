@@ -30,6 +30,7 @@ var tplFuncMap = template.FuncMap{
 	"canPost":           tplfn_canPost,
 	"getThumb":          tplfn_getThumb,
 	"getImagePath":      tplfn_getImagePath,
+	"formatDate":        tplfn_formatDate,
 }
 
 func init() {
@@ -69,7 +70,7 @@ func tplfn_articleEditable(user *WebUser, article *ProjectArticleItem) bool {
 }
 
 func tplfn_getTimeGapString(tm int64) string {
-	now := time.Now().Unix()
+	/*now := time.Now().Unix()
 	gap := now - tm
 	if gap < 0 {
 		return "undefined"
@@ -100,7 +101,24 @@ func tplfn_getTimeGapString(tm int64) string {
 		return fmt.Sprintf("%d 分钟前", minute)
 	}
 
-	return fmt.Sprintf("%d 秒前", gap)
+	return fmt.Sprintf("%d 秒前", gap)*/
+	t := time.Unix(tm, 0)
+	gap := time.Now().Sub(t)
+	if gap.Seconds() < 60 {
+		return "刚刚"
+	} else if gap.Minutes() < 60 {
+		return fmt.Sprintf("%.0f 分钟前", gap.Minutes())
+	} else if gap.Hours() < 24 {
+		return fmt.Sprintf("%.0f 小时前", gap.Hours())
+	} else {
+		hours := int(gap.Hours())
+		days := hours / 24
+		if days < 30 {
+			return fmt.Sprintf("%d 天前", days)
+		} else {
+			return t.Format("2006-01-02 15:04")
+		}
+	}
 }
 
 func tplfn_convertToHtml(str string) template.HTML {
@@ -181,6 +199,11 @@ func tplfn_getImagePath(path string) string {
 	path = strings.Trim(path, "/")
 	path = strings.Trim(path, "\\")
 	return kPrefixImagePath + "/" + path
+}
+
+func tplfn_formatDate(tm int64) string {
+	timeVal := time.Unix(tm, 0)
+	return timeVal.Format("2006-01-02")
 }
 
 func getTplBinaryData(file string) string {
@@ -270,5 +293,5 @@ func renderMessage(ctx *RequestContext, title string, text string, ret bool) {
 	if !ret {
 		result = "1"
 	}
-	ctx.Redirect(fmt.Sprintf("/common/message?title=%s&text=%s&result=%s", title, text, result), http.StatusOK)
+	ctx.Redirect(fmt.Sprintf("/common/message?title=%s&text='%s'&result=%s", title, text, result), http.StatusFound)
 }

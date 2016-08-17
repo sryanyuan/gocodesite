@@ -1,4 +1,4 @@
-{{define "Title"}}会员 {{.watchedUser.UserName}}{{end}}
+{{define "Title"}}会员 {{.watchedUser.NickName}}{{end}}
 {{define "importcss"}}
 <link href="/static/css/member_info.css" rel="stylesheet" />
 {{end}}
@@ -84,15 +84,18 @@
 							<ul id="member-post-list-group" class="list-group" articleCount="{{len .articles}}">
 								{{range $i, $v := .articles}}
 								<li class="list-group-item">
-									<div class="title">
+									<div class="recent-article-title">
 										<a href="/project/{{$v.ProjectId}}/article/{{$v.Id}}">{{$v.ArticleTitle}}</a>
 									</div>
-									<div class="info">
+									<div class="recent-article-info">
 										<span class="member-post-info">发表于 {{getTimeGapString $v.PostTime}}</span>
 										   • <span class="member-post-reply-count" id="member-post-reply-count-{{$v.Id}}" articleId="{{$v.Id}}">0</span> 个回复
 									</div>
 								</li>
 								{{end}}
+								<div style="text-align:center;margin-top:10px;padding-bottom:10px;">
+									<button type="button" class="btn btn-link" style="background-color:white; border:1px solid #DDDDDD;border-radius:4px;"><a href="/member/{{.watchedUser.NickName}}/articles?p=1">查看所有主题</a></button>
+								</div>
 							</ul>
 						</div>
 					</div>

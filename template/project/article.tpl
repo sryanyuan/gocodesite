@@ -6,6 +6,7 @@
 {{define "importjs"}}
 <script src="/static/js/editormd.min.js"></script>
 <script src="/static/js/article.js"></script>
+<script src="/static/js/comment_load.js"></script>
 {{end}}
 {{define "content"}}
 <div id="id-content" class="container">

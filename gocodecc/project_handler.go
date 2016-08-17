@@ -54,7 +54,7 @@ func projectArticlesHandler(ctx *RequestContext) {
 	projectId, err := strconv.Atoi(vars["projectid"])
 	if nil != err ||
 		0 == projectId {
-		ctx.Redirect("/", http.StatusNotFound)
+		ctx.RenderMessagePage("错误", "Invalid projectid", false)
 		return
 	}
 	page, err := strconv.Atoi(vars["page"])

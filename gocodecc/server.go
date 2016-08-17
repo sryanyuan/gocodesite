@@ -2,6 +2,7 @@ package gocodecc
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/cihub/seelog"
 	"github.com/gorilla/mux"
@@ -13,6 +14,10 @@ var layoutFiles = []string{
 	"template/component/footer.tpl",
 }
 
+var (
+	metaInfoCreateSiteTime int64
+)
+
 const kErrMsg_InternalError = "内部错误，请重试"
 
 func Start() error {
@@ -21,6 +26,17 @@ func Start() error {
 	if err = initModels(); nil != err {
 		panic(err)
 	}
+
+	//	initialize meta info
+	initMetaInfo()
+
+	//	get base meta info
+	metaInfoCreateSiteTimeStr, err := modelMetaInfoGet("create_site_time")
+	if nil != err {
+		seelog.Error("Failed to read meta info")
+		return err
+	}
+	metaInfoCreateSiteTime, _ = strconv.ParseInt(metaInfoCreateSiteTimeStr, 10, 64)
 
 	//	initialize routers
 	r := mux.NewRouter()

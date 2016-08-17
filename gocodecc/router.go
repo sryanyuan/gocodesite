@@ -185,11 +185,13 @@ type RouterItem struct {
 var routerItems = []RouterItem{
 	{"/", kPermission_Guest, indexHandler},
 	{"/about", kPermission_Guest, aboutHander},
+	{"/guestbook", kPermission_Guest, guestbookHandler},
 	{"/account/signup", kPermission_Guest, signupHandler},
 	{"/signin", kPermission_Guest, signinHandler},
 	{"/signout", kPermission_User, signOutHandler},
 	{"/account/signupsuccess", kPermission_Guest, signupSuccessHandler},
 	{"/member/{username}", kPermission_Guest, memberInfoHandler},
+	{"/member/{username}/articles", kPermission_Guest, memberArticlesHandler},
 	{"/project", kPermission_Guest, projectCategoryHandler},
 	{"/project/{projectid:[0-9]*}/page/{page:[0-9]*}", kPermission_Guest, projectArticlesHandler},
 	{"/project/{projectid:[0-9]*}/cmd/{cmd}", kPermission_Guest, projectArticleCmdHandler},

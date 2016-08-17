@@ -30,7 +30,7 @@
 					</div>
 					<label>上传类型：</label>
 					<div class="form-group">
-						<input type="radio" name="dst" value="js" checked>javascript脚本</input>
+						<input type="radio" name="dst" value="static" checked>静态文件</input>
 						<input type="radio" name="dst" value="tpl">页面模板</input>
 					</div>
 					<div class="form-group">

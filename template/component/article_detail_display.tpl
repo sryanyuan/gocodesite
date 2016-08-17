@@ -1,5 +1,5 @@
 {{define "article_detail_display"}}
-<div id="article-container" class="media">
+<div id="article-container" class="media shadow-box">
 	<a class="pull-left" href="/project/{{.ProjectId}}/article/{{.Id}}" target="_blank">
 		<img class="media-object" src="
 		{{if eq .CoverImage ""}}
@@ -22,9 +22,9 @@
 			<span style="margin-left:8px;"><i class="fa fa-server"></i> 分类：<a href="/project/{{.ProjectId}}/page/1" target="_blank">{{.ProjectName}}</a><span>
 		</div>
 		<div class="category-short-content">
-			{{getThumb .ArticleContentHtml 60}}
+			<p>{{getThumb .ArticleContentHtml 100}}</p>
 		</div>
-		<div style="border-bottom:1px solid #EEEEEE;margin-top:8px;margin-bottom:5px;"></div>
+		<div style="border-bottom:1px solid #EEEEEE;margin-top:20px;margin-bottom:5px;"></div>
 		<div class="category-ex-info">
 			<i class="fa fa-hand-o-up"></i> 点击数：{{.Click}}
 			<span style="margin-left:8px;"><i class="fa fa-reply"></i> 回复数：<span id="id-article-last-reply-{{.Id}}" class="article-last-reply" articleId="{{.Id}}">0</span><span>

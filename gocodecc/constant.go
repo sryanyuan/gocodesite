@@ -1,5 +1,6 @@
 package gocodecc
 
 const (
-	kPrefixImagePath = "/static/images"
+	kPrefixImagePath     = "/static/images"
+	kErrMsg_AccessDenied = "Access denied"
 )

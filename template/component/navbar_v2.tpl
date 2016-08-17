@@ -21,6 +21,9 @@
 				<li {{if eq .active "project"}}class="active"{{end}}>
 					<a href="/project">分类</a>
 				</li>
+				<li {{if eq .active "guestbook"}}class="active"{{end}}>
+					<a href="/guestbook">留言板</a>
+				</li>
 				<li {{if eq .active "about"}}class="active"{{end}}>
 					<a href="/about">关于我</a>
 				</li>

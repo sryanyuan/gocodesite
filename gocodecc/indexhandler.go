@@ -26,11 +26,21 @@ func indexHandler(ctx *RequestContext) {
 		ctx.RenderMessagePage("错误", err.Error(), false)
 		return
 	}
+
+	//	get member count
+	memberCount, err := modelWebUserGetCount()
+	if nil != err {
+		ctx.RenderMessagePage("错误", err.Error(), false)
+		return
+	}
+
 	dataCtx := map[string]interface{}{
 		"active":         "home",
 		"recentArticles": recentArticles,
 		"articleCount":   articleCount,
 		"category":       category,
+		"memberCount":    memberCount,
+		"createSiteTime": metaInfoCreateSiteTime,
 	}
 	dataHtml := renderTemplate(ctx, homeRenderTpls, dataCtx)
 	ctx.w.Write(dataHtml)

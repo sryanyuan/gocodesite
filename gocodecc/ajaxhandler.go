@@ -485,7 +485,8 @@ func ajaxHandler(ctx *RequestContext) {
 				return
 			}
 			if ctx.user.Permission < kPermission_SuperAdmin {
-				result.Msg = "access denied"
+				//result.Msg = "access denied"
+				result.Msg = kErrMsg_AccessDenied
 				return
 			}
 
@@ -522,8 +523,8 @@ func ajaxHandler(ctx *RequestContext) {
 
 			//	check with path
 			pathSel := ctx.r.Form.Get("dst")
-			if pathSel == "js" {
-				pathSel = "./static/js/"
+			if pathSel == "static" {
+				pathSel = "./static/"
 			} else if pathSel == "tpl" {
 				pathSel = "./template/"
 			} else {
