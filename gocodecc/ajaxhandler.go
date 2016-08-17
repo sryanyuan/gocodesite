@@ -9,12 +9,14 @@ import (
 	"strings"
 	"time"
 
+	"github.com/dchest/captcha"
 	"github.com/gorilla/mux"
 )
 
 type AjaxResult struct {
-	Result int    `json:"Result"`
-	Msg    string `json:"Msg"`
+	Result    int    `json:"Result"`
+	Msg       string `json:"Msg"`
+	CaptchaId string `json:"CaptchaId"`
 }
 
 func ajaxHandler(ctx *RequestContext) {
@@ -33,6 +35,13 @@ func ajaxHandler(ctx *RequestContext) {
 				redirectUrl = fmt.Sprintf("/common/message?text=%s&result=1&title=上传失败", result.Msg)
 			}
 			ctx.Redirect(redirectUrl, http.StatusFound)
+		} else if action == "article_submit" ||
+			action == "article_edit" {
+			if 0 != result.Result {
+				//	new captcha
+				result.CaptchaId = captcha.NewLen(4)
+			}
+			renderJson(ctx, &result)
 		} else {
 			renderJson(ctx, &result)
 		}
@@ -206,11 +215,16 @@ func ajaxHandler(ctx *RequestContext) {
 			}
 
 			ctx.r.ParseForm()
+			defer ctx.r.Body.Close()
 			projectId, err := strconv.Atoi(ctx.r.Form.Get("projectid"))
-			ctx.r.Body.Close()
 			if projectId == 0 ||
 				nil != err {
 				result.Msg = "invalid project"
+				return
+			}
+			//	check captcha
+			if !captcha.VerifyString(ctx.r.Form.Get("captchaid"), ctx.r.Form.Get("captchaSolution")) {
+				result.Msg = "验证码错误"
 				return
 			}
 			//	check auth
@@ -287,6 +301,11 @@ func ajaxHandler(ctx *RequestContext) {
 			ctx.r.ParseForm()
 			defer ctx.r.Body.Close()
 
+			//	check captcha
+			if !captcha.VerifyString(ctx.r.Form.Get("captchaid"), ctx.r.Form.Get("captchaSolution")) {
+				result.Msg = "验证码错误"
+				return
+			}
 			projectId, _ := strconv.Atoi(ctx.r.Form.Get("projectId"))
 			if projectId == 0 {
 				result.Msg = "invalid project"

@@ -81,6 +81,13 @@
 							</div>
 						</div>
 						<hr/>
+						<div class="form-group">
+						  <div class="input-group">
+							<input type="text" id="captchaSolution" name="captchaSolution" placeholder="请输入右侧验证码" />
+							<img id="id-article-captchaimg" src="/captcha/{{.captchaid}}.png" alt="验证码" title="看不清，点击" />
+							<input type="hidden" id="id-article-captchaIdHolder" name="captchaid" value="{{.captchaid}}">
+						  </div>
+						</div>
 						<div style="text-align:center">
 							<!--input type="submit" id="article-submit" class="btn btn-primary" value="提交"/-->
 							<a id="article-submit" href="javascript:void(0);" onclick="submitPostArticle(this)" class="btn btn-success">提交</a>

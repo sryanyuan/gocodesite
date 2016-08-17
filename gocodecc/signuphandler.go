@@ -60,6 +60,8 @@ func signupHandler(ctx *RequestContext) {
 				failedMsg = "非法的用户名"
 				break
 			}
+			//	... nickname is deprecated
+			nickName = userName
 			if matched, _ := regexp.Match("^([\u4E00-\uFA29]|[\uE7C7-\uE7F3]|[a-zA-Z0-9_]){4,10}$", []byte(nickName)); !matched {
 				failedMsg = "非法的昵称"
 				break

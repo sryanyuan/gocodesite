@@ -1,5 +1,10 @@
 $(document).ready(function(){
-	
+	var signInCaptcha = $("#id-article-captchaimg")
+	signInCaptcha.click(function(event){
+		event.preventDefault();
+		var refurl = $(this).attr("src")
+		$(this).attr("src", refurl+"?reload="+(new Date()).getTime());
+	});
 })
 
 function showAlert(str) {
@@ -25,6 +30,14 @@ function submitPostArticle(obj) {
 		} else {
 			//	failed
 			showAlert(ret.Msg);
+			
+			//	refresh captcha?
+			if(null != ret.CaptchaId &&
+				ret.CaptchaId.length != 0){
+				var signInCaptcha = $("#id-article-captchaimg")
+				signInCaptcha.attr("src", "/captcha/"+ret.CaptchaId+".png");
+				$("#id-article-captchaIdHolder").attr("value", ret.CaptchaId)
+			}
 		}
 	}).error(function(e){
 		showAlert("请求超时");

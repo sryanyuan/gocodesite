@@ -24,7 +24,7 @@ func Start() error {
 	var err error
 	//	initialize model
 	if err = initModels(); nil != err {
-		panic(err)
+		seelog.Error(err)
 	}
 
 	//	initialize meta info

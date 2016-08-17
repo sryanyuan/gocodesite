@@ -55,7 +55,7 @@ type ProjectArticleItem struct {
 	ReplyTime              int64
 	ActiveTime             int64
 	Click                  int
-	ProjectId              int
+	ProjectId              int    `orm:"index"`
 	CoverImage             string `orm:"size(128)"`
 }
 

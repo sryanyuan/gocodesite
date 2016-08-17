@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/dchest/captcha"
 	"github.com/gorilla/mux"
 )
 
@@ -189,6 +190,7 @@ func _newProjectArticle(ctx *RequestContext, projectId int) {
 	tplData := make(map[string]interface{})
 	tplData["active"] = "project"
 	tplData["project"] = &category
+	tplData["captchaid"] = captcha.NewLen(4)
 	data := renderTemplate(ctx, projectArticleNewArticleTpls, tplData)
 	ctx.w.Write(data)
 }
@@ -203,6 +205,7 @@ func _editProjectArticle(ctx *RequestContext, articleId int) {
 	tplData := make(map[string]interface{})
 	tplData["active"] = "project"
 	tplData["article"] = article
+	tplData["captchaid"] = captcha.NewLen(4)
 	data := renderTemplate(ctx, projectArticleEditArticleRenderTpls, tplData)
 	ctx.w.Write(data)
 }
