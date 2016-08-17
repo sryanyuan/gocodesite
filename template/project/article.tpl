@@ -74,6 +74,7 @@
 						{{.article.ProjectName}}
 					</a>
 				</li>
+				<li>{{.article.ArticleTitle}}</li>
 			</div>
 			<div class="content">
 				<div class="page-header">

@@ -27,6 +27,7 @@
 						分类
 					</a>
 				</li>
+				<li>{{.category.ProjectName}}</li>
 			</div>
 			<div id="articles" articleCount="{{len .articles}}" class="articles-container">
 				{{range .articles}}
