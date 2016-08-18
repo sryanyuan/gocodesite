@@ -58,7 +58,7 @@
 					{{end}}
 					<i class="fa fa-caret-down"></i></a>
 						<ul id="id_loginmenu" class="dropdown-menu">
-							<li class="dropdown-header">欢迎 {{.user.UserName}}</li>
+							<li class="dropdown-header">欢迎 <span style="font-weight:bold;">{{.user.UserName}}</span></li>
 							<li role="separator" class="divider"></li>
 							<li>
 								<a href="/member/{{.user.UserName}}"><i class="fa fa-cog"></i>&nbsp;&nbsp;用户中心</a>
