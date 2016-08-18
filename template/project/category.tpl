@@ -125,12 +125,7 @@
 				{{range .category}}
 				<div class="media category-box shadow-box lbcolor-box">
 					<a class="pull-left" href="/project/{{.Id}}/page/1">
-						<img class="media-object" src="
-						{{if eq .Image ""}}
-						{{getImagePath "category_cover.png"}}
-						{{else}}
-						{{getImagePath .Image}}
-						{{end}}"
+						<img class="media-object" src="{{getCategoryCoverImagePath .Image}}"
 						width="219" height="148" style="border:1px solid #EEEEEE;padding:2px 2px 2px 2px;"/>
 					</a>
 					<div class="media-body">

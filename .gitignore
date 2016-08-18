@@ -5,3 +5,5 @@ gocodecc.log.*
 static/conf/app.conf
 *.db
 log/
+static/images/category-images
+static/images/article-images

@@ -3,8 +3,11 @@ package gocodecc
 import (
 	"database/sql"
 	"errors"
+	"os"
+	"strconv"
 
 	"github.com/astaxie/beego/orm"
+	"github.com/cihub/seelog"
 )
 
 var (
@@ -133,10 +136,38 @@ func modelProjectCategoryGetAll() ([]*ProjectCategoryItem, error) {
 func modelProjectCategoryAdd(item *ProjectCategoryItem) error {
 	o := orm.NewOrm()
 	_, err := o.Insert(item)
+
+	if nil == err {
+		categoryImagePath := "./" + kPrefixImagePath + "/category-images"
+		exists, _ := PathExists(categoryImagePath)
+		if !exists {
+			err = os.Mkdir(categoryImagePath, 0777)
+			if nil != err {
+				seelog.Error(err)
+			}
+		}
+	}
+
 	return err
 }
 
 func modelProjectCategoryRemove(id int) error {
+	//	get base info
+	var err error
+	var category ProjectCategoryItem
+	category.Id = id
+	o := orm.NewOrm()
+	err = o.Read(&category)
+	if nil != err {
+		return err
+	}
+
+	//	get category image
+	categoryImagePath := ""
+	if len(category.Image) != 0 {
+		categoryImagePath = "./" + kPrefixImagePath + "/category-images/" + category.Image
+	}
+
 	db, err := getRawDB()
 	if nil != err {
 		return err
@@ -170,7 +201,26 @@ func modelProjectCategoryRemove(id int) error {
 		return err
 	}
 
-	return tx.Commit()
+	err = tx.Commit()
+
+	if nil == err {
+		//	remove all articles image
+		//	NOTE : remove if using cdn
+		articleImagePath := "./" + kPrefixImagePath + "/article-images/" + strconv.Itoa(id)
+		err = os.RemoveAll(articleImagePath)
+		if nil != err {
+			seelog.Error(err)
+		}
+
+		if len(categoryImagePath) != 0 {
+			err = os.RemoveAll(categoryImagePath)
+			if nil != err {
+				seelog.Error(err)
+			}
+		}
+	}
+
+	return err
 }
 
 func modelProjectCategoryRemoveByProjectName(projectName string) error {
@@ -298,6 +348,15 @@ func modelProjectArticleNewArticle(article *ProjectArticleItem) (int64, error) {
 	}
 
 	o.Commit()
+
+	//	create image directory
+	//	NOTE : If using cdn , remove it
+	articleImagePath := "./" + kPrefixImagePath + "/article-images/" + strconv.Itoa(article.ProjectId) + "/" + strconv.FormatInt(insertId, 10)
+	err = os.MkdirAll(articleImagePath, 0777)
+	if nil != err {
+		seelog.Error(err)
+	}
+
 	return insertId, nil
 	/*db, err := getRawDB()
 	if nil != err {
@@ -516,6 +575,15 @@ func modelProjectArticleDelete(articleId, projectId int) error {
 	}
 
 	o.Commit()
+
+	//	delete project article image path
+	//	NOTE : using cdn , remove it
+	articleImagePath := "./" + kPrefixImagePath + "/article-images/" + strconv.Itoa(projectId) + "/" + strconv.Itoa(articleId)
+	err = os.RemoveAll(articleImagePath)
+	if nil != err {
+		seelog.Error(err)
+	}
+
 	return nil
 }
 

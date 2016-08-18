@@ -18,19 +18,21 @@ var goVersion = runtime.Version()
 var tplBinaryDataMap map[string]string
 
 var tplFuncMap = template.FuncMap{
-	"getProcessTime":    tplfn_getprocesstime,
-	"getUnixTimeString": tplfn_getUnixTimeString,
-	"getMemberAvatar":   tplfn_getMemberAvatar,
-	"getTimeGapString":  tplfn_getTimeGapString,
-	"articleEditable":   tplfn_articleEditable,
-	"convertToHtml":     tplfn_convertToHtml,
-	"getPageRange":      tplfn_getPageRange,
-	"minusInt":          tplfn_minusInt,
-	"addInt":            tplfn_addInt,
-	"canPost":           tplfn_canPost,
-	"getThumb":          tplfn_getThumb,
-	"getImagePath":      tplfn_getImagePath,
-	"formatDate":        tplfn_formatDate,
+	"getProcessTime":            tplfn_getprocesstime,
+	"getUnixTimeString":         tplfn_getUnixTimeString,
+	"getMemberAvatar":           tplfn_getMemberAvatar,
+	"getTimeGapString":          tplfn_getTimeGapString,
+	"articleEditable":           tplfn_articleEditable,
+	"convertToHtml":             tplfn_convertToHtml,
+	"getPageRange":              tplfn_getPageRange,
+	"minusInt":                  tplfn_minusInt,
+	"addInt":                    tplfn_addInt,
+	"canPost":                   tplfn_canPost,
+	"getThumb":                  tplfn_getThumb,
+	"getImagePath":              tplfn_getImagePath,
+	"formatDate":                tplfn_formatDate,
+	"getArticleCoverImagePath":  tplfn_getArticleCoverImagePath,
+	"getCategoryCoverImagePath": tplfn_getCategoryCoverImagePath,
 }
 
 func init() {
@@ -70,38 +72,6 @@ func tplfn_articleEditable(user *WebUser, article *ProjectArticleItem) bool {
 }
 
 func tplfn_getTimeGapString(tm int64) string {
-	/*now := time.Now().Unix()
-	gap := now - tm
-	if gap < 0 {
-		return "undefined"
-	}
-
-	year := gap / (365 * 30 * 24 * 60 * 60)
-	if year > 0 {
-		return fmt.Sprintf("%d 年前", year)
-	}
-
-	month := gap / (30 * 24 * 60 * 60)
-	if month > 0 {
-		return fmt.Sprintf("%d 月前", month)
-	}
-
-	day := gap / (24 * 60 * 60)
-	if day > 0 {
-		return fmt.Sprintf("%d 天前", day)
-	}
-
-	hour := gap / (60 * 60)
-	if hour > 0 {
-		return fmt.Sprintf("%d 小时前", hour)
-	}
-
-	minute := gap / 60
-	if minute > 0 {
-		return fmt.Sprintf("%d 分钟前", minute)
-	}
-
-	return fmt.Sprintf("%d 秒前", gap)*/
 	t := time.Unix(tm, 0)
 	gap := time.Now().Sub(t)
 	if gap.Seconds() < 60 {
@@ -204,6 +174,26 @@ func tplfn_getImagePath(path string) string {
 func tplfn_formatDate(tm int64) string {
 	timeVal := time.Unix(tm, 0)
 	return timeVal.Format("2006-01-02")
+}
+
+func tplfn_getArticleCoverImagePath(projectId int, articleId int, path string) string {
+	if len(path) == 0 {
+		//	using default image
+		return kPrefixImagePath + "/article_cover.png"
+	}
+	path = strings.Trim(path, "/")
+	path = strings.Trim(path, "\\")
+	return kPrefixImagePath + "/article-images/" + strconv.Itoa(projectId) + "/" + strconv.Itoa(articleId) + "/" + path
+}
+
+func tplfn_getCategoryCoverImagePath(path string) string {
+	if len(path) == 0 {
+		//	using default image
+		return kPrefixImagePath + "/category_cover.png"
+	}
+	path = strings.Trim(path, "/")
+	path = strings.Trim(path, "\\")
+	return kPrefixImagePath + "/category-images/" + path
 }
 
 func getTplBinaryData(file string) string {

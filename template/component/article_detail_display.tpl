@@ -1,12 +1,7 @@
 {{define "article_detail_display"}}
 <div id="article-container" class="media shadow-box lbcolor-box">
 	<a class="pull-left" href="/project/{{.ProjectId}}/article/{{.Id}}" target="_blank">
-		<img class="media-object" src="
-		{{if eq .CoverImage ""}}
-		{{getImagePath "/article_cover.png"}}
-		{{else}}
-		{{getImagePath .CoverImage}}
-		{{end}}"
+		<img class="media-object" src="{{getArticleCoverImagePath .ProjectId .Id .CoverImage}}"
 		width="219" height="148" style="border:1px solid #EEEEEE;padding:2px 2px 2px 2px;" />
 	</a>
 	<div class="media-body category-body">
