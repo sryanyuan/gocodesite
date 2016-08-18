@@ -2,6 +2,7 @@
 {{define "importcss"}}
 <link href="/static/css/editormd.min.css" rel="stylesheet" />
 <link href="/static/css/article.css" rel="stylesheet" />
+<link href="/static/css/guestbook.css" rel="stylesheet" />
 {{end}}
 {{define "importjs"}}
 <script src="/static/js/editormd.min.js"></script>
@@ -76,7 +77,7 @@
 				</li>
 				<li>{{.article.ArticleTitle}}</li>
 			</div>
-			<div class="content">
+			<div class="content shadow-box">
 				<div class="page-header">
 					<div style="text-align:center;"><h1>{{.article.ArticleTitle}}</h1></div>
 					<div class="btn-group btn-group-sm pull-right">
@@ -97,7 +98,9 @@
 					{{convertToHtml $content}}
 				</div>
 			</div>
-			{{template "comment_article_html" .}}
+			<div id="comment-container" class="shadow-box white-box">
+				{{template "comment_article_html" .}}
+			</div>
 		</div>
 		<div class="col-md-4">
 			<div class="panel panel-default">

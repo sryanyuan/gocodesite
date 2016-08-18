@@ -840,7 +840,7 @@ func modelProjectArticleGetArticles(projectId int, page int, limit int) ([]*Proj
 	return topArticles, pages, nil
 }
 
-func modelProjectArticleGetRecentArticles(limit int) ([]*ProjectArticleItem, error) {
+func modelProjectArticleGetRecentArticles(page int, limit int) ([]*ProjectArticleItem, error) {
 	db, err := getRawDB()
 	if nil != err {
 		return nil, err
@@ -860,7 +860,7 @@ func modelProjectArticleGetRecentArticles(limit int) ([]*ProjectArticleItem, err
 		click,
 		project_id,
 		cover_image FROM `+projectArticleItemTableName+
-		" ORDER BY post_time DESC LIMIT ?", limit); nil != err {
+		" ORDER BY post_time DESC LIMIT ? OFFSET ?", limit, limit*page); nil != err {
 		return nil, err
 	}
 

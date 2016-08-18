@@ -28,8 +28,9 @@ dd {
 #article-container {
 	padding:20px 20px 20px 20px;
 	background-color:white;
-	border-bottom:3px solid #DDDDDD;
-	border-left:3px solid #DDDDDD;
+	//border-bottom:1px dotted #DDDDDD;
+	//border-left:3px solid #3472ef;
+	margin-top:0px;
 }
 
 .category-body {

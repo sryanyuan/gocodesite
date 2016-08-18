@@ -1,4 +1,4 @@
-{{define "Title"}}{{.category.ProjectName}}{{end}}
+{{define "Title"}}文章列表{{end}}
 {{define "importcss"}}
 <link href="/static/css/articles.css" rel="stylesheet" />
 {{end}}
@@ -9,25 +9,13 @@
 <div id="id-content" class="container">
 	<div class="row">
 		<div class="col-md-8 col-md-offset-2">
-			{{if canPost .category .user}}
-			<!--Administrator panel-->
-			<p>
-				<a href="/project/{{.project}}/cmd/new_article"><button type="button" class="btn btn-sm btn-success">添加文章</button></a>
-			</p>
-			<hr/>
-			{{end}}
 			<div class="breadcrumb">
 				<li>
 					<a href="/">
 						<i class="fa fa-home"></i>首页
 					</a>
 				</li>
-				<li>
-					<a href="/project">
-						分类
-					</a>
-				</li>
-				<li>{{.category.ProjectName}}</li>
+				<li>文章列表</li>
 			</div>
 			<div id="articles" articleCount="{{len .articles}}" class="articles-container">
 				{{$articleCount := len .articles}}
@@ -57,7 +45,7 @@
 							<!--first page-->
 							{{if eq $i 0}}
 							{{if gt $v 2}}
-							<li><a href="/project/{{$.project}}/page/1">1</a></li>
+							<li><a href="/articles">1</a></li>
 							<li class="disabled"><a href="javascript:void(0)" style="background-color:#F2F2F2">...</a></li>
 							{{end}}
 							{{end}}
@@ -68,7 +56,7 @@
 								{{if gt $v $.pages}}
 									<li class="disabled"><a href="javascript:void(0);">{{$v}}</a></li>
 								{{else}}
-									<li><a href="/project/{{$.project}}/page/{{$v}}">{{$v}}</a></li>
+									<li><a href="/articles?p={{$v}}">{{$v}}</a></li>
 								{{end}}
 							{{end}}
 							
@@ -79,13 +67,13 @@
 							{{if eq $i $lastPageIndex}}
 							{{if lt $v $lastPage}}
 							<li class="disabled"><a href="javascript:void(0)"  style="background-color:#F2F2F2">...</a></li>
-							<li><a href="/project/{{$.project}}/page/{{$.pages}}">{{$.pages}}</a></li>
+							<li><a href="/articles?p={{$.pages}}">{{$.pages}}</a></li>
 							{{end}}
 							{{end}}
 						{{end}}
 						<!--next page-->
 						{{if lt .page .pages}}
-						<li><a href="/project/{{.project}}/page/{{addInt .page 1}}" aria-lable="Next"><span aria-hidden="true">&raquo;</span></a></li>
+						<li><a href="/articles?p={{addInt .page 1}}" aria-lable="Next"><span aria-hidden="true">&raquo;</span></a></li>
 						{{else}}
 						<li class="disabled"><a href="javascript:void(0);" aria-lable="Next" style="background-color:#F2F2F2"><span aria-hidden="true">&raquo;</span></a></li>
 						{{end}}

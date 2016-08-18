@@ -120,10 +120,10 @@
 			<div id="category-container">
 				{{$categoryCount := len .category}}
 				{{if eq $categoryCount 0}}
-				<h3 class="section-title-s1" style="max-width:none;">当前还有没有创建任何目录噢！</h3>
+				<h3 class="section-title-s1" style="max-width:none;">当前还没有创建任何目录噢！</h3>
 				{{else}}
 				{{range .category}}
-				<div class="media category-box shadow-box">
+				<div class="media category-box shadow-box lbcolor-box">
 					<a class="pull-left" href="/project/{{.Id}}/page/1">
 						<img class="media-object" src="
 						{{if eq .Image ""}}
@@ -141,7 +141,7 @@
 							<i class="fa fa-smile-o"></i> 创建者：<a href="/member/{{.Author}}" target="_blank">{{.Author}}</a>
 							<span style="margin-left:8px;"><i class="fa fa-book"></i> 文章数：{{.ItemCount}}<span>
 							<span style="margin-left:8px;"><i class="fa fa-universal-access"></i> 发帖权限：
-							{{if lt .PostPriv 4}}
+							{{if eq .PostPriv 2}}
 								普通用户
 							{{else}}
 								超级管理员

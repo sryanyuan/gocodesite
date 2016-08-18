@@ -99,20 +99,30 @@ func memberArticlesHandler(ctx *RequestContext) {
 	}
 
 	articlePerPage := 10
-	pages := (articleCount + articlePerPage - 1) / articlePerPage
 	showPages := 5
+	pages := (articleCount + articlePerPage - 1) / articlePerPage
+	var articles []*ProjectArticleItem
 
-	if page <= 0 ||
-		page > pages {
-		ctx.RenderMessagePage("错误", kErrMsg_InternalError, false)
-		return
-	}
+	if 0 == pages {
+		//	never post
+		if page != 1 {
+			ctx.RenderMessagePage("错误", kErrMsg_InternalError, false)
+			return
+		}
+		articles = make([]*ProjectArticleItem, 0, 1)
+	} else {
+		if page <= 0 ||
+			page > pages {
+			ctx.RenderMessagePage("错误", kErrMsg_InternalError, false)
+			return
+		}
 
-	//	get articles
-	articles, err := modelProjectArticleGetByAuthor(watchedUser.NickName, page-1, articlePerPage)
-	if nil != err {
-		ctx.RenderMessagePage("错误", kErrMsg_InternalError, false)
-		return
+		//	get articles
+		articles, err = modelProjectArticleGetByAuthor(watchedUser.NickName, page-1, articlePerPage)
+		if nil != err {
+			ctx.RenderMessagePage("错误", kErrMsg_InternalError, false)
+			return
+		}
 	}
 
 	tplData := make(map[string]interface{})

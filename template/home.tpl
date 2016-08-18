@@ -18,7 +18,7 @@
 <div id="id-content" class="container theme-showcase" role="main">
 	<div class="row">
 		<div class="col-md-8 col-md-offset-0">
-			<h2 class="section-title-s2">最近的文章</h2>
+			<h2 class="section-title-s2 lbcolor-box">最近的文章</h2>
 			<div id="articles" class="articles-container" articleCount="{{len .recentArticles}}">
 				{{range .recentArticles}}
 				{{template "article_detail_display" .}}
@@ -26,14 +26,14 @@
 			</div>
 			{{$recentArticlesCount := len .recentArticles}}
 			{{if gt .articleCount $recentArticlesCount}}
-			<div style="text-align:center;margin-top:10px;">
-				<button type="button" class="btn btn-link" style="background-color:white; border:1px solid #DDDDDD;"><a href="/project">...查看更多...</a></button>
+			<div class="white-box shadow-box lbcolor-box" style="text-align:center;padding-top:10px;padding-bottom:10px;">
+				<button type="button" class="btn btn-link" style="background-color:white; border:1px solid #DDDDDD;"><a href="/articles">...查看更多...</a></button>
 			</div>
 			{{end}}
 		</div>
 		<div class="col-md-3 col-md-offset-0">
-			<h2 class="section-title-s2"><a href="/project">主题目录</a></h2>
-			<div class="section-category shadow-box">
+			<h2 class="section-title-s2 lbcolor-box"><a href="/project">主题目录</a></h2>
+			<div class="section-category shadow-box lbcolor-box">
 				<ul class="posts" style="list-style:none;">
 					{{range .category}}
 					<li class="post-item">
@@ -44,8 +44,8 @@
 				</ul>
 			</div>
 			<div style="height:25px;"></div>
-			<h2 class="section-title-s2">统计</h2>
-			<div class="section-statistics shadow-box">
+			<h2 class="section-title-s2 lbcolor-box">统计</h2>
+			<div class="section-statistics shadow-box lbcolor-box">
 				<ul class="posts" style="list-style:none;">
 					<li class="post-item">
 						<label class="post-item-label-2">主题数：</label>

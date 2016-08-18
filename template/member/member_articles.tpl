@@ -1,4 +1,4 @@
-{{define "Title"}}{{.category.ProjectName}}{{end}}
+{{define "Title"}}{{.watchedUser.NickName}} 的主题{{end}}
 {{define "importcss"}}
 <link href="/static/css/articles.css" rel="stylesheet" />
 {{end}}
@@ -23,8 +23,13 @@
 				<li>全部主题</li>
 			</div>
 			<div id="articles" articleCount="{{len .articles}}" class="articles-container">
+				{{$articleCount := len .articles}}
+				{{if eq $articleCount 0}}
+				<h3 class="section-title-s1" style="max-width:none;">当前还没有创建任何主题噢！</h3>
+				{{else}}
 				{{range .articles}}
 				{{template "article_detail_display" .}}
+				{{end}}
 				{{end}}
 			</div>
 			
@@ -73,7 +78,7 @@
 						{{end}}
 						<!--next page-->
 						{{if lt .page .pages}}
-						<li><a href="/project/{{.project}}/page/{{addInt .page 1}}" aria-lable="Next"><span aria-hidden="true">&raquo;</span></a></li>
+						<li><a href="/member/{{$.watchedUser.NickName}}/articles?p={{addInt .page 1}}" aria-lable="Next"><span aria-hidden="true">&raquo;</span></a></li>
 						{{else}}
 						<li class="disabled"><a href="javascript:void(0);" aria-lable="Next" style="background-color:#F2F2F2"><span aria-hidden="true">&raquo;</span></a></li>
 						{{end}}

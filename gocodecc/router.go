@@ -189,6 +189,7 @@ var routerItems = []RouterItem{
 	{"/account/signup", kPermission_Guest, signupHandler},
 	{"/signin", kPermission_Guest, signinHandler},
 	{"/signout", kPermission_User, signOutHandler},
+	{"/articles", kPermission_Guest, articlesHandler},
 	{"/account/signupsuccess", kPermission_Guest, signupSuccessHandler},
 	{"/member/{username}", kPermission_Guest, memberInfoHandler},
 	{"/member/{username}/articles", kPermission_Guest, memberArticlesHandler},
