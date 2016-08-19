@@ -1,10 +1,13 @@
 package gocodecc
 
 import (
+	"bytes"
 	"io/ioutil"
 	"os"
 	"regexp"
 	"strings"
+
+	"github.com/PuerkitoBio/goquery"
 )
 
 // 获取文件大小的接口
@@ -74,4 +77,20 @@ func delDirFile(dirpath string) error {
 	}
 
 	return nil
+}
+
+func getOneImageFromHtml(html string) string {
+	htmlReader := bytes.NewBuffer([]byte(html))
+	doc, err := goquery.NewDocumentFromReader(htmlReader)
+	if nil == err {
+		imgNodes := doc.Find("img")
+		if imgNodes.Length() != 0 {
+			imgPath, exists := imgNodes.First().Attr("src")
+			if exists {
+				return imgPath
+			}
+			return ""
+		}
+	}
+	return ""
 }

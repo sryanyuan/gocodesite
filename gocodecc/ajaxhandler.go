@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -19,11 +20,20 @@ type AjaxResult struct {
 	CaptchaId string `json:"CaptchaId"`
 }
 
+type ArticleImageUploadResult struct {
+	Success int    `json:"success"`
+	Url     string `json:"url"`
+	Message string `json:"message"`
+}
+
 func ajaxHandler(ctx *RequestContext) {
 	vars := mux.Vars(ctx.r)
 	action := vars["action"]
 	var result AjaxResult
 	result.Result = -1
+
+	//	for article upload image
+	var uploadResult ArticleImageUploadResult
 
 	defer func() {
 		if action == "upload" {
@@ -42,6 +52,8 @@ func ajaxHandler(ctx *RequestContext) {
 				result.CaptchaId = captcha.NewLen(4)
 			}
 			renderJson(ctx, &result)
+		} else if action == "article_image_upload" {
+			ctx.RenderJson(&uploadResult)
 		} else {
 			renderJson(ctx, &result)
 		}
@@ -368,6 +380,39 @@ func ajaxHandler(ctx *RequestContext) {
 				result.Msg = "内容太长了"
 				return
 			}
+
+			if len(coverImage) == 0 &&
+				len(article.CoverImage) == 0 {
+				//	find the first image label and use it
+				coverImage = getOneImageFromHtml(contentHtml)
+				if len(coverImage) != 0 {
+					coverImage = filepath.Base(coverImage)
+					extType := strings.ToLower(filepath.Ext(coverImage))
+					switch extType {
+					case ".jpg":
+						fallthrough
+					case ".jpeg":
+						fallthrough
+					case ".png":
+						fallthrough
+					case ".gif":
+						fallthrough
+					case ".webp":
+						{
+							//	nothing
+						}
+					default:
+						{
+							extType = ""
+						}
+					}
+					if len(extType) == 0 {
+						//	invalid image extension
+						coverImage = ""
+					}
+				}
+			}
+
 			//	do post
 			colsEdit := []string{"active_time", "edit_time"}
 			article.ActiveTime = time.Now().Unix()
@@ -469,6 +514,66 @@ func ajaxHandler(ctx *RequestContext) {
 
 			//	done
 			result.Result = 0
+		}
+	case "article_image_upload":
+		{
+			ctx.r.ParseForm()
+			projectId, err := strconv.Atoi(ctx.r.Form.Get("projectId"))
+			if err != nil ||
+				0 == projectId {
+				uploadResult.Message = "非法的参数"
+				return
+			}
+			articleId, err := strconv.Atoi(ctx.r.Form.Get("articleId"))
+			if nil != err ||
+				0 == articleId {
+				uploadResult.Message = "非法的参数"
+				return
+			}
+
+			//	create directory
+			articleImagePath := "." + kPrefixImagePath + "/article-images/" + strconv.Itoa(projectId) + "/" + strconv.Itoa(articleId)
+			err = os.MkdirAll(articleImagePath, 0777)
+			if nil != err {
+				uploadResult.Message = err.Error()
+				return
+			}
+
+			file, header, err := ctx.r.FormFile("editormd-image-file")
+			if nil != err {
+				panic(err)
+				return
+			}
+			defer file.Close()
+
+			// 检查是否是jpg或png文件
+			uploadFileType := header.Header["Content-Type"][0]
+
+			filenameExtension := ""
+			if uploadFileType == "image/jpeg" {
+				filenameExtension = ".jpg"
+			} else if uploadFileType == "image/png" {
+				filenameExtension = ".png"
+			} else if uploadFileType == "image/gif" {
+				filenameExtension = ".gif"
+			}
+
+			if filenameExtension == "" {
+				uploadResult.Message = "不支持的文件格式，请上传 jpg/png/gif 图片"
+				return
+			}
+
+			//	copy to dest directory
+			uploadImagePath := articleImagePath + "/" + header.Filename
+			f, err := os.OpenFile(uploadImagePath, os.O_WRONLY|os.O_CREATE, 0666)
+			if err != nil {
+				uploadResult.Message = err.Error()
+				return
+			}
+			defer f.Close()
+			io.Copy(f, file)
+			uploadResult.Success = 1
+			uploadResult.Url = strings.Trim(uploadImagePath, ".")
 		}
 	case "account_verify":
 		{

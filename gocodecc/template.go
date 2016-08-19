@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"html/template"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"runtime"
 	"strconv"
@@ -275,6 +276,7 @@ func renderJson(ctx *RequestContext, js interface{}) {
 	} else {
 		ctx.w.Header().Set("Content-Type", "application/json")
 		ctx.w.Write(data)
+		log.Println(string(data))
 	}
 }
 

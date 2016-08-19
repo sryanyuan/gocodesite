@@ -12,8 +12,8 @@
 		height: 400,
 		markdown: null,
 		autoFocus: false,
-		//path: "/static/js/editor.md-1.5.0/lib/",
-		path: "../../../static/js/editor.md-1.5.0/lib/",
+		path: "/static/js/editor.md-1.5.0/lib/",
+		//path: "../../../static/js/editor.md-1.5.0/lib/",
 		placeholder: "采用markdown语法",
 		toolbarIcons: function() {
 		  return ["undo", "redo", "|", "bold", "italic", "quote", "|", "h1", "h2", "h3", "h4", "h5", "h6", "|", "list-ul", "list-ol", "hr", "|", "link", "reference-link", "image", "code", "preformatted-text", "code-block", "|", "goto-line", "watch", "preview", "fullscreen", "|", "help", "info"]
@@ -21,7 +21,7 @@
 		saveHTMLToTextarea: true,
 		imageUpload: false,
 		imageFormats: ["jpg", "jpeg", "gif", "png"],
-		imageUploadURL: "/upload/image",
+		imageUploadURL: "/ajax/article_image_upload?projectId={{.project.Id}}",
 		onchange: function() {
 		  $("#article-submit").attr('disabled', this.getMarkdown().trim() == "");
 		}
@@ -56,6 +56,7 @@
 			<div class="reply-container">
 				<form id="postarticle-form" action="/ajax/article_submit" method="post" role="form">
 					<fieldset>
+						<p><span style="color:red;">创建文章暂不支持上传图片，请在编辑文章页面进行图片上传</p>
 						<div class="from-group">
 							<label for="title">文章标题</label>
 							<textarea id="text-title" name="title" class="form-control" rows="1" placeholder="请输入文章标题" 

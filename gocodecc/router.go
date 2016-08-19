@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	//"github.com/cihub/seelog"
+	"github.com/cihub/seelog"
 	"github.com/dchest/captcha"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
@@ -173,6 +173,8 @@ func wrapHandler(item *RouterItem) http.HandlerFunc {
 			responseWithAccessDenied(w)
 			return
 		}
+
+		seelog.Debug("Request url : ", r.URL)
 
 		requestCtx.user = user
 		item.Handler(&requestCtx)
