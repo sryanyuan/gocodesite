@@ -2,6 +2,7 @@ package gocodecc
 
 import (
 	"database/sql"
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -64,6 +65,11 @@ func (this *RequestContext) RenderJson(js interface{}) {
 
 func (this *RequestContext) RenderMessagePage(title string, text string, result bool) {
 	renderMessage(this, title, text, result)
+}
+
+func (this *RequestContext) RenderDownloadPage(title string, text string, downloadUrl string) {
+	url := fmt.Sprintf("/common/download?title=%s&text='%s'&url=%s", title, text, downloadUrl)
+	this.Redirect(url, http.StatusFound)
 }
 
 func (this *RequestContext) RenderString(str string) {
@@ -200,6 +206,7 @@ var routerItems = []RouterItem{
 	{"/ajax/{action}", kPermission_Guest, ajaxHandler},
 	{"/admin/{action}", kPermission_SuperAdmin, adminHandler},
 	{"/common/{action}", kPermission_Guest, commonHandler},
+	{"/download/{filename}", kPermission_Guest, downloadHandler},
 }
 
 func fileHandler(w http.ResponseWriter, r *http.Request) {

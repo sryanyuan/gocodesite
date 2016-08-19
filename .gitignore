@@ -7,3 +7,4 @@ static/conf/app.conf
 log/
 static/images/category-images
 static/images/article-images
+markdown-articles/

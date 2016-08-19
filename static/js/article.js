@@ -1,7 +1,3 @@
-$(document).ready(function(){
-	
-})
-
 function showAlert(text) {
 	$("#id-modalalert-text").html(text);
 	$("#modalAlert").modal({backdrop:"static"});

@@ -260,8 +260,7 @@ func ajaxHandler(ctx *RequestContext) {
 				return
 			}
 			contentHtml := ctx.r.Form.Get("editormd-html-code")
-			contentHtml = strings.Replace(contentHtml, "<pre>", "", -1)
-			contentHtml = strings.Replace(contentHtml, "</pre>", "", -1)
+			//contentHtml = strings.Replace(contentHtml, "<pre>", `<pre class="prettyprint linenums">`, -1)
 			if len(contentHtml) == 0 {
 				result.Msg = "请输入内容"
 				return
@@ -351,8 +350,7 @@ func ajaxHandler(ctx *RequestContext) {
 				return
 			}
 			contentHtml := ctx.r.Form.Get("editormd-html-code")
-			contentHtml = strings.Replace(contentHtml, "<pre>", "", -1)
-			contentHtml = strings.Replace(contentHtml, "</pre>", "", -1)
+			//contentHtml = strings.Replace(contentHtml, "<pre>", `<pre class="prettyprint linenums">`, -1)
 			if len(contentHtml) == 0 {
 				result.Msg = "请输入内容"
 				return

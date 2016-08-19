@@ -56,6 +56,8 @@
 				<div class="panel-body">
 					<div>
 						<a href="/admin/upload" class="btn btn-sm btn-success">上传静态文件</a>
+						<a href="/admin/pack_markdown" class="btn btn-sm btn-success">打包Markdown</a>
+						<a href="/admin/clean_markdown" class="btn btn-sm btn-success">清理Markdown</a>
 					</div>
 				</div>
 			</div>

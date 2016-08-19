@@ -1,6 +1,7 @@
 package gocodecc
 
 import (
+	"archive/zip"
 	"database/sql"
 	"errors"
 	"os"
@@ -8,6 +9,7 @@ import (
 
 	"github.com/astaxie/beego/orm"
 	"github.com/cihub/seelog"
+	"github.com/satori/go.uuid"
 )
 
 var (
@@ -40,15 +42,15 @@ var (
 
 const (
 	kArticleTitleLimit   = 128
-	kArticleContentLimit = 12800
+	kArticleContentLimit = 0xffff
 )
 
 type ProjectArticleItem struct {
 	Id                     int    `orm:"pk;auto;index"`
 	ProjectName            string `orm:"size(128)"`
 	ArticleTitle           string `orm:"size(128)"`
-	ArticleContentHtml     string `orm:"size(12800)"`
-	ArticleContentMarkdown string `orm:"size(12800)"`
+	ArticleContentHtml     string `orm:"type(text)"`
+	ArticleContentMarkdown string `orm:"type(text)"`
 	ArticleAuthor          string `orm:"size(20)"`
 	Like                   int
 	PostTime               int64
@@ -973,4 +975,65 @@ func modelProjectArticleGetLastPostTime(author string) int64 {
 	}
 
 	return lastPostTime
+}
+
+func modelProjectArticlesPack(dest string) (string, error) {
+	u := uuid.NewV4()
+	packPath := dest
+	packFilename := "pack_" + u.String() + ".zip"
+	packFullPath := packPath + packFilename
+	err := os.MkdirAll(packPath, 0777)
+	if nil != err {
+		return "", err
+	}
+
+	//	create zip package file
+	zipFile, err := os.Create(packFullPath)
+	if nil != err {
+		return "", err
+	}
+	defer zipFile.Close()
+	zw := zip.NewWriter(zipFile)
+	defer zw.Close()
+
+	db, err := getRawDB()
+	if nil != err {
+		return "", err
+	}
+
+	var rows *sql.Rows
+	if rows, err = db.Query(`
+		SELECT id,
+		project_name,
+		article_title,
+		article_author,
+		article_content_markdown FROM ` + projectArticleItemTableName); nil != err {
+		return "", err
+	}
+
+	//	free the conn
+	defer rows.Close()
+
+	//	get all item
+	for rows.Next() {
+		item := &ProjectArticleItem{}
+		if err = rows.Scan(
+			&item.Id,
+			&item.ProjectName,
+			&item.ArticleTitle,
+			&item.ArticleAuthor,
+			&item.ArticleContentMarkdown); nil != err {
+			return "", err
+		}
+
+		articlePath := item.ProjectName + "/" + item.ArticleAuthor
+		markdownPath := articlePath + "/" + item.ArticleTitle + ".md"
+		writter, err := zw.Create(markdownPath)
+		if nil != err {
+			return "", err
+		}
+		writter.Write([]byte(item.ArticleContentMarkdown))
+	}
+
+	return packFullPath, nil
 }

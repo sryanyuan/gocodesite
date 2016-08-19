@@ -1,6 +1,7 @@
 package gocodecc
 
 import (
+	"io/ioutil"
 	"os"
 	"regexp"
 	"strings"
@@ -50,4 +51,27 @@ func PathExists(path string) (bool, error) {
 		return false, nil
 	}
 	return false, err
+}
+
+//删除目录下的文件信息
+//dirpath 目录路径
+func delDirFile(dirpath string) error {
+	//读取目录信息
+	dir, err := ioutil.ReadDir(dirpath)
+	if err != nil {
+		return err
+	}
+
+	for _, file := range dir {
+		//读取到的是目录
+		if file.IsDir() {
+			continue
+		}
+		//文件的最后修改时间
+		if err = os.Remove(dirpath + "/" + file.Name()); nil != err {
+			return err
+		}
+	}
+
+	return nil
 }

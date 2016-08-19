@@ -3,11 +3,19 @@
 <link href="/static/css/editormd.min.css" rel="stylesheet" />
 <link href="/static/css/article.css" rel="stylesheet" />
 <link href="/static/css/guestbook.css" rel="stylesheet" />
+<link href="/static/css/google-code-prettify/prettify.css" rel="stylesheet" />
 {{end}}
 {{define "importjs"}}
 <script src="/static/js/editormd.min.js"></script>
 <script src="/static/js/article.js"></script>
 <script src="/static/js/comment_load.js"></script>
+<script src="/static/js/google-code-prettify/prettify.js"></script>
+<script type="text/javascript">
+	$(document).ready(function(e){
+		$(".prettify-body pre").addClass("prettyprint linenums lang-go");
+		prettyPrint();
+	})
+</script>
 {{end}}
 {{define "content"}}
 <div id="id-content" class="container">
@@ -93,7 +101,7 @@
 						<span style="margin-bottom:5px;">由 <a href="/member/{{.article.ArticleAuthor}}">{{.article.ArticleAuthor}}</a> 在 {{getTimeGapString .article.PostTime}} 发布</span>
 					</div>
 				</div>
-				<div class="body editormd-preview-container">
+				<div class="body editormd-preview-container prettify-body">
 					{{$content := .article.ArticleContentHtml}}
 					{{convertToHtml $content}}
 				</div>
