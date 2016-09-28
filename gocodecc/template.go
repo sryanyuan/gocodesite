@@ -144,8 +144,11 @@ func tplfn_addInt(val int, step int) int {
 func tplfn_getThumb(str string, charCount int) string {
 	text := trimHtmlLabel(str)
 	text = strings.TrimSpace(text)
-	if len(text) > charCount {
-		text = string(([]rune(text))[:charCount])
+
+	//	using rune
+	runeText := []rune(text)
+	if len(runeText) > charCount {
+		text = string(runeText[:charCount])
 		text += "..."
 	}
 	return text
