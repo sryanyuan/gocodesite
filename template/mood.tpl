@@ -1,30 +1,42 @@
-{{define "Title"}}文章列表{{end}}
+{{define "Title"}}闲言碎语{{end}}
 {{define "importcss"}}
-<link href="/static/css/articles.css" rel="stylesheet" />
+<link href="/static/css/mood.css" rel="stylesheet" />
 {{end}}
 {{define "importjs"}}
-<script src="/static/js/articles.js"></script>
+<!--script src="/static/js/articles.js"></script-->
 {{end}}
 {{define "content"}}
 <div id="id-content" class="container">
 	<div class="row">
-		<div class="col-md-8 col-md-offset-2">
+		<div class="col-md-10 col-md-offset-1">
 			<div class="breadcrumb">
 				<li>
 					<a href="/">
 						<i class="fa fa-home"></i>首页
 					</a>
 				</li>
-				<li>文章列表</li>
+				<li>闲言碎语</li>
 			</div>
-			<div id="articles" articleCount="{{len .articles}}" class="articles-container">
-				{{$articleCount := len .articles}}
-				{{if eq $articleCount 0}}
-				<h3 class="section-title-s1" style="max-width:none;">当前还没有创建任何主题噢！</h3>
+			<div id="moods" class="mood-container">
+				{{$moodCount := len .moods}}
+				{{if eq $moodCount 0}}
+				<h3 class="section-title-s1" style="max-width:none;">当前还没有创建任何闲言碎语噢！</h3>
 				{{else}}
-				{{range .articles}}
-				{{template "article_detail_display" .}}
+				<div>
+				{{range .moods}}
+					<ul class="arrow-box">
+						<div style="overflow:hidden;">
+							<p>
+								{{if ne .Image ""}}
+								<img src="{{getMoodImagePath .Image}}"/>
+								{{end}}
+								{{.Mood}}
+							</p>
+						</div>
+						<span class="dateview">{{formatDate .PostTime}}</span>
+					</ul>
 				{{end}}
+				</div>
 				{{end}}
 			</div>
 			
@@ -35,7 +47,7 @@
 						{{if gt .pages 0}}
 						<!--previous page-->
 						{{if gt .page 1}}
-						<li><a href="/articles?p={{minusInt .page 1}}" aria-lable="Previous"><span aria-hidden="true">&laquo;</span></a></li>
+						<li><a href="/mood?p={{minusInt .page 1}}" aria-lable="Previous"><span aria-hidden="true">&laquo;</span></a></li>
 						{{else}}
 						<li class="disabled"><a href="javascript:void(0);" aria-lable="Previous" style="background-color:#F2F2F2"><span aria-hidden="true">&laquo;</span></a></li>
 						{{end}}
@@ -45,7 +57,7 @@
 							<!--first page-->
 							{{if eq $i 0}}
 							{{if gt $v 2}}
-							<li><a href="/articles">1</a></li>
+							<li><a href="/mood">1</a></li>
 							<li class="disabled"><a href="javascript:void(0)" style="background-color:#F2F2F2">...</a></li>
 							{{end}}
 							{{end}}
@@ -56,7 +68,7 @@
 								{{if gt $v $.pages}}
 									<li class="disabled"><a href="javascript:void(0);">{{$v}}</a></li>
 								{{else}}
-									<li><a href="/articles?p={{$v}}">{{$v}}</a></li>
+									<li><a href="/mood?p={{$v}}">{{$v}}</a></li>
 								{{end}}
 							{{end}}
 							
@@ -67,13 +79,13 @@
 							{{if eq $i $lastPageIndex}}
 							{{if lt $v $lastPage}}
 							<li class="disabled"><a href="javascript:void(0)"  style="background-color:#F2F2F2">...</a></li>
-							<li><a href="/articles?p={{$.pages}}">{{$.pages}}</a></li>
+							<li><a href="/mood?p={{$.pages}}">{{$.pages}}</a></li>
 							{{end}}
 							{{end}}
 						{{end}}
 						<!--next page-->
 						{{if lt .page .pages}}
-						<li><a href="/articles?p={{addInt .page 1}}" aria-lable="Next"><span aria-hidden="true">&raquo;</span></a></li>
+						<li><a href="/mood?p={{addInt .page 1}}" aria-lable="Next"><span aria-hidden="true">&raquo;</span></a></li>
 						{{else}}
 						<li class="disabled"><a href="javascript:void(0);" aria-lable="Next" style="background-color:#F2F2F2"><span aria-hidden="true">&raquo;</span></a></li>
 						{{end}}

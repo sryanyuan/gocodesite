@@ -33,6 +33,7 @@ var tplFuncMap = template.FuncMap{
 	"formatDate":                tplfn_formatDate,
 	"getArticleCoverImagePath":  tplfn_getArticleCoverImagePath,
 	"getCategoryCoverImagePath": tplfn_getCategoryCoverImagePath,
+	"getMoodImagePath":          tplfn_getMoodImagePath,
 }
 
 func init() {
@@ -143,8 +144,11 @@ func tplfn_addInt(val int, step int) int {
 func tplfn_getThumb(str string, charCount int) string {
 	text := trimHtmlLabel(str)
 	text = strings.TrimSpace(text)
-	if len(text) > charCount {
-		text = string(([]rune(text))[:charCount])
+
+	//	using rune
+	runeText := []rune(text)
+	if len(runeText) > charCount {
+		text = string(runeText[:charCount])
 		text += "..."
 	}
 	return text
@@ -194,6 +198,12 @@ func tplfn_getCategoryCoverImagePath(path string) string {
 	path = strings.Trim(path, "/")
 	path = strings.Trim(path, "\\")
 	return kPrefixImagePath + "/category-images/" + path
+}
+
+func tplfn_getMoodImagePath(path string) string {
+	path = strings.Trim(path, "/")
+	path = strings.Trim(path, "\\")
+	return kPrefixImagePath + "/mood-images/" + path
 }
 
 func getTplBinaryData(file string) string {
