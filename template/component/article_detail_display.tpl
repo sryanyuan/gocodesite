@@ -1,5 +1,5 @@
 {{define "article_detail_display"}}
-<div id="article-container" class="media shadow-box lbcolor-box">
+<div id="article-container" class="media shadow-box">
 	<a class="pull-left" href="/project/{{.ProjectId}}/article/{{.Id}}" target="_blank">
 		<img class="media-object" src="{{getArticleCoverImagePath .ProjectId .Id .CoverImage}}"
 		width="219" height="148" style="border:1px solid #EEEEEE;padding:2px 2px 2px 2px;" />
@@ -11,7 +11,7 @@
 			<span style="color:red;margin-left:10px;">[置顶]</span>
 			{{end}}
 		</h4>
-		<div class="category-base-info" style="padding-left:5px;border-left:2px solid #BEBEBE;">
+		<div class="category-base-info" style="padding-left:5px;">
 			<i class="fa fa-user"></i> 作者：<a href="/member/{{.ArticleAuthor}}" target="_blank">{{.ArticleAuthor}}</a>
 			<span style="margin-left:8px;"><i class="fa fa-clock-o"></i> 更新时间：{{getTimeGapString .ActiveTime}}<span>
 			<span style="margin-left:8px;"><i class="fa fa-server"></i> 分类：<a href="/project/{{.ProjectId}}/page/1" target="_blank">{{.ProjectName}}</a><span>
