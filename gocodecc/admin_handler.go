@@ -1,7 +1,10 @@
 package gocodecc
 
 import (
+	"bytes"
 	"path/filepath"
+	"strconv"
+	"time"
 
 	"github.com/gorilla/mux"
 )
@@ -43,6 +46,53 @@ func adminHandler(ctx *RequestContext) {
 				return
 			}
 			ctx.RenderMessagePage("成功", "清理完毕", true)
+		}
+	case "article_visitors":
+		{
+			results, err := modelArticleVisitorGet(0)
+			if nil != err {
+				ctx.RenderMessagePage("错误", err.Error(), false)
+				return
+			}
+			textBuffer := bytes.NewBuffer(nil)
+			for _, v := range results {
+				textBuffer.WriteString("IP:")
+				textBuffer.WriteString(v.RemoteIp)
+				textBuffer.WriteString(" | ")
+				textBuffer.WriteString("URI:")
+				textBuffer.WriteString(v.Uri)
+				textBuffer.WriteString(" | ")
+				textBuffer.WriteString("TIMES:")
+				textBuffer.WriteString(strconv.Itoa(v.VisitTimes))
+				textBuffer.WriteString(" | ")
+				textBuffer.WriteString("RECENT:")
+				tr := time.Unix(v.RecentVisitTime, 0)
+				textBuffer.WriteString(tr.Format("2006-01-02 15:04:05"))
+				textBuffer.WriteString("\r\n")
+			}
+			ctx.WriteResponse(textBuffer.Bytes())
+		}
+	case "site_visitors":
+		{
+			results, err := modelSiteVisitorGet(0)
+			if nil != err {
+				ctx.RenderMessagePage("错误", err.Error(), false)
+				return
+			}
+			textBuffer := bytes.NewBuffer(nil)
+			for _, v := range results {
+				textBuffer.WriteString("IP:")
+				textBuffer.WriteString(v.RemoteIp)
+				textBuffer.WriteString(" | ")
+				textBuffer.WriteString("TIMES:")
+				textBuffer.WriteString(strconv.Itoa(v.VisitTimes))
+				textBuffer.WriteString(" | ")
+				textBuffer.WriteString("RECENT:")
+				tr := time.Unix(v.RecentVisitTime, 0)
+				textBuffer.WriteString(tr.Format("2006-01-02 15:04:05"))
+				textBuffer.WriteString("\r\n")
+			}
+			ctx.WriteResponse(textBuffer.Bytes())
 		}
 	}
 }

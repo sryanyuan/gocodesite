@@ -1,7 +1,11 @@
 package gocodecc
 
-import "github.com/astaxie/beego/orm"
-import "time"
+import (
+	"fmt"
+	"time"
+
+	"github.com/astaxie/beego/orm"
+)
 
 type ArticleVistorModel struct {
 	Id              int `orm:"pk;auto;index"`
@@ -52,6 +56,33 @@ func modelArticleVisitorInc(uri string, ip string) error {
 	return nil
 }
 
+func modelArticleVisitorGet(limit int) ([]*ArticleVistorModel, error) {
+	db, err := getRawDB()
+	if nil != err {
+		return nil, err
+	}
+	limitExp := ""
+	if limit > 0 {
+		limitExp = fmt.Sprintf(" LIMIT %d", limit)
+	}
+	rows, err := db.Query("SELECT recent_visit_time, visit_times, remote_ip, uri FROM " + articleVistorTableName + limitExp)
+	if nil != err {
+		return nil, err
+	}
+	defer rows.Close()
+
+	results := make([]*ArticleVistorModel, 0, 128)
+	for rows.Next() {
+		var result ArticleVistorModel
+		if err = rows.Scan(&result.RecentVisitTime, &result.VisitTimes, &result.RemoteIp, &result.Uri); nil != err {
+			return nil, err
+		}
+		results = append(results, &result)
+	}
+
+	return results, nil
+}
+
 type SiteVisitorModel struct {
 	Id              int `orm:"pk;auto;index"`
 	RecentVisitTime int64
@@ -60,11 +91,11 @@ type SiteVisitorModel struct {
 }
 
 var (
-	siteVistorTableName = "site_visitor"
+	siteVisitorTableName = "site_visitor"
 )
 
 func (this *SiteVisitorModel) TableName() string {
-	return siteVistorTableName
+	return siteVisitorTableName
 }
 
 func modelSiteVisitorInc(ip string) error {
@@ -72,25 +103,52 @@ func modelSiteVisitorInc(ip string) error {
 	if nil != err {
 		return err
 	}
-	row := db.QueryRow("SELECT COUNT(*) FROM "+siteVistorTableName+" WHERE remote_ip = ?", ip)
+	row := db.QueryRow("SELECT COUNT(*) FROM "+siteVisitorTableName+" WHERE remote_ip = ?", ip)
 	var cnt int
 	if err = row.Scan(&cnt); nil != err {
 		return err
 	}
 	if cnt == 0 {
-		_, err = db.Exec("INSERT INTO "+siteVistorTableName+" (recent_visit_time, visit_times, remote_ip) VALUES (?, ?, ?)",
+		_, err = db.Exec("INSERT INTO "+siteVisitorTableName+" (recent_visit_time, visit_times, remote_ip) VALUES (?, ?, ?)",
 			time.Now().Unix(), 1, ip)
 		if nil != err {
 			return err
 		}
 	} else {
-		_, err = db.Exec("UPDATE "+siteVistorTableName+" SET visit_times = visit_times + 1 WHERE remote_ip = ?",
+		_, err = db.Exec("UPDATE "+siteVisitorTableName+" SET visit_times = visit_times + 1 WHERE remote_ip = ?",
 			ip)
 		if nil != err {
 			return err
 		}
 	}
 	return nil
+}
+
+func modelSiteVisitorGet(limit int) ([]*SiteVisitorModel, error) {
+	db, err := getRawDB()
+	if nil != err {
+		return nil, err
+	}
+	limitExp := ""
+	if limit > 0 {
+		limitExp = fmt.Sprintf(" LIMIT %d", limit)
+	}
+	rows, err := db.Query("SELECT recent_visit_time, visit_times, remote_ip FROM " + siteVisitorTableName + limitExp)
+	if nil != err {
+		return nil, err
+	}
+	defer rows.Close()
+
+	results := make([]*SiteVisitorModel, 0, 128)
+	for rows.Next() {
+		var result SiteVisitorModel
+		if err = rows.Scan(&result.RecentVisitTime, &result.VisitTimes, &result.RemoteIp); nil != err {
+			return nil, err
+		}
+		results = append(results, &result)
+	}
+
+	return results, nil
 }
 
 func init() {

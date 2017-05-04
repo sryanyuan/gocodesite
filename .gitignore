@@ -3,6 +3,7 @@ gocodesite.exe~
 gocodecc.log
 gocodecc.log.*
 static/conf/app.conf
+static/conf/app.json
 *.db
 log/
 static/images/category-images
