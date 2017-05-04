@@ -8,3 +8,5 @@ log/
 static/images/category-images
 static/images/article-images
 markdown-articles/
+static/images/
+debug

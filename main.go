@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"log"
 	"os"
@@ -19,16 +20,16 @@ func getModulePath() string {
 	return dir
 }
 
-func initConf() bool {
-	configpath := flag.String("configpath", "", "configpath <lua config file path>")
+func initConf() error {
+	configpath := flag.String("config", "", "configpath <json config file path>")
 	flag.Parse()
 
 	if len(*configpath) == 0 {
 		flag.PrintDefaults()
-		return false
+		return errors.New("Invalid config path")
 	}
 
-	return gocodecc.ReadLuaConfig(*configpath, "appconfig")
+	return gocodecc.ReadJSONConfig(*configpath)
 }
 
 func main() {
@@ -54,8 +55,8 @@ func main() {
 	}()
 
 	//	load config
-	if !initConf() {
-		seelog.Error("Failed to init parameters")
+	if err = initConf(); nil != err {
+		seelog.Error("Failed to init parameters:", err)
 		return
 	}
 

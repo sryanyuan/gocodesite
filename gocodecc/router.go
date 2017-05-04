@@ -176,6 +176,16 @@ func wrapHandler(item *RouterItem) http.HandlerFunc {
 
 		seelog.Debug("Request url : ", r.URL)
 
+		// Add site visitor counter
+		var err error
+		remoteIPColonIndex := strings.LastIndex(r.RemoteAddr, ":")
+		if -1 != remoteIPColonIndex {
+			remoteIP := r.RemoteAddr[:remoteIPColonIndex]
+			if err = modelSiteVisitorInc(remoteIP); nil != err {
+				seelog.Error("Update site visitor failed:", err)
+			}
+		}
+
 		requestCtx.user = user
 		item.Handler(&requestCtx)
 	}

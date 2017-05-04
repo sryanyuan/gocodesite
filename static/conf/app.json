@@ -1,0 +1,6 @@
+{
+    "db-address":"web.db",
+    "listen-address":":1111",
+    "weibo-address":"http://weibo.com/u/2215093590",
+    "github-address":"https://github.com/sryanyuan"
+}

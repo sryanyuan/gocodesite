@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/cihub/seelog"
 	"github.com/dchest/captcha"
 	"github.com/gorilla/mux"
 )
@@ -114,6 +115,15 @@ func projectArticleHandler(ctx *RequestContext) {
 	if nil == author {
 		ctx.Redirect("/", http.StatusNotFound)
 		return
+	}
+
+	// Increase article visitors
+	remoteIPColonIndex := strings.LastIndex(ctx.r.RemoteAddr, ":")
+	if -1 != remoteIPColonIndex {
+		remoteIP := ctx.r.RemoteAddr[:remoteIPColonIndex]
+		if err = modelArticleVisitorInc(ctx.r.URL.Path, remoteIP); nil != err {
+			seelog.Error("Update article visitor failed:", err)
+		}
 	}
 
 	//	increase click count
