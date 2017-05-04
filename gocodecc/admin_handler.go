@@ -83,10 +83,10 @@ func adminHandler(ctx *RequestContext) {
 			for _, v := range results {
 				textBuffer.WriteString("IP:")
 				textBuffer.WriteString(v.RemoteIp)
-				textBuffer.WriteString(" | ")
+				textBuffer.WriteString("\t| ")
 				textBuffer.WriteString("TIMES:")
 				textBuffer.WriteString(strconv.Itoa(v.VisitTimes))
-				textBuffer.WriteString(" | ")
+				textBuffer.WriteString("\t| ")
 				textBuffer.WriteString("RECENT:")
 				tr := time.Unix(v.RecentVisitTime, 0)
 				textBuffer.WriteString(tr.Format("2006-01-02 15:04:05"))
