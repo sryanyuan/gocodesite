@@ -47,8 +47,8 @@ func modelArticleVisitorInc(uri string, ip string) error {
 			return err
 		}
 	} else {
-		_, err = db.Exec("UPDATE "+articleVistorTableName+" SET visit_times = visit_times + 1 WHERE remote_ip = ? AND uri = ?",
-			ip, uri)
+		_, err = db.Exec("UPDATE "+articleVistorTableName+" SET visit_times = visit_times + 1 , recent_visit_time = ? WHERE remote_ip = ? AND uri = ?",
+			time.Now().Unix(), ip, uri)
 		if nil != err {
 			return err
 		}
@@ -115,8 +115,8 @@ func modelSiteVisitorInc(ip string) error {
 			return err
 		}
 	} else {
-		_, err = db.Exec("UPDATE "+siteVisitorTableName+" SET visit_times = visit_times + 1 WHERE remote_ip = ?",
-			ip)
+		_, err = db.Exec("UPDATE "+siteVisitorTableName+" SET visit_times = visit_times + 1 , recent_visit_time = ? WHERE remote_ip = ?",
+			time.Now().Unix(), ip)
 		if nil != err {
 			return err
 		}
