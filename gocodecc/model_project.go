@@ -745,6 +745,81 @@ func modelProjectArticleGetArticlesByProjectName(project string, page int, limit
 	return topArticles, pages, nil
 }
 
+func modelProjectArticleGetAllTopArticles(page int, limit int) ([]*ProjectArticleItem, error) {
+	db, err := getRawDB()
+	if nil != err {
+		return nil, err
+	}
+
+	var rows *sql.Rows
+	if 0 != limit {
+		if rows, err = db.Query(`
+	SELECT id,
+	project_id,
+	project_name,
+	article_title,
+	article_author,
+	article_content_html,
+	post_time,
+	top,
+	reply_author,
+	reply_time,
+	active_time,
+	click,
+	cover_image FROM `+projectArticleItemTableName+
+			" WHERE top = 1 ORDER BY active_time DESC LIMIT ? OFFSET ?", limit, page*limit); nil != err {
+			return nil, err
+		}
+	} else {
+		if rows, err = db.Query(`
+	SELECT id,
+	project_id,
+	project_name,
+	article_title,
+	article_author,
+	article_content_html,
+	post_time,
+	top,
+	reply_author,
+	reply_time,
+	active_time,
+	click,
+	cover_image FROM ` + projectArticleItemTableName +
+			" WHERE top = 1 ORDER BY active_time DESC"); nil != err {
+			return nil, err
+		}
+	}
+
+	//	free the conn
+	defer rows.Close()
+
+	//	get all item
+	resultSet := make([]*ProjectArticleItem, 0, limit)
+	for rows.Next() {
+		item := &ProjectArticleItem{}
+		if err = rows.Scan(
+			&item.Id,
+			&item.ProjectId,
+			&item.ProjectName,
+			&item.ArticleTitle,
+			&item.ArticleAuthor,
+			&item.ArticleContentHtml,
+			&item.PostTime,
+			&item.Top,
+			&item.ReplyAuthor,
+			&item.ReplyTime,
+			&item.ActiveTime,
+			&item.Click,
+			&item.CoverImage); nil != err {
+			return nil, err
+		}
+
+		resultSet = append(resultSet, item)
+	}
+
+	return resultSet, nil
+}
+
 //	using project id
 //	items, total page count
 func modelProjectArticleGetTopArticles(projectId int, page int, limit int) ([]*ProjectArticleItem, error) {
@@ -908,6 +983,58 @@ func modelProjectArticleGetArticles(projectId int, page int, limit int) ([]*Proj
 	pages := (int(articleCount) + limit - 1) / limit
 
 	return topArticles, pages, nil
+}
+
+func modelProjectArticleGetRecentNotTopArticles(page int, limit int) ([]*ProjectArticleItem, error) {
+	db, err := getRawDB()
+	if nil != err {
+		return nil, err
+	}
+
+	var rows *sql.Rows
+	if rows, err = db.Query(`
+		SELECT id,
+		project_name,
+		article_title,
+		article_author,
+		article_content_html,
+		post_time,
+		reply_author,
+		reply_time,
+		active_time,
+		click,
+		project_id,
+		cover_image FROM `+projectArticleItemTableName+
+		" WHERE top = 0 ORDER BY post_time DESC LIMIT ? OFFSET ?", limit, limit*page); nil != err {
+		return nil, err
+	}
+
+	//	free the conn
+	defer rows.Close()
+
+	//	get all item
+	articles := make([]*ProjectArticleItem, 0, 10)
+	for rows.Next() {
+		item := &ProjectArticleItem{}
+		if err = rows.Scan(
+			&item.Id,
+			&item.ProjectName,
+			&item.ArticleTitle,
+			&item.ArticleAuthor,
+			&item.ArticleContentHtml,
+			&item.PostTime,
+			&item.ReplyAuthor,
+			&item.ReplyTime,
+			&item.ActiveTime,
+			&item.Click,
+			&item.ProjectId,
+			&item.CoverImage); nil != err {
+			return nil, err
+		}
+		articles = append(articles, item)
+	}
+
+	return articles, nil
 }
 
 func modelProjectArticleGetRecentArticles(page int, limit int) ([]*ProjectArticleItem, error) {

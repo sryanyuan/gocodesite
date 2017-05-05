@@ -18,6 +18,16 @@
 <div id="id-content" class="container theme-showcase" role="main">
 	<div class="row">
 		<div class="col-md-9 col-md-offset-0">
+			{{$topArticlesCount := len .topArticles}}
+			{{if gt $topArticlesCount 0}}
+			<h2 class="section-title-s2 lbcolor-box">置顶的文章</h2>
+			<div id="recent-articles" class="articles-container" articleCount="{{len .topArticles}}">
+				{{range .topArticles}}
+				{{template "article_detail_display" .}}
+				{{end}}
+			</div>
+			{{end}}
+			
 			<h2 class="section-title-s2 lbcolor-box">最近的文章</h2>
 			<div id="articles" class="articles-container" articleCount="{{len .recentArticles}}">
 				{{range .recentArticles}}

@@ -6,6 +6,12 @@ var homeRenderTpls []string = []string{
 }
 
 func indexHandler(ctx *RequestContext) {
+	// Get top articles
+	topArticles, err := modelProjectArticleGetAllTopArticles(0, 0)
+	if nil != err {
+		ctx.RenderMessagePage("错误", err.Error(), false)
+		return
+	}
 	//	get recent articles
 	recentArticles, err := modelProjectArticleGetRecentArticles(0, 5)
 	if nil != err {
@@ -36,6 +42,7 @@ func indexHandler(ctx *RequestContext) {
 
 	dataCtx := map[string]interface{}{
 		"active":         "home",
+		"topArticles":    topArticles,
 		"recentArticles": recentArticles,
 		"articleCount":   articleCount,
 		"category":       category,
