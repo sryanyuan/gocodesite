@@ -13,7 +13,7 @@ func indexHandler(ctx *RequestContext) {
 		return
 	}
 	//	get recent articles
-	recentArticles, err := modelProjectArticleGetRecentArticles(0, 5)
+	recentArticles, err := modelProjectArticleGetRecentNotTopArticles(0, 5)
 	if nil != err {
 		ctx.RenderMessagePage("错误", err.Error(), false)
 		return
