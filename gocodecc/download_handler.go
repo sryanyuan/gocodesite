@@ -35,6 +35,7 @@ func downloadHandler(ctx *RequestContext) {
 				ctx.RenderMessagePage("错误", "cannot open the file specific", false)
 				return
 			}
+			defer f.Close()
 			content, _ := ioutil.ReadAll(f)
 			ctx.w.Header().Set("Content-Type", "application/zip")
 			ctx.w.Write(content)

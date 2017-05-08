@@ -10,6 +10,8 @@ import (
 	"github.com/astaxie/beego/orm"
 	"github.com/cihub/seelog"
 	"github.com/satori/go.uuid"
+
+	"github.com/axgle/mahonia"
 )
 
 var (
@@ -1155,7 +1157,10 @@ func modelProjectArticlesPack(dest string) (string, error) {
 
 		articlePath := item.ProjectName + "/" + item.ArticleAuthor
 		markdownPath := articlePath + "/" + item.ArticleTitle + ".md"
-		writter, err := zw.Create(markdownPath)
+		// Encoding to gbk
+		encoder := mahonia.NewEncoder("gb18030")
+		zipPath := encoder.ConvertString(markdownPath)
+		writter, err := zw.Create(zipPath)
 		if nil != err {
 			return "", err
 		}
