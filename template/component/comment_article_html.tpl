@@ -1,5 +1,13 @@
 {{define "comment_article_html"}}
-<!-- 多说评论框 start -->
-	<div class="ds-thread" data-thread-key="{{.article.Id}}" data-title="{{.article.ArticleTitle}}" data-url="{{.url}}"></div>
-<!-- 多说评论框 end -->
+
+{{if eq .config.CommentProvider "duoshuo"}}
+{{template "comment_article_html_duoshuo"}}
+{{else if eq .config.CommentProvider "livere"}}
+{{template "comment_article_html_livere"}}
+{{else if eq .config.CommentProvider "163"}}
+{{template "comment_article_html_163"}}
+{{else}}
+Comment disabled ({{.config.CommentProvider}})
+{{end}}
+
 {{end}}

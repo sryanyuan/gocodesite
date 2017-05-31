@@ -26,6 +26,9 @@ var projectArticleNewArticleTpls = []string{
 var projectArticleRenderTpls = []string{
 	"template/project/article.tpl",
 	"template/component/comment_article_html.tpl",
+	"template/component/comment_article_html_duoshuo.tpl",
+	"template/component/comment_article_html_livere.tpl",
+	"template/component/comment_article_html_163.tpl",
 }
 
 var projectArticleEditArticleRenderTpls = []string{

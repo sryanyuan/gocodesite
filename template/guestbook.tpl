@@ -21,7 +21,11 @@
 		<div class="col-md-3 col-md-offset-0">
 			<h2 class="section-title-s2">最近访客</h2>
 			<div id="comment-visitor-container" class="white-box shadow-box">
+				{{if eq .config.CommentProvider "duoshuo"}}
 				<ul class="ds-recent-visitors" data-num-items="30" id="ds-recent-visitors"></ul>
+				{{else}}
+				Recent visitor disabled
+				{{end}}
 			</div>
 		</div>
 	</div>

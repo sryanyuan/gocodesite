@@ -7,11 +7,12 @@ import (
 )
 
 type AppConfig struct {
-	Debug         bool   `json:"debug"`
-	DBAddress     string `json:"db-address"`
-	ListenAddress string `json:"listen-address"`
-	WeiboAddress  string `json:"weibo-address"`
-	GithubAddress string `json:"github-address"`
+	Debug           bool   `json:"debug"`
+	DBAddress       string `json:"db-address"`
+	ListenAddress   string `json:"listen-address"`
+	WeiboAddress    string `json:"weibo-address"`
+	GithubAddress   string `json:"github-address"`
+	CommentProvider string `json:"comment-provider"`
 }
 
 var (
