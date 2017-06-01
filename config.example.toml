@@ -4,7 +4,7 @@ debug = false
 db-address = "web.db"
 # HTTP listen address
 listen-address = ":1111"
-# Is using nginx reverse proxy
+# Is using nginx reverse proxy, header key : X-real-ip
 nginx-proxy = false
 # Site title
 site-title = "mysite"

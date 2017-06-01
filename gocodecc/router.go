@@ -60,6 +60,19 @@ func (c *RequestContext) GetNginxRealIP() string {
 	return c.r.Header.Get("X-real-ip")
 }
 
+func (c *RequestContext) GetRemoteIP() string {
+	if c.config.NginxProxy {
+		return c.GetNginxRealIP()
+	}
+	// Parse ip from remote addr
+	remoteIPColonIndex := strings.LastIndex(c.r.RemoteAddr, ":")
+	if -1 != remoteIPColonIndex {
+		return c.r.RemoteAddr[:remoteIPColonIndex]
+	}
+
+	return ""
+}
+
 func (this *RequestContext) Redirect(url string, code int) {
 	http.Redirect(this.w, this.r, url, code)
 }
@@ -184,18 +197,13 @@ func wrapHandler(config *AppConfig, item *RouterItem) http.HandlerFunc {
 
 		// Add site visitor counter
 		var err error
-		remoteAddr := r.RemoteAddr
-		if config.NginxProxy {
-			remoteAddr = requestCtx.GetNginxRealIP()
-		}
-		remoteIPColonIndex := strings.LastIndex(remoteAddr, ":")
-		if -1 != remoteIPColonIndex {
-			remoteIP := remoteAddr[:remoteIPColonIndex]
+		remoteIP := requestCtx.GetRemoteIP()
+		if remoteIP == "" {
+			seelog.Error("Get ip from request failed")
+		} else {
 			if err = modelSiteVisitorInc(remoteIP); nil != err {
 				seelog.Error("Update site visitor failed:", err)
 			}
-		} else {
-			seelog.Error("Parse ip failed, addr:", remoteAddr)
 		}
 
 		requestCtx.user = user

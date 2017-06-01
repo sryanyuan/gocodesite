@@ -121,18 +121,13 @@ func projectArticleHandler(ctx *RequestContext) {
 	}
 
 	// Increase article visitors
-	remoteAddr := ctx.r.RemoteAddr
-	if ctx.config.NginxProxy {
-		remoteAddr = ctx.GetNginxRealIP()
-	}
-	remoteIPColonIndex := strings.LastIndex(remoteAddr, ":")
-	if -1 != remoteIPColonIndex {
-		remoteIP := remoteAddr[:remoteIPColonIndex]
+	remoteIP := ctx.GetRemoteIP()
+	if remoteIP == "" {
+		seelog.Error("Get ip from request failed")
+	} else {
 		if err = modelArticleVisitorInc(ctx.r.URL.Path, remoteIP); nil != err {
 			seelog.Error("Update article visitor failed:", err)
 		}
-	} else {
-		seelog.Error("Parse ip failed, addr:", remoteAddr)
 	}
 
 	//	increase click count
