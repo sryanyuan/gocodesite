@@ -19,7 +19,7 @@ var (
 	articleVistorTableName = "article_visitor"
 )
 
-func (this *ArticleVistorModel) TableName() string {
+func (m *ArticleVistorModel) TableName() string {
 	return articleVistorTableName
 }
 
@@ -94,7 +94,7 @@ var (
 	siteVisitorTableName = "site_visitor"
 )
 
-func (this *SiteVisitorModel) TableName() string {
+func (m *SiteVisitorModel) TableName() string {
 	return siteVisitorTableName
 }
 

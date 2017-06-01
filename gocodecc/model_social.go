@@ -34,7 +34,7 @@ type SocialInfo struct {
 	PersonalWebsite string `orm:"size(50)"`
 }
 
-func (this *SocialInfo) TableName() string {
+func (m *SocialInfo) TableName() string {
 	return "social_info"
 }
 

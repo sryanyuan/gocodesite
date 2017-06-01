@@ -34,7 +34,7 @@ type ProjectCategoryItem struct {
 	PostPriv        uint32
 }
 
-func (this *ProjectCategoryItem) TableName() string {
+func (m *ProjectCategoryItem) TableName() string {
 	return projectCategoryItemTableName
 }
 
@@ -66,7 +66,7 @@ type ProjectArticleItem struct {
 	CoverImage             string `orm:"size(128)"`
 }
 
-func (this *ProjectArticleItem) TableName() string {
+func (m *ProjectArticleItem) TableName() string {
 	return projectArticleItemTableName
 }
 

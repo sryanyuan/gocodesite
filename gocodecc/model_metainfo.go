@@ -21,7 +21,7 @@ func init() {
 	orm.RegisterModel(new(MetaInfo))
 }
 
-func (this *MetaInfo) TableName() string {
+func (m *MetaInfo) TableName() string {
 	return metaInfoTableName
 }
 

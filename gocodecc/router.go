@@ -43,9 +43,7 @@ func checkPermission(perChecked uint32, want uint32) bool {
 	return false
 }
 
-/*
-	Http context
-*/
+// RequestContext wraps request and response
 type RequestContext struct {
 	w         http.ResponseWriter
 	r         *http.Request
@@ -73,42 +71,42 @@ func (c *RequestContext) GetRemoteIP() string {
 	return ""
 }
 
-func (this *RequestContext) Redirect(url string, code int) {
-	http.Redirect(this.w, this.r, url, code)
+func (c *RequestContext) Redirect(url string, code int) {
+	http.Redirect(c.w, c.r, url, code)
 }
 
-func (this *RequestContext) RenderJson(js interface{}) {
-	renderJson(this, js)
+func (c *RequestContext) RenderJson(js interface{}) {
+	renderJson(c, js)
 }
 
-func (this *RequestContext) RenderMessagePage(title string, text string, result bool) {
-	renderMessage(this, title, text, result)
+func (c *RequestContext) RenderMessagePage(title string, text string, result bool) {
+	renderMessage(c, title, text, result)
 }
 
-func (this *RequestContext) RenderDownloadPage(title string, text string, downloadUrl string) {
+func (c *RequestContext) RenderDownloadPage(title string, text string, downloadUrl string) {
 	url := fmt.Sprintf("/common/download?title=%s&text='%s'&url=%s", title, text, downloadUrl)
-	this.Redirect(url, http.StatusFound)
+	c.Redirect(url, http.StatusFound)
 }
 
-func (this *RequestContext) RenderString(str string) {
-	this.w.Write([]byte(str))
+func (c *RequestContext) RenderString(str string) {
+	c.w.Write([]byte(str))
 }
 
-func (this *RequestContext) WriteHeader(header int) {
-	this.w.WriteHeader(header)
+func (c *RequestContext) WriteHeader(header int) {
+	c.w.WriteHeader(header)
 }
 
-func (this *RequestContext) WriteResponse(rsp []byte) (int, error) {
-	return this.w.Write(rsp)
+func (c *RequestContext) WriteResponse(rsp []byte) (int, error) {
+	return c.w.Write(rsp)
 }
 
-func (this *RequestContext) GetSession(name string) (*sessions.Session, error) {
-	return store.Get(this.r, name)
+func (c *RequestContext) GetSession(name string) (*sessions.Session, error) {
+	return store.Get(c.r, name)
 }
 
-func (this *RequestContext) GetWebUser() *WebUser {
+func (c *RequestContext) GetWebUser() *WebUser {
 	user := modelWebUserNew()
-	session, err := this.GetSession("user")
+	session, err := c.GetSession("user")
 	if nil != err {
 		return user
 	}
@@ -138,8 +136,8 @@ func (this *RequestContext) GetWebUser() *WebUser {
 	return dbuser
 }
 
-func (this *RequestContext) SaveWebUser(user *WebUser, saveDays int) {
-	session, err := this.GetSession("user")
+func (c *RequestContext) SaveWebUser(user *WebUser, saveDays int) {
+	session, err := c.GetSession("user")
 	if nil != err {
 		return
 	}
@@ -155,17 +153,17 @@ func (this *RequestContext) SaveWebUser(user *WebUser, saveDays int) {
 			MaxAge: saveDays * 24 * 60 * 60,
 		}
 	}
-	session.Save(this.r, this.w)
+	session.Save(c.r, c.w)
 }
 
-func (this *RequestContext) ClearWebUser() {
-	session, err := this.GetSession("user")
+func (c *RequestContext) ClearWebUser() {
+	session, err := c.GetSession("user")
 	if nil != err {
 		return
 	}
 
 	session.Options = &sessions.Options{MaxAge: -1}
-	session.Save(this.r, this.w)
+	session.Save(c.r, c.w)
 }
 
 /*
@@ -240,6 +238,8 @@ var routerItems = []RouterItem{
 	{"/admin/{action}", kPermission_SuperAdmin, adminHandler},
 	{"/common/{action}", kPermission_Guest, commonHandler},
 	{"/download/{filename}", kPermission_Guest, downloadHandler},
+	{"/manager", kPermission_SuperAdmin, managerHandler},
+	{"/manager/user", kPermission_SuperAdmin, managerHandler},
 }
 
 func fileHandler(w http.ResponseWriter, r *http.Request) {

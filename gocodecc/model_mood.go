@@ -21,7 +21,7 @@ func init() {
 	orm.RegisterModel(new(MoodInfo))
 }
 
-func (this *MoodInfo) TableName() string {
+func (m *MoodInfo) TableName() string {
 	return moodInfoTableName
 }
 

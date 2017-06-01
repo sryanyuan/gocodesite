@@ -1,6 +1,7 @@
 package gocodecc
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/astaxie/beego/orm"
@@ -28,7 +29,7 @@ type WebUser struct {
 	Mood          string `orm:"size(128)"`
 }
 
-func (this *WebUser) TableName() string {
+func (m *WebUser) TableName() string {
 	return "web_user"
 }
 
@@ -117,4 +118,35 @@ func modelWebUserGetCount() (int, error) {
 		return 0, err
 	}
 	return count, nil
+}
+
+func modelWebUserGetAll(limit, offset int) ([]*WebUser, error) {
+	db, err := getRawDB()
+	if nil != err {
+		return nil, err
+	}
+
+	users := make([]*WebUser, 0, 32)
+	expr := "SELECT uid, permission, user_name, e_mail FROM web_user "
+	if 0 != limit {
+		expr += fmt.Sprintf("LIMIT %d ", limit)
+	}
+	if 0 != offset {
+		expr += fmt.Sprintf("OFFSET %d", offset)
+	}
+	rows, err := db.Query(expr)
+	if nil != err {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var user WebUser
+		if err = rows.Scan(&user.Uid, &user.Permission, &user.UserName, &user.EMail); nil != err {
+			return nil, err
+		}
+		users = append(users, &user)
+	}
+
+	return users, nil
 }

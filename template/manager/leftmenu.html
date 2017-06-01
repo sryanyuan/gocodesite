@@ -1,0 +1,9 @@
+{{define "leftmenu"}}
+<ul class="menu" id="manager-menu">
+    <li {{if eq .active "user"}}class="active" {{end}}>
+        <a href="/manager/user">
+                    <i class="fa fa-users" aria-hidden="true"></i>用户管理
+                </a>
+    </li>
+</ul>
+{{end}}

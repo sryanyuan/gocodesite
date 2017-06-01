@@ -63,9 +63,17 @@
 						<ul id="id_loginmenu" class="dropdown-menu">
 							<li class="dropdown-header">欢迎 <span style="font-weight:bold;">{{.user.UserName}}</span></li>
 							<li role="separator" class="divider"></li>
+
 							<li>
 								<a href="/member/{{.user.UserName}}"><i class="fa fa-cog"></i>&nbsp;&nbsp;用户中心</a>
 							</li>
+							
+							{{if gt .user.Permission 3}}
+							<li>
+								<a href="/manager"><i class="fa fa-cog"></i>&nbsp;&nbsp;管理后台</a>
+							</li>
+							{{end}}
+
 							<li>
 								<a href="/signout"><i class="fa fa-sign-out"></i>&nbsp;&nbsp;登出</a>
 							</li>
