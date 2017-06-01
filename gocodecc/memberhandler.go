@@ -8,12 +8,12 @@ import (
 )
 
 var memberInfoRenderTpls = []string{
-	"template/member/member_info.tpl",
+	"template/member/member_info.html",
 }
 
 var memberArticlesRenderTpls = []string{
-	"template/member/member_articles.tpl",
-	"template/component/article_detail_display.tpl",
+	"template/member/member_articles.html",
+	"template/component/article_detail_display.html",
 }
 
 func memberInfoHandler(ctx *RequestContext) {

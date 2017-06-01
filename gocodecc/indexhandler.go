@@ -1,8 +1,8 @@
 package gocodecc
 
 var homeRenderTpls []string = []string{
-	"template/component/article_detail_display.tpl",
-	"template/home.tpl",
+	"template/component/article_detail_display.html",
+	"template/home.html",
 }
 
 func indexHandler(ctx *RequestContext) {

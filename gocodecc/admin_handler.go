@@ -10,7 +10,7 @@ import (
 )
 
 var adminUploadRenderTpls []string = []string{
-	"template/admin/upload.tpl",
+	"template/admin/upload.html",
 }
 
 func adminHandler(ctx *RequestContext) {

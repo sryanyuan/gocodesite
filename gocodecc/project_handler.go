@@ -11,20 +11,20 @@ import (
 )
 
 var projectCategoryRenderTpls = []string{
-	"template/project/category.tpl",
+	"template/project/category.html",
 }
 
 var projectArticlesRenderTpls = []string{
-	"template/project/articles.tpl",
-	"template/component/article_detail_display.tpl",
+	"template/project/articles.html",
+	"template/component/article_detail_display.html",
 }
 
 var projectArticleNewArticleTpls = []string{
-	"template/project/new_article.tpl",
+	"template/project/new_article.html",
 }
 
 var projectArticleRenderTpls = []string{
-	"template/project/article.tpl",
+	"template/project/article.html",
 	"template/component/comment_embed.html",
 	"template/component/comment_duoshuo.html",
 	"template/component/comment_livere.html",
@@ -32,7 +32,7 @@ var projectArticleRenderTpls = []string{
 }
 
 var projectArticleEditArticleRenderTpls = []string{
-	"template/project/edit_article.tpl",
+	"template/project/edit_article.html",
 }
 
 func projectHandler(ctx *RequestContext) {

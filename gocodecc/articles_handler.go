@@ -5,8 +5,8 @@ import (
 )
 
 var articlesRenderTpls = []string{
-	"template/articles.tpl",
-	"template/component/article_detail_display.tpl",
+	"template/articles.html",
+	"template/component/article_detail_display.html",
 }
 
 func articlesHandler(ctx *RequestContext) {

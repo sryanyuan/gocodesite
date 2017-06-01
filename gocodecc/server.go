@@ -9,9 +9,9 @@ import (
 )
 
 var layoutFiles = []string{
-	"template/layout.tpl",
-	"template/component/navbar_v2.tpl",
-	"template/component/footer.tpl",
+	"template/layout.html",
+	"template/component/navbar_v2.html",
+	"template/component/footer.html",
 }
 
 var (

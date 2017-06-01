@@ -5,7 +5,7 @@ import (
 )
 
 var moodRenderTpls = []string{
-	"template/mood.tpl",
+	"template/mood.html",
 }
 
 func moodHandler(ctx *RequestContext) {

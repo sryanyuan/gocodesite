@@ -1,7 +1,7 @@
 package gocodecc
 
 var guestbookRenderTpls = []string{
-	"template/guestbook.tpl",
+	"template/guestbook.html",
 	"template/component/comment_embed.html",
 	"template/component/comment_duoshuo.html",
 	"template/component/comment_livere.html",

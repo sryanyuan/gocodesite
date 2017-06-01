@@ -5,11 +5,11 @@ import (
 )
 
 var commonMessageRenderTpls []string = []string{
-	"template/common/message.tpl",
+	"template/common/message.html",
 }
 
 var commonDownloadRenderTpls []string = []string{
-	"template/common/download.tpl",
+	"template/common/download.html",
 }
 
 func commonHandler(ctx *RequestContext) {

@@ -10,7 +10,7 @@ import (
 )
 
 var signinRenderTpls = []string{
-	"template/account/signin.tpl",
+	"template/account/signin.html",
 }
 
 type SignInResult struct {

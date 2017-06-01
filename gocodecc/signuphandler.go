@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/dchest/captcha"
-
 	//"github.com/cihub/seelog"
 )
 
@@ -20,7 +19,7 @@ type SignUpResult struct {
 }
 
 var signupRenderTpls = []string{
-	"template/account/signup.tpl",
+	"template/account/signup.html",
 }
 
 func signupHandler(ctx *RequestContext) {
@@ -133,7 +132,7 @@ func signupHandler(ctx *RequestContext) {
 }
 
 var signupSuccessRenderTpls = []string{
-	"template/account/signupsuccess.tpl",
+	"template/account/signupsuccess.html",
 }
 
 func signupSuccessHandler(ctx *RequestContext) {
