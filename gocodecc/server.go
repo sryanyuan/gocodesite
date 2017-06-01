@@ -98,7 +98,7 @@ func (s *Site) Start() error {
 
 	// Initialize routers
 	r := mux.NewRouter()
-	InitRouters(s, r)
+	InitRouters(s.config, r)
 	http.Handle("/", r)
 
 	// Run the server

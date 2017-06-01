@@ -52,9 +52,13 @@ type RequestContext struct {
 	dbSession *sql.DB
 	user      *WebUser
 	tmRequest time.Time
-	site      *Site
+	config    *AppConfig
 }
 type HttpHandler func(*RequestContext)
+
+func (c *RequestContext) GetNginxRealIP() string {
+	return c.r.Header.Get("X-real-ip")
+}
 
 func (this *RequestContext) Redirect(url string, code int) {
 	http.Redirect(this.w, this.r, url, code)
@@ -158,14 +162,14 @@ func responseWithAccessDenied(w http.ResponseWriter) {
 	http.Error(w, "Access denied", http.StatusForbidden)
 }
 
-func wrapHandler(site *Site, item *RouterItem) http.HandlerFunc {
+func wrapHandler(config *AppConfig, item *RouterItem) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		requestCtx := RequestContext{
 			w:         w,
 			r:         r,
 			dbSession: nil,
 			tmRequest: time.Now(),
-			site:      site,
+			config:    config,
 		}
 
 		user := requestCtx.GetWebUser()
@@ -180,12 +184,18 @@ func wrapHandler(site *Site, item *RouterItem) http.HandlerFunc {
 
 		// Add site visitor counter
 		var err error
-		remoteIPColonIndex := strings.LastIndex(r.RemoteAddr, ":")
+		remoteAddr := r.RemoteAddr
+		if config.NginxProxy {
+			remoteAddr = requestCtx.GetNginxRealIP()
+		}
+		remoteIPColonIndex := strings.LastIndex(remoteAddr, ":")
 		if -1 != remoteIPColonIndex {
-			remoteIP := r.RemoteAddr[:remoteIPColonIndex]
+			remoteIP := remoteAddr[:remoteIPColonIndex]
 			if err = modelSiteVisitorInc(remoteIP); nil != err {
 				seelog.Error("Update site visitor failed:", err)
 			}
+		} else {
+			seelog.Error("Parse ip failed, addr:", remoteAddr)
 		}
 
 		requestCtx.user = user
@@ -229,11 +239,11 @@ func fileHandler(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, filePath)
 }
 
-func InitRouters(site *Site, r *mux.Router) {
+func InitRouters(config *AppConfig, r *mux.Router) {
 	//	handle func
 	routersCount := len(routerItems)
 	for i := 0; i < routersCount; i++ {
-		r.HandleFunc(routerItems[i].Url, wrapHandler(site, &routerItems[i]))
+		r.HandleFunc(routerItems[i].Url, wrapHandler(config, &routerItems[i]))
 	}
 	captchaStorage := captcha.NewMemoryStore(captcha.CollectNum, time.Minute*time.Duration(2))
 	captcha.SetCustomStore(captchaStorage)

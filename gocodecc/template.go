@@ -271,12 +271,12 @@ func renderTemplate(rctx *RequestContext, fileNames []string, data map[string]in
 
 	data["goversion"] = goVersion
 	data["requesttime"] = rctx.tmRequest
-	data["config"] = rctx.site.config
+	data["config"] = rctx.config
 	data["imgPrefix"] = kPrefixImagePath
 	data["url"] = rctx.r.URL.Path
 
 	//	get render data
-	return parseTemplate(fileNames, !rctx.site.config.Debug, layoutFiles, data)
+	return parseTemplate(fileNames, !rctx.config.Debug, layoutFiles, data)
 }
 
 func renderJson(ctx *RequestContext, js interface{}) {

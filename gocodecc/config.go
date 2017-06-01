@@ -17,6 +17,7 @@ type AppConfig struct {
 	ListenAddress   string            `json:"listen-address" toml:"listen-address" validate:"nonzero"`
 	WeiboAddress    string            `json:"weibo-address" toml:"weibo-address"`
 	GithubAddress   string            `json:"github-address" toml:"github-address"`
+	NginxProxy      bool              `json:"nginx-proxy" toml:"nginx-proxy"`
 	CommentProvider string            `json:"comment-provider" toml:"comment-provider"`
 	CommentContext  map[string]string `json:"comment-context" toml:"comment-context"`
 }
