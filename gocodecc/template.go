@@ -11,6 +11,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/cihub/seelog"
 )
 
 var goVersion = runtime.Version()
@@ -77,19 +79,27 @@ func tplfn_getTimeGapString(tm int64) string {
 	gap := time.Now().Sub(t)
 	if gap.Seconds() < 60 {
 		return "刚刚"
-	} else if gap.Minutes() < 60 {
-		return fmt.Sprintf("%.0f 分钟前", gap.Minutes())
-	} else if gap.Hours() < 24 {
-		return fmt.Sprintf("%.0f 小时前", gap.Hours())
-	} else {
-		hours := int(gap.Hours())
-		days := hours / 24
-		if days < 30 {
-			return fmt.Sprintf("%d 天前", days)
-		} else {
-			return t.Format("2006-01-02 15:04")
-		}
 	}
+
+	if gap.Minutes() < 60 {
+		return fmt.Sprintf("%.0f 分钟前", gap.Minutes())
+	}
+	if gap.Hours() < 24 {
+		return fmt.Sprintf("%.0f 小时前", gap.Hours())
+	}
+
+	hours := int(gap.Hours())
+	days := hours / 24
+	if days < 30 {
+		return fmt.Sprintf("%d 天前", days)
+	}
+	// Get timezone
+	tz, err := time.LoadLocation(siteTimezone)
+	if nil != err {
+		seelog.Error("Load localtion failed, timezone:", siteTimezone)
+		return t.Format("2006-01-02 15:04")
+	}
+	return t.In(tz).Format("2006-01-02 15:04")
 }
 
 func tplfn_convertToHtml(str string) template.HTML {

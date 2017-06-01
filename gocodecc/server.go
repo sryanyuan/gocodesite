@@ -85,6 +85,9 @@ func (s *Site) Start() error {
 		seelog.Error(err)
 	}
 
+	// Update timezone
+	setTimezone(s.config.Timezone)
+
 	// Initialize meta info
 	initMetaInfo()
 
