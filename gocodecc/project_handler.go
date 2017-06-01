@@ -25,10 +25,10 @@ var projectArticleNewArticleTpls = []string{
 
 var projectArticleRenderTpls = []string{
 	"template/project/article.tpl",
-	"template/component/comment_article_html.tpl",
-	"template/component/comment_article_html_duoshuo.tpl",
-	"template/component/comment_article_html_livere.tpl",
-	"template/component/comment_article_html_163.tpl",
+	"template/component/comment_embed.html",
+	"template/component/comment_duoshuo.html",
+	"template/component/comment_livere.html",
+	"template/component/comment_163.html",
 }
 
 var projectArticleEditArticleRenderTpls = []string{
@@ -56,9 +56,9 @@ func projectCategoryHandler(ctx *RequestContext) {
 func projectArticlesHandler(ctx *RequestContext) {
 	//	search all project
 	vars := mux.Vars(ctx.r)
-	projectId, err := strconv.Atoi(vars["projectid"])
+	projectID, err := strconv.Atoi(vars["projectid"])
 	if nil != err ||
-		0 == projectId {
+		0 == projectID {
 		ctx.RenderMessagePage("错误", "Invalid projectid", false)
 		return
 	}
@@ -72,7 +72,7 @@ func projectArticlesHandler(ctx *RequestContext) {
 	}
 
 	var category ProjectCategoryItem
-	err = modelProjectCategoryGetByProjectId(projectId, &category)
+	err = modelProjectCategoryGetByProjectId(projectID, &category)
 	if nil != err {
 		ctx.Redirect("/", http.StatusNotFound)
 		return
@@ -80,7 +80,7 @@ func projectArticlesHandler(ctx *RequestContext) {
 
 	pageItems := 10
 	showPages := 5
-	articles, pages, err := modelProjectArticleGetArticles(projectId, page-1, pageItems)
+	articles, pages, err := modelProjectArticleGetArticles(projectID, page-1, pageItems)
 	if nil != err {
 		panic(err)
 	}
@@ -88,7 +88,7 @@ func projectArticlesHandler(ctx *RequestContext) {
 	tplData := make(map[string]interface{})
 	tplData["articles"] = articles
 	tplData["active"] = "project"
-	tplData["project"] = projectId
+	tplData["project"] = projectID
 	tplData["pages"] = pages
 	tplData["page"] = page
 	tplData["pageItems"] = pageItems
@@ -100,14 +100,14 @@ func projectArticlesHandler(ctx *RequestContext) {
 
 func projectArticleHandler(ctx *RequestContext) {
 	vars := mux.Vars(ctx.r)
-	articleId, err := strconv.Atoi(vars["articleid"])
+	articleID, err := strconv.Atoi(vars["articleid"])
 
 	if nil != err {
 		ctx.Redirect("/", http.StatusNotFound)
 		return
 	}
 
-	article, err := modelProjectArticleGet(articleId)
+	article, err := modelProjectArticleGet(articleID)
 	if nil != err {
 		ctx.Redirect("/", http.StatusNotFound)
 		return
@@ -130,7 +130,7 @@ func projectArticleHandler(ctx *RequestContext) {
 	}
 
 	//	increase click count
-	if err = modelProjectArticleIncClick(articleId); nil != err {
+	if err = modelProjectArticleIncClick(articleID); nil != err {
 		return
 	}
 	article.Click = article.Click + 1
@@ -139,6 +139,8 @@ func projectArticleHandler(ctx *RequestContext) {
 	tplData["active"] = "project"
 	tplData["article"] = article
 	tplData["author"] = author
+	tplData["commentID"] = strconv.Itoa(article.Id)
+	tplData["commentTitle"] = article.ArticleTitle
 	data := renderTemplate(ctx, projectArticleRenderTpls, tplData)
 	ctx.w.Write(data)
 }
@@ -146,11 +148,11 @@ func projectArticleHandler(ctx *RequestContext) {
 func projectArticleCmdHandler(ctx *RequestContext) {
 	vars := mux.Vars(ctx.r)
 	cmd := vars["cmd"]
-	projectId, err := strconv.Atoi(vars["projectid"])
+	projectID, err := strconv.Atoi(vars["projectid"])
 	cmd = strings.ToLower(cmd)
 
 	if nil != err ||
-		0 == projectId {
+		0 == projectID {
 		ctx.Redirect("/", http.StatusNotFound)
 		return
 	}
@@ -158,18 +160,18 @@ func projectArticleCmdHandler(ctx *RequestContext) {
 	switch cmd {
 	case "new_article":
 		{
-			_newProjectArticle(ctx, projectId)
+			_newProjectArticle(ctx, projectID)
 		}
 	case "edit_article":
 		{
 			ctx.r.ParseForm()
-			articleId, err := strconv.Atoi(ctx.r.Form.Get("articleId"))
+			articleID, err := strconv.Atoi(ctx.r.Form.Get("articleId"))
 			if nil != err {
 				ctx.Redirect("/", http.StatusNotFound)
 				return
 			}
 
-			_editProjectArticle(ctx, articleId)
+			_editProjectArticle(ctx, articleID)
 		}
 	default:
 		{

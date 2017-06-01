@@ -3,6 +3,8 @@ $('li.dropdown').mouseover(function() {
      $(this).addClass('open');    }).mouseout(function() {        $(this).removeClass('open');    }); 
 
 function adjustFooter(){
+	return;
+	
 	if ($(window).height() != $(document).height()) {
 		$("#id_footer").removeClass("navbar-fixed-bottom");
 	} else {

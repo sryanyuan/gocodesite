@@ -15,7 +15,7 @@
 				<li class="active">留言板</li>
 			</ul>
 			<div id="comment-container" class="shadow-box white-box">
-				{{template "comment_guestbook_html" .}}
+				{{template "comment_embed" .}}
 			</div>
 		</div>
 		<div class="col-md-3 col-md-offset-0">

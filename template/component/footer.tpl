@@ -1,5 +1,6 @@
 {{define "footer"}}
-<footer id="id_footer" class="footer navbar-fixed-bottom">
+<!--footer id="id_footer" class="footer navbar-fixed-bottom"-->
+<footer id="id_footer" class="footer navbar-default">
 	<div class="container">
 		<p>
 			
@@ -19,7 +20,7 @@
 				<li><a href="{{.config.WeiboAddress}}" target="_blank"><i class="fa fa-weibo" aria-hidden="true"></i></a></li>
 				{{end}}
 				<li><i class="fa fa-smile-o"></i></li>
-				<li><i class="fa fa-copyright"></i>2016-2016 gocode.cc</li>
+				<li><i class="fa fa-copyright"></i>2016-2017 gocode.cc</li>
 			</ul>
 		</p>
 	</div>

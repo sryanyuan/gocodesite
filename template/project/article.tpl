@@ -107,7 +107,7 @@
 				</div>
 			</div>
 			<div id="comment-container" class="shadow-box white-box">
-				{{template "comment_article_html" .}}
+				{{template "comment_embed" .}}
 			</div>
 		</div>
 		<div class="col-md-4">
