@@ -13,7 +13,7 @@ var signinRenderTpls = []string{
 	"template/account/signin.html",
 }
 
-type SignInResult struct {
+type signInResult struct {
 	Result    int
 	Msg       string
 	CaptchaId string
@@ -28,7 +28,7 @@ func signinHandler(ctx *RequestContext) {
 	} else {
 		ctx.r.ParseForm()
 
-		var result = SignInResult{
+		var result = signInResult{
 			Result: 1,
 		}
 
