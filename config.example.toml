@@ -1,0 +1,23 @@
+# Is debug mode enabled
+debug = false
+# Database source, to sqlite, it is a file
+db-address = "web.db"
+# HTTP listen address
+listen-address = ":1111"
+# Site title
+site-title = "mysite"
+# Home title
+home-title = "hello, this is my site"
+# Weibo address, if set, it will be displayed in the footer
+weibo-address = ""
+# Github address, if set, it will be displayed in the footer
+github-address = ""
+# Comment provider, now supports duoshuo(unavailable), livere, 163
+comment-provider = ""
+# Comment context
+[comment-context]
+# If comment is livere, data_uid field must be set
+data_uid = ""
+# If comment is 163, productKey and loader must be set
+productKey = ""
+loader = ""

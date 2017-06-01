@@ -206,11 +206,11 @@ func tplfn_getMoodImagePath(path string) string {
 	return kPrefixImagePath + "/mood-images/" + path
 }
 
-func getTplBinaryData(file string) string {
+func getTplBinaryData(file string, cache bool) string {
 	data, ok := tplBinaryDataMap[file]
 	if ok {
 		//	directy return data
-		if !g_appConfig.Debug {
+		if cache {
 			return data
 		}
 	}
@@ -227,14 +227,14 @@ func getTplBinaryData(file string) string {
 	return layoutContent
 }
 
-func parseTemplate(fileNames []string, layoutFiles []string, data map[string]interface{}) []byte {
+func parseTemplate(fileNames []string, cache bool, layoutFiles []string, data map[string]interface{}) []byte {
 	var err error
 	var buffer bytes.Buffer
 	t := template.New("layout").Funcs(tplFuncMap)
 
 	//	parse layout
 	for _, v := range layoutFiles {
-		tplContent := getTplBinaryData(v)
+		tplContent := getTplBinaryData(v, cache)
 
 		if t, err = t.Parse(tplContent); nil != err {
 			panic(err)
@@ -271,12 +271,12 @@ func renderTemplate(rctx *RequestContext, fileNames []string, data map[string]in
 
 	data["goversion"] = goVersion
 	data["requesttime"] = rctx.tmRequest
-	data["config"] = &g_appConfig
+	data["config"] = rctx.site.config
 	data["imgPrefix"] = kPrefixImagePath
 	data["url"] = rctx.r.URL.Path
 
 	//	get render data
-	return parseTemplate(fileNames, layoutFiles, data)
+	return parseTemplate(fileNames, !rctx.site.config.Debug, layoutFiles, data)
 }
 
 func renderJson(ctx *RequestContext, js interface{}) {

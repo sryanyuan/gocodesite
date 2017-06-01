@@ -52,6 +52,7 @@ type RequestContext struct {
 	dbSession *sql.DB
 	user      *WebUser
 	tmRequest time.Time
+	site      *Site
 }
 type HttpHandler func(*RequestContext)
 
@@ -157,13 +158,14 @@ func responseWithAccessDenied(w http.ResponseWriter) {
 	http.Error(w, "Access denied", http.StatusForbidden)
 }
 
-func wrapHandler(item *RouterItem) http.HandlerFunc {
+func wrapHandler(site *Site, item *RouterItem) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		requestCtx := RequestContext{
 			w:         w,
 			r:         r,
 			dbSession: nil,
 			tmRequest: time.Now(),
+			site:      site,
 		}
 
 		user := requestCtx.GetWebUser()
@@ -227,11 +229,11 @@ func fileHandler(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, filePath)
 }
 
-func InitRouters(r *mux.Router) {
+func InitRouters(site *Site, r *mux.Router) {
 	//	handle func
 	routersCount := len(routerItems)
 	for i := 0; i < routersCount; i++ {
-		r.HandleFunc(routerItems[i].Url, wrapHandler(&routerItems[i]))
+		r.HandleFunc(routerItems[i].Url, wrapHandler(site, &routerItems[i]))
 	}
 	captchaStorage := captcha.NewMemoryStore(captcha.CollectNum, time.Minute*time.Duration(2))
 	captcha.SetCustomStore(captchaStorage)

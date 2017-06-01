@@ -11,3 +11,5 @@ static/images/article-images
 markdown-articles/
 static/images/
 debug
+*.dev.json
+*.dev.toml

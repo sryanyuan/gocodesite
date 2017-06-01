@@ -12,6 +12,7 @@ import (
 var (
 	dbDriverName = "sqlite3"
 	dbDriverType = orm.DRSqlite
+	dbDataSource = ""
 )
 
 func snakeString(s string) string {
@@ -31,16 +32,23 @@ func snakeString(s string) string {
 	return strings.ToLower(string(data[:]))
 }
 
-func initModels() error {
+// syncDB create all database and tables
+func syncDB() error {
+	var err error
+
+	if err = orm.RunSyncdb("default", false, true); nil != err {
+		return err
+	}
+	return nil
+}
+
+func initModels(ds string) error {
 	var err error
 
 	if err = orm.RegisterDriver(dbDriverName, dbDriverType); nil != err {
 		return err
 	}
-	if err = orm.RegisterDataBase("default", dbDriverName, g_appConfig.DBAddress); nil != err {
-		return err
-	}
-	if err = orm.RunSyncdb("default", false, g_appConfig.Debug); nil != err {
+	if err = orm.RegisterDataBase("default", dbDriverName, ds); nil != err {
 		return err
 	}
 
