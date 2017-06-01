@@ -49,6 +49,12 @@ func adminHandler(ctx *RequestContext) {
 		}
 	case "article_visitors":
 		{
+			// Timezone
+			tz, err := time.LoadLocation(siteTimezone)
+			if nil != err {
+				ctx.RenderMessagePage("错误", err.Error(), false)
+				return
+			}
 			results, err := modelArticleVisitorGet(0)
 			if nil != err {
 				ctx.RenderMessagePage("错误", err.Error(), false)
@@ -66,7 +72,7 @@ func adminHandler(ctx *RequestContext) {
 				textBuffer.WriteString(strconv.Itoa(v.VisitTimes))
 				textBuffer.WriteString(" \t| ")
 				textBuffer.WriteString("RECENT:")
-				tr := time.Unix(v.RecentVisitTime, 0)
+				tr := time.Unix(v.RecentVisitTime, 0).In(tz)
 				textBuffer.WriteString(tr.Format("2006-01-02 15:04:05"))
 				textBuffer.WriteString("\r\n")
 			}
@@ -74,6 +80,12 @@ func adminHandler(ctx *RequestContext) {
 		}
 	case "site_visitors":
 		{
+			// Timezone
+			tz, err := time.LoadLocation(siteTimezone)
+			if nil != err {
+				ctx.RenderMessagePage("错误", err.Error(), false)
+				return
+			}
 			results, err := modelSiteVisitorGet(0)
 			if nil != err {
 				ctx.RenderMessagePage("错误", err.Error(), false)
@@ -88,7 +100,7 @@ func adminHandler(ctx *RequestContext) {
 				textBuffer.WriteString(strconv.Itoa(v.VisitTimes))
 				textBuffer.WriteString(" \t| ")
 				textBuffer.WriteString("RECENT:")
-				tr := time.Unix(v.RecentVisitTime, 0)
+				tr := time.Unix(v.RecentVisitTime, 0).In(tz)
 				textBuffer.WriteString(tr.Format("2006-01-02 15:04:05"))
 				textBuffer.WriteString("\r\n")
 			}
