@@ -238,8 +238,8 @@ var routerItems = []RouterItem{
 	{"/admin/{action}", kPermission_SuperAdmin, adminHandler},
 	{"/common/{action}", kPermission_Guest, commonHandler},
 	{"/download/{filename}", kPermission_Guest, downloadHandler},
+	{"/manager/{panel}", kPermission_SuperAdmin, managerPanelHandler},
 	{"/manager", kPermission_SuperAdmin, managerHandler},
-	{"/manager/user", kPermission_SuperAdmin, managerHandler},
 }
 
 func fileHandler(w http.ResponseWriter, r *http.Request) {

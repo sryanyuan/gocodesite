@@ -192,6 +192,11 @@ func tplfn_getImagePath(path string) string {
 
 func tplfn_formatDate(tm int64) string {
 	timeVal := time.Unix(tm, 0)
+	tz, err := time.LoadLocation(siteTimezone)
+	if nil != err {
+		return err.Error()
+	}
+	timeVal = timeVal.In(tz)
 	return timeVal.Format("2006-01-02")
 }
 

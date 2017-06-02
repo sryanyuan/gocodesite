@@ -127,7 +127,7 @@ func modelWebUserGetAll(limit, offset int) ([]*WebUser, error) {
 	}
 
 	users := make([]*WebUser, 0, 32)
-	expr := "SELECT uid, permission, user_name, e_mail FROM web_user "
+	expr := "SELECT uid, permission, user_name, e_mail, last_login_time, create_time FROM web_user "
 	if 0 != limit {
 		expr += fmt.Sprintf("LIMIT %d ", limit)
 	}
@@ -142,7 +142,12 @@ func modelWebUserGetAll(limit, offset int) ([]*WebUser, error) {
 
 	for rows.Next() {
 		var user WebUser
-		if err = rows.Scan(&user.Uid, &user.Permission, &user.UserName, &user.EMail); nil != err {
+		if err = rows.Scan(&user.Uid,
+			&user.Permission,
+			&user.UserName,
+			&user.EMail,
+			&user.LastLoginTime,
+			&user.CreateTime); nil != err {
 			return nil, err
 		}
 		users = append(users, &user)

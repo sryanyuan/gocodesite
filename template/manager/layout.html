@@ -1,0 +1,21 @@
+{{define "Title"}}管理后台{{end}}
+{{define "importjs"}}{{end}}
+{{define "importcss"}}
+<link href="/static/css/manager.css" rel="stylesheet" />
+{{end}}
+{{define "content"}}
+<div class="row" id="manager-box">
+    <div class="col-md-12 col-md-offset-0">
+        <div class="page-left">
+            {{template "leftmenu" .}}
+        </div>
+        <div class="page-right">
+            {{if eq .active "users"}}
+            {{template "manager_users" .}}
+            {{else}}
+            Undefined page {{.active}}
+            {{end}}
+        </div>
+    </div>
+</div>
+{{end}}

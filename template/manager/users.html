@@ -1,0 +1,35 @@
+{{define "manager_users"}}
+<div class="m-box">
+    <div class="box-head">
+        <strong class="box-title">成员管理</strong>
+    </div>
+    <div class="box-body">
+        <div class="user-list">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th witdh="80">ID</th>
+                        <th>用户名</th>
+                        <th>权限</th>
+                        <th>邮箱</th>
+                        <th>注册时间</th>
+                        <th>登陆时间</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{range .users}}
+                    <tr>
+                        <td>{{.Uid}}</td>
+                        <td>{{.UserName}}</td>
+                        <td>{{.Permission}}</td>
+                        <td>{{.EMail}}</td>
+                        <td>{{formatDate .CreateTime}}</td>
+                        <td>{{formatDate .LastLoginTime}}</td>
+                    </tr>
+                    {{end}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{{end}}

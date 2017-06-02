@@ -1,14 +1,36 @@
 package gocodecc
 
-import "github.com/cihub/seelog"
+import (
+	"net/http"
+
+	"github.com/gorilla/mux"
+)
 
 var managerIndexRenderTpls = []string{
-	"template/manager/index.html",
+	"template/manager/layout.html",
 	"template/manager/leftmenu.html",
+	"template/manager/users.html",
+}
+
+func managerPanelHandler(ctx *RequestContext) {
+	vars := mux.Vars(ctx.r)
+	panel := vars["panel"]
+
+	// Dispatch to each panel
+	switch panel {
+	case "users":
+		{
+			managerUserHandler(ctx)
+		}
+	default:
+		{
+			managerDefaultHandler(ctx)
+		}
+	}
 }
 
 func managerHandler(ctx *RequestContext) {
-	managerUserHandler(ctx)
+	ctx.Redirect("/manager/users", http.StatusFound)
 }
 
 func managerUserHandler(ctx *RequestContext) {
@@ -19,9 +41,13 @@ func managerUserHandler(ctx *RequestContext) {
 	}
 
 	tplData := make(map[string]interface{})
-	tplData["active"] = "user"
+	tplData["active"] = "users"
 	tplData["users"] = users
-	seelog.Debug(len(users))
 	data := renderTemplate(ctx, managerIndexRenderTpls, tplData)
+	ctx.w.Write(data)
+}
+
+func managerDefaultHandler(ctx *RequestContext) {
+	data := renderTemplate(ctx, managerIndexRenderTpls, nil)
 	ctx.w.Write(data)
 }
