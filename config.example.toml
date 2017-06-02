@@ -13,6 +13,10 @@ home-title = "hello, this is my site"
 # Banner image and text
 banner-image = "../images/banner_top.jpg"
 banner-text = "Hello world"
+# Footer copyright info
+footer-copyright = "2016-2017 gocode.cc"
+# About html file can render in about page
+about-html-file = 'about.html'
 # Timezone
 timezone = "Asia/Shanghai"
 # Weibo address, if set, it will be displayed in the footer

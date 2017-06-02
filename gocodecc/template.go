@@ -7,10 +7,13 @@ import (
 	"html/template"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"runtime"
 	"strconv"
 	"strings"
 	"time"
+
+	"sync"
 
 	"github.com/cihub/seelog"
 )
@@ -36,6 +39,7 @@ var tplFuncMap = template.FuncMap{
 	"getArticleCoverImagePath":  tplfn_getArticleCoverImagePath,
 	"getCategoryCoverImagePath": tplfn_getCategoryCoverImagePath,
 	"getMoodImagePath":          tplfn_getMoodImagePath,
+	"readFileData":              tplfn_readFileData,
 }
 
 func init() {
@@ -103,6 +107,7 @@ func tplfn_getTimeGapString(tm int64) string {
 }
 
 func tplfn_convertToHtml(str string) template.HTML {
+	seelog.Info("Convert:", str)
 	return template.HTML(str)
 }
 
@@ -214,6 +219,39 @@ func tplfn_getMoodImagePath(path string) string {
 	path = strings.Trim(path, "/")
 	path = strings.Trim(path, "\\")
 	return kPrefixImagePath + "/mood-images/" + path
+}
+
+var readFileCacheMap = make(map[string]template.HTML)
+var readFileLock sync.Mutex
+
+func tplfn_readFileData(path string) template.HTML {
+	readFileLock.Lock()
+	defer readFileLock.Unlock()
+
+	// Find in cache
+	if data, ok := readFileCacheMap[path]; ok {
+		return data
+	}
+
+	// Open and cache
+	f, err := os.Open(path)
+	if nil != err {
+		errMsg := fmt.Sprintf("Open file data error, file=%s, error=%s", path, err.Error())
+		return template.HTML(errMsg)
+	}
+	defer f.Close()
+
+	fileBytes, err := ioutil.ReadAll(f)
+	if nil != err {
+		errMsg := fmt.Sprintf("Read file data error, file=%s, error=%s", path, err.Error())
+		seelog.Error(errMsg)
+		return template.HTML(errMsg)
+	}
+
+	fileStr := template.HTML(fileBytes)
+	readFileCacheMap[path] = fileStr
+
+	return fileStr
 }
 
 func getTplBinaryData(file string, cache bool) string {
