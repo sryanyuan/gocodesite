@@ -107,7 +107,6 @@ func tplfn_getTimeGapString(tm int64) string {
 }
 
 func tplfn_convertToHtml(str string) template.HTML {
-	seelog.Info("Convert:", str)
 	return template.HTML(str)
 }
 
