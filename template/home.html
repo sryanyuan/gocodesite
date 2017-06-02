@@ -4,19 +4,36 @@
 {{define "importcss"}}
 <link href="/static/css/home.css" rel="stylesheet" />
 <link href="/static/css/articles.css" rel="stylesheet" />
+
+<!-->
+Banner css
+<-->
+{{if ne .config.BannerImage ""}}
+<style type="text/css">
+.banner {
+	background:url({{.config.BannerImage}}) top center;
+	height:265px;
+	overflow:hidden;
+	margin-bottom:15px;
+}
+</style>
+{{end}}
+
 {{end}}
 {{define "importjs"}}
 <script src="/static/js/home.js"></script>
 {{end}}
 {{define "content"}}
 <!--banner-->
+{{if ne .config.BannerImage ""}}
 <div class="banner">
 	<section class="banner-box">
 		<ul class="banner-text">
-			<p>To be stronger!!!</p>
+			<p>{{.config.BannerText}}</p>
 		</ul>
 	</section>
 </div>
+{{end}}
 <div id="id-content" class="container theme-showcase" role="main">
 	<div class="row">
 		<div class="col-md-9 col-md-offset-0">

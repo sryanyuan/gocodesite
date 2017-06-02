@@ -33,12 +33,12 @@ body {
 	background-color:white;
 }
 
-.banner {
+/*.banner {
 	background:url(../images/banner_top.jpg) top center;
 	height:265px;
 	overflow:hidden;
 	margin-bottom:15px;
-}
+}*/
 
 .banner-box {
 	width:1000px;

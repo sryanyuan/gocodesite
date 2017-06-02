@@ -14,6 +14,8 @@ type AppConfig struct {
 	DBAddress       string            `json:"db-address" toml:"db-address" validate:"nonzero"`
 	SiteTitle       string            `json:"site-title" toml:"site-title"`
 	HomeTitle       string            `json:"home-title" toml:"home-title"`
+	BannerImage     string            `json:"banner-image" toml:"banner-image"`
+	BannerText      string            `json:"banner-text" toml:"banner-text"`
 	ListenAddress   string            `json:"listen-address" toml:"listen-address" validate:"nonzero"`
 	WeiboAddress    string            `json:"weibo-address" toml:"weibo-address"`
 	GithubAddress   string            `json:"github-address" toml:"github-address"`
