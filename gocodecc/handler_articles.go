@@ -1,6 +1,7 @@
 package gocodecc
 
 import (
+	"fmt"
 	"strconv"
 )
 
@@ -66,6 +67,15 @@ func articlesHandler(ctx *RequestContext) {
 	tplData["pages"] = pages
 	tplData["page"] = page
 	tplData["showPages"] = showPages
+	if ctx.config.CommentProvider == "native" {
+		// Get all comment count
+		for _, v := range articles {
+			cnt, err := modelReplyGetCount(fmt.Sprintf("/project/%d/article/%d", v.ProjectId, v.Id))
+			if nil == err {
+				v.ReplyCount = cnt
+			}
+		}
+	}
 	data := renderTemplate(ctx, articlesRenderTpls, tplData)
 	ctx.w.Write(data)
 }

@@ -1,6 +1,7 @@
 package gocodecc
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -10,6 +11,9 @@ import (
 	"strings"
 	"time"
 
+	"regexp"
+
+	"github.com/cihub/seelog"
 	"github.com/dchest/captcha"
 	"github.com/gorilla/mux"
 )
@@ -25,6 +29,8 @@ type ArticleImageUploadResult struct {
 	Url     string `json:"url"`
 	Message string `json:"message"`
 }
+
+var projectArticleReg = regexp.MustCompile("^/project/\\d+/article/(\\d+)$")
 
 func ajaxHandler(ctx *RequestContext) {
 	vars := mux.Vars(ctx.r)
@@ -671,6 +677,194 @@ func ajaxHandler(ctx *RequestContext) {
 			}
 			defer f.Close()
 			io.Copy(f, file)
+			result.Result = 0
+		}
+	case "reply_add":
+		{
+			var err error
+			if ctx.r.Method != "POST" {
+				result.Msg = "Invalid method"
+				return
+			}
+
+			ctx.r.ParseForm()
+
+			if !captcha.VerifyString(ctx.r.Form.Get("captchaid"), ctx.r.Form.Get("captchaSolution")) {
+				result.Msg = "验证码错误"
+				result.CaptchaId = captcha.NewLen(4)
+				return
+			}
+
+			url := ctx.r.Form.Get("uri")
+			seelog.Debugf("reply_add url %s", url)
+			var article *ProjectArticleItem
+			// Check if url is valid, maybe project article or guestbook
+			if url == "/guestbook" {
+				// ok
+			} else {
+				substrs := projectArticleReg.FindStringSubmatch(url)
+				if nil == substrs ||
+					len(substrs) != 2 {
+					result.Msg = "非法的URL"
+					result.CaptchaId = captcha.NewLen(4)
+					return
+				}
+				articleID, err := strconv.Atoi(substrs[1])
+				if nil != err {
+					result.Msg = err.Error()
+					return
+				}
+				// Just check if exists
+				article, err = modelProjectArticleGet(articleID)
+				if nil != err {
+					result.Msg = err.Error()
+					result.CaptchaId = captcha.NewLen(4)
+					return
+				}
+				if nil == article {
+					result.Msg = "非法的URL"
+					result.CaptchaId = captcha.NewLen(4)
+					return
+				}
+			}
+
+			comment := ctx.r.PostForm.Get("content")
+			if len(comment) == 0 {
+				result.Msg = "请输入留言内容"
+				return
+			}
+
+			user := ctx.user
+			if ctx.user.Uid == 0 {
+				// If role is guest, need mail info
+				mail := ctx.r.Form.Get("mail")
+				if len(mail) == 0 {
+					result.Msg = "请留下邮箱信息"
+					return
+				}
+				if len(mail) > 21 {
+					result.Msg = "游客信息过长，请限制在21个字符以内"
+					return
+				}
+				user = &WebUser{}
+				user.UserName = mail
+			}
+
+			err = modelReplyNew(url, user, comment)
+			if nil != err {
+				result.Msg = err.Error()
+				return
+			}
+
+			// Add message tip
+			if url != "/guestbook" {
+				articleAuthor := modelWebUserGetUserByUserName(article.ArticleAuthor)
+				if nil != articleAuthor {
+					err = modelMessageNew(articleAuthor.Uid, MessageTypeReply, comment, url, user)
+					if nil != err {
+						seelog.Errorf("Add reply message error:%s", err.Error())
+					}
+				}
+			}
+
+			result.Result = 0
+		}
+	case "reply_del":
+		{
+			if ctx.r.Method != "POST" {
+				result.Msg = "Invalid method"
+				return
+			}
+			if ctx.user.Permission < kPermission_SuperAdmin {
+				result.Msg = kErrMsg_AccessDenied
+				return
+			}
+
+			ctx.r.ParseForm()
+
+			replyIDStr := ctx.r.Form.Get("replyId")
+			replyID, err := strconv.Atoi(replyIDStr)
+			if nil != err {
+				result.Msg = err.Error()
+				return
+			}
+			seelog.Debug(replyID)
+			if err = modelReplyMarkDelete(replyID); nil != err {
+				result.Msg = err.Error()
+				return
+			}
+			result.Result = 0
+		}
+	case "message_get_count":
+		{
+			if ctx.r.Method != "GET" {
+				result.Msg = "Invalid method"
+				return
+			}
+			if ctx.user.Uid == 0 {
+				result.Result = 0
+				return
+			}
+
+			cnt, err := modelMessageGetCountByReceiver(ctx.user.Uid)
+			if nil != err {
+				result.Msg = err.Error()
+				return
+			}
+
+			result.Result = 0
+			result.Msg = strconv.Itoa(cnt)
+		}
+	case "message_get":
+		{
+			if ctx.r.Method != "GET" {
+				result.Msg = "Invalid method"
+				return
+			}
+			if ctx.user.Uid == 0 {
+				result.Result = 0
+				return
+			}
+
+			messages, err := modelMessageGetByReceiver(ctx.user.Uid)
+			if nil != err {
+				result.Msg = err.Error()
+				return
+			}
+
+			jsonBytes, err := json.Marshal(messages)
+			if nil != err {
+				result.Msg = err.Error()
+				return
+			}
+
+			result.Result = 0
+			result.Msg = string(jsonBytes)
+		}
+	case "message_read":
+		{
+			if ctx.r.Method != "GET" {
+				result.Msg = "Invalid method"
+				return
+			}
+			if ctx.user.Uid == 0 {
+				result.Msg = "Access denied"
+				return
+			}
+
+			ctx.r.ParseForm()
+			messageIDStr := ctx.r.Form.Get("message")
+			messageID, err := strconv.Atoi(messageIDStr)
+			if nil != err {
+				result.Msg = err.Error()
+				return
+			}
+
+			if err = modelMessageMarkRead(ctx.user.Uid, messageID); nil != err {
+				result.Msg = err.Error()
+				return
+			}
+
 			result.Result = 0
 		}
 	default:

@@ -1,4 +1,5 @@
 $(document).ready(function(){
+	return;
 	//	get reply
 	var articleGroup = $("#articles");
 	var articleCount = articleGroup.attr("articleCount");

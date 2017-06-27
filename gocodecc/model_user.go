@@ -27,6 +27,7 @@ type WebUser struct {
 	MailVerified  bool
 	LastLoginIp   string `orm:"size(15)"`
 	Mood          string `orm:"size(128)"`
+	ImportFrom    int
 }
 
 func (m *WebUser) TableName() string {

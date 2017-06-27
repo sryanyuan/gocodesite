@@ -14,8 +14,9 @@
                 "GOPATH": "${workspaceRoot}/../../../../"
             },
             "args": [
-                "-config",
-                "static/conf/app.json"
+                "run",
+                "--config",
+                "static/conf/app.dev.toml"
             ],
             "showLog": true
         }

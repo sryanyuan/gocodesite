@@ -1,0 +1,97 @@
+{{define "reply_list"}}
+<div id="modalReplyDeleteConfirm" class="modal fade in" role="dialog" aria-hidden="true" style="display: none;">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<a class="close" data-dismiss="modal">×</a>
+				<h4 id="id-modalreplydeleteconfirm-text"></h4>
+			</div>
+			<div class="modal-footer">
+				<a href="javascript:void(0)" onclick="submitDeleteReply(this, '/ajax/reply_del')" class="btn btn-success">确定</a>
+				<a href="javascript:void(0)" class="btn" data-dismiss="modal">取消</a>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div id="reply_list" class="panel panel-default">
+    {{$repliesCount := len .replies}}
+    <div class="panel-heading">共 {{$repliesCount}} 条回复</div>
+    <div class="panel-body">
+        {{if eq $repliesCount 0}}
+        <div class="reply none">
+            暂时没有人回复哦，赶紧抢沙发
+        </div>
+        {{else}}
+            {{range $ridx, $reply := .replies}}
+                <div class="reply_box">
+                    <table cellpadding="0" cellspacing="0" width="100%">
+                        <tbody>
+                            <tr>
+                                <td width="48" valign="top" align="center">
+                                    <!--a href="/member/{{$reply.ReplyUser}}"-->
+                                        <img class="gravatar img-rounded" style="float:left;margin-right:10px;" src="{{$.imgPrefix}}/{{getMemberAvatar $reply.ReplyUser}}" width="42" height="42"></img>
+                                    <!--/a-->
+                                </td>
+                                <td width="10" valign="top"></td>
+                                <td width="auto" valign="top" align="left">
+                                    <div class="fr">
+                                        {{if eq $reply.IsDeleted false}}
+                                        {{if gt $.user.Permission 3}}
+                                        <a href="javascript:void(0)" class="fa fa-remove" title="删除该回复" replyid="{{$reply.Id}}" onclick="deleteReply(this, '{{$reply.Id}}')" ></a>
+                                        {{end}}
+                                        <a href="javascript:void(0)" class="fa fa-mail-reply" title="回复该帖" onclick="replyArticle('{{$reply.Uid}}')" ></a>
+                                        {{end}}
+                                        &nbsp;&nbsp;<span><label class="badge">{{addInt $ridx 1}}</label></span>
+                                    </div>
+                                    <div>
+                                        <strong>
+                                            {{if eq $reply.Uid 0}}
+                                            {{$reply.ReplyUser}}&nbsp;&nbsp;
+                                            <span class="reply_info">(游客) {{getTimeGapString $reply.CreateTime}}</span>
+                                            {{else}}
+                                            <a href="/member/{{$reply.ReplyUser}}">{{$reply.ReplyUser}}</a>&nbsp;&nbsp;
+                                            <span class="reply_info">{{getTimeGapString $reply.CreateTime}}</span>
+                                            {{end}}
+                                        </strong>
+                                        <div class="sep5"></div>
+                                        {{if $reply.IsDeleted}}
+                                        <div class="reply_comment" style="color: #a3a3a3;"><strong>该回复已被删除</strong></div>
+                                        {{else}}
+                                        <div class="reply_comment">{{$reply.Comment}}</div>
+                                        {{end}}
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            {{end}}
+        {{end}}
+    </div>
+</div>
+
+<div id="reply_edit" class="panel panel-default">
+    <div class="panel-heading reply_edit_header">发表新回复</div>
+    <div class="panel-body">
+        <form method="POST" id="reply_form" action="/ajax/reply_add?uri={{.url}}">
+            {{if eq $.user.Uid 0}}
+            <input type="email" class="form-control input-md" placeholder="游客请输入 昵称/Email" name="mail" id="user_login" />
+            <div class="sep5"></div>
+            {{end}}
+            <textarea name="content" maxlength="512" class="reply_edit" style="overflow: hidden; word-wrap:break-word; resize: none; height: 112px;"></textarea>
+            <div class="sep10"></div>
+            <div class="form-group">
+				<div class="input-group">
+					<input type="text" id="captchaSolution" name="captchaSolution" placeholder="请输入右侧验证码" />
+					<img id="id-signup-captchaimg" src="/captcha/{{.captchaid}}.png" alt="验证码" title="看不清，点击" />
+					<input type="hidden" id="id-signup-captchaIdHolder" name="captchaid" value="{{.captchaid}}">
+				</div>
+			</div>
+            <div style="text-align:center">
+				<a id="reply_submit" href="javascript:void(0);" onclick="submitReply(this)" class="btn btn-success">回复</a>
+			</div>
+        </form>
+    </div>
+</div>
+{{end}}

@@ -1,5 +1,7 @@
 package gocodecc
 
+import "fmt"
+
 var homeRenderTpls []string = []string{
 	"template/component/article_detail_display.html",
 	"template/home.html",
@@ -48,6 +50,21 @@ func indexHandler(ctx *RequestContext) {
 		"category":       category,
 		"memberCount":    memberCount,
 		"createSiteTime": metaInfoCreateSiteTime,
+	}
+	if ctx.config.CommentProvider == "native" {
+		// Get all comment count
+		for _, v := range topArticles {
+			cnt, err := modelReplyGetCount(fmt.Sprintf("/project/%d/article/%d", v.ProjectId, v.Id))
+			if nil == err {
+				v.ReplyCount = cnt
+			}
+		}
+		for _, v := range recentArticles {
+			cnt, err := modelReplyGetCount(fmt.Sprintf("/project/%d/article/%d", v.ProjectId, v.Id))
+			if nil == err {
+				v.ReplyCount = cnt
+			}
+		}
 	}
 	dataHtml := renderTemplate(ctx, homeRenderTpls, dataCtx)
 	ctx.w.Write(dataHtml)

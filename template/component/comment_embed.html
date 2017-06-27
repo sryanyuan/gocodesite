@@ -6,6 +6,8 @@
 {{template "comment_livere" .}}
 {{else if eq .config.CommentProvider "163"}}
 {{template "comment_163" .}}
+{{else if eq .config.CommentProvider "native"}}
+{{template "comment_native" .}}
 {{else}}
 Comment disabled ({{.config.CommentProvider}})
 {{end}}

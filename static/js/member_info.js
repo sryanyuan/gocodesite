@@ -1,4 +1,5 @@
 $(document).ready(function(){
+	return;
 	//	get comment count
 	var articleGroup = $("#member-post-list-group");
 	var articleCount = articleGroup.attr("articleCount");

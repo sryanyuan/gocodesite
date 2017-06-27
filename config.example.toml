@@ -23,7 +23,7 @@ timezone = "Asia/Shanghai"
 weibo-address = ""
 # Github address, if set, it will be displayed in the footer
 github-address = ""
-# Comment provider, now supports duoshuo(unavailable), livere, 163
+# Comment provider, now supports duoshuo(unavailable), livere, 163, native
 comment-provider = ""
 # Comment context
 [comment-context]

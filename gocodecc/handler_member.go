@@ -1,6 +1,7 @@
 package gocodecc
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -57,6 +58,15 @@ func memberInfoHandler(ctx *RequestContext) {
 	tplData["postCount"] = articleCount
 	tplData["watchedSocialInfo"] = socialInfo
 	tplData["articles"] = articles
+	if ctx.config.CommentProvider == "native" {
+		// Get all comment count
+		for _, v := range articles {
+			cnt, err := modelReplyGetCount(fmt.Sprintf("/project/%d/article/%d", v.ProjectId, v.Id))
+			if nil == err {
+				v.ReplyCount = cnt
+			}
+		}
+	}
 	data := renderTemplate(ctx, memberInfoRenderTpls, tplData)
 	ctx.w.Write(data)
 }

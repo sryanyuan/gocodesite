@@ -233,6 +233,7 @@ var routerItems = []RouterItem{
 	{"/project", kPermission_Guest, projectCategoryHandler},
 	{"/project/{projectid:[0-9]*}/page/{page:[0-9]*}", kPermission_Guest, projectArticlesHandler},
 	{"/project/{projectid:[0-9]*}/cmd/{cmd}", kPermission_Guest, projectArticleCmdHandler},
+	{"/project/{projectid:[0-9]*}/article/{articleid:[0-9]*}/reply}", kPermission_User, projectArticleReplyHandler},
 	{"/project/{projectid:[0-9]*}/article/{articleid:[0-9]*}", kPermission_Guest, projectArticleHandler},
 	{"/ajax/{action}", kPermission_Guest, ajaxHandler},
 	{"/admin/{action}", kPermission_SuperAdmin, adminHandler},
@@ -251,6 +252,7 @@ func InitRouters(config *AppConfig, r *mux.Router) {
 	//	handle func
 	routersCount := len(routerItems)
 	for i := 0; i < routersCount; i++ {
+		seelog.Debugf("Register router path %s, permission %d", routerItems[i].Url, routerItems[i].Permission)
 		r.HandleFunc(routerItems[i].Url, wrapHandler(config, &routerItems[i]))
 	}
 	captchaStorage := captcha.NewMemoryStore(captcha.CollectNum, time.Minute*time.Duration(2))

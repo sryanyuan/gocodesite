@@ -64,6 +64,7 @@ type ProjectArticleItem struct {
 	Click                  int
 	ProjectId              int    `orm:"index"`
 	CoverImage             string `orm:"size(128)"`
+	ReplyCount             int    `orm:"-"`
 }
 
 func (m *ProjectArticleItem) TableName() string {

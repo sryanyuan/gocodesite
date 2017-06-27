@@ -1,9 +1,13 @@
 package gocodecc
 
 import (
+	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
+
+	"io/ioutil"
 
 	"github.com/cihub/seelog"
 	"github.com/dchest/captcha"
@@ -29,6 +33,8 @@ var projectArticleRenderTpls = []string{
 	"template/component/comment_duoshuo.html",
 	"template/component/comment_livere.html",
 	"template/component/comment_163.html",
+	"template/component/comment_native.html",
+	"template/component/reply_list.html",
 }
 
 var projectArticleEditArticleRenderTpls = []string{
@@ -98,6 +104,20 @@ func projectArticlesHandler(ctx *RequestContext) {
 	ctx.w.Write(data)
 }
 
+func markMessageURLRead(user *WebUser, messageID int, url string) error {
+	message, err := modelMessageGetByID(messageID)
+	if nil != err {
+		return err
+	}
+	if message.Url != url {
+		return errors.New("Url mismatch")
+	}
+	if message.Receiver != user.Uid {
+		return fmt.Errorf("User mismatch receiver %d != %d", message.Receiver, user.Uid)
+	}
+	return modelMessageMarkRead(user.Uid, messageID)
+}
+
 func projectArticleHandler(ctx *RequestContext) {
 	vars := mux.Vars(ctx.r)
 	articleID, err := strconv.Atoi(vars["articleid"])
@@ -111,6 +131,20 @@ func projectArticleHandler(ctx *RequestContext) {
 	if nil != err {
 		ctx.Redirect("/", http.StatusNotFound)
 		return
+	}
+
+	// Mark message read?
+	ctx.r.ParseForm()
+	messageIDStr := ctx.r.Form.Get("messageid")
+	if len(messageIDStr) != 0 {
+		messageID, err := strconv.Atoi(messageIDStr)
+		if nil != err {
+			ctx.RenderMessagePage("错误", err.Error(), false)
+			return
+		}
+		if err = markMessageURLRead(ctx.user, messageID, ctx.r.URL.Path); nil != err {
+			seelog.Error(err)
+		}
 	}
 
 	//	get author
@@ -136,12 +170,28 @@ func projectArticleHandler(ctx *RequestContext) {
 	}
 	article.Click = article.Click + 1
 
+	// Replies
+	var replies []*ReplyModel
+	if ctx.config.CommentProvider == "native" {
+		// Native should pull all replies
+		replies, err = modelReplyGetArticleReply(fmt.Sprintf("/project/%d/article/%d", article.ProjectId, article.Id), 0, 0)
+		if nil != err {
+			ctx.RenderMessagePage("错误", err.Error(), false)
+			return
+		}
+	}
+
 	tplData := make(map[string]interface{})
 	tplData["active"] = "project"
 	tplData["article"] = article
 	tplData["author"] = author
 	tplData["commentID"] = strconv.Itoa(article.Id)
 	tplData["commentTitle"] = article.ArticleTitle
+	tplData["replies"] = replies
+	if ctx.config.CommentProvider == "native" {
+		tplData["captchaid"] = captcha.NewLen(4)
+	}
+
 	data := renderTemplate(ctx, projectArticleRenderTpls, tplData)
 	ctx.w.Write(data)
 }
@@ -224,4 +274,36 @@ func _editProjectArticle(ctx *RequestContext, articleId int) {
 	tplData["captchaid"] = captcha.NewLen(4)
 	data := renderTemplate(ctx, projectArticleEditArticleRenderTpls, tplData)
 	ctx.w.Write(data)
+}
+
+func projectArticleReplyHandler(ctx *RequestContext) {
+	if ctx.r.Method != http.MethodGet {
+		ctx.RenderMessagePage("Permission denied", "Invalid method", false)
+		return
+	}
+	vars := mux.Vars(ctx.r)
+	articleID, err := strconv.Atoi(vars["articleid"])
+
+	if nil != err {
+		seelog.Debug(err)
+		ctx.Redirect("/", http.StatusNotFound)
+		return
+	}
+
+	// Read reply body
+	bodyBytes, err := ioutil.ReadAll(ctx.r.Body)
+	if nil != err {
+		seelog.Debug(err)
+		ctx.WriteResponse([]byte(err.Error()))
+		return
+	}
+
+	// Is use logined ?
+	if ctx.user.Uid == 0 {
+		seelog.Debug("sign in")
+		ctx.Redirect("/signin", http.StatusContinue)
+		return
+	}
+
+	seelog.Debug(string(bodyBytes), articleID)
 }
