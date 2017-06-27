@@ -1,6 +1,10 @@
 package gocodecc
 
-import "github.com/astaxie/beego/orm"
+import (
+	"time"
+
+	"github.com/astaxie/beego/orm"
+)
 
 const (
 	_ = iota
@@ -17,6 +21,7 @@ type MessageModel struct {
 	Message    string
 	Url        string
 	Read       int
+	CreateTime int64
 }
 
 var (
@@ -37,8 +42,8 @@ func modelMessageNew(receiver uint32, tp int, msg string, url string, sender *We
 		return err
 	}
 
-	_, err = db.Exec("INSERT INTO message (receiver, sender, sender_name, type, message, url, read) VALUES (?, ?, ?, ?, ?, ?, 0)",
-		receiver, sender.Uid, sender.UserName, tp, msg, url)
+	_, err = db.Exec("INSERT INTO message (receiver, sender, sender_name, type, message, url, read, create_time) VALUES (?, ?, ?, ?, ?, ?, ?, 0)",
+		receiver, sender.Uid, sender.UserName, tp, msg, url, time.Now().Unix())
 	return err
 }
 
@@ -78,13 +83,25 @@ func modelMessageGetByID(id int) (*MessageModel, error) {
 	return &message, nil
 }
 
-func modelMessageGetByReceiver(receiver uint32) ([]*MessageModel, error) {
+func modelMessageGetByReceiver(receiver uint32, page, limit int) ([]*MessageModel, error) {
 	db, err := getRawDB()
 	if nil != err {
 		return nil, err
 	}
 
-	rows, err := db.Query("SELECT id, type, message, url, sender, sender_name FROM message WHERE receiver = ? AND read = 0", receiver)
+	args := make([]interface{}, 0, 3)
+	args = append(args, receiver)
+	sqlExpr := "SELECT id, type, message, url, sender, sender_name FROM message WHERE receiver = ? AND read = 0 ORDER BY create_time DESC "
+	if limit != 0 {
+		sqlExpr += " LIMIT ? "
+		args = append(args, limit)
+		if page != 0 {
+			sqlExpr += " OFFSET ? "
+			args = append(args, limit*page)
+		}
+	}
+
+	rows, err := db.Query(sqlExpr, args...)
 	if nil != err {
 		return nil, err
 	}

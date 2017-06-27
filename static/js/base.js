@@ -27,6 +27,8 @@ function adjustBodyMinHeight() {
 	$("body").css("filter", "progid:DXImageTransform.Microsoft.gradient( startColorstr='#e5e5e5', endColorstr='#ffffff',GradientType=0 );");*/
 }
 
+var totalMessageCnt = 0;
+
 function pullMessageCount() {
 	$.getJSON("/ajax/message_get_count", function(ret){
 		if (0 == ret.Result) {
@@ -39,6 +41,7 @@ function pullMessageCount() {
 			if (cnt == 0 || isNaN(cnt)) {
 				return;
 			}
+			totalMessageCnt = cnt;
 			// Add tip to navbar
 			$("#navbar_message").removeClass("hidden");
 			$("#navbar_message_count").html(ret.Msg);
@@ -74,14 +77,12 @@ function formatMessageHTML() {
 							'<a href="' + messages[i].Url + '?messageid=' + messages[i].Id + '">' + messages[i].Message + '</a></div>';
 							container.append(item);
 						}
-
-						// Max tip
-						if (i > 8) {
-							var item = '<div style="border-bottom: 1px solid #e2e2e2;min-width: 250px;padding-bottom: 3px;">评论太多了，请先阅读上面的吧...</div>';
-							container.append(item);
-							break;
-						}
 					}
+				}
+				// Max tip
+				if (totalMessageCnt > 8) {
+					var item = '<div style="border-bottom: 1px solid #e2e2e2;min-width: 250px;padding-bottom: 3px;">评论太多了，请先阅读上面的吧...</div>';
+					container.append(item);
 				}
 			}, 10)
 		}

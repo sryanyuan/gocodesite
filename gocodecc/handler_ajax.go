@@ -826,7 +826,7 @@ func ajaxHandler(ctx *RequestContext) {
 				return
 			}
 
-			messages, err := modelMessageGetByReceiver(ctx.user.Uid)
+			messages, err := modelMessageGetByReceiver(ctx.user.Uid, 0, 8)
 			if nil != err {
 				result.Msg = err.Error()
 				return
