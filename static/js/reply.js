@@ -56,3 +56,9 @@ function submitDeleteReply(obj, action) {
 		alert("请求超时");
 	});
 }
+
+function replyArticle(username) {
+	var commentInput = $("#comment_input");
+	commentInput.append("@"+username+" \r\n");
+	commentInput.focus();
+}

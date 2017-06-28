@@ -24,7 +24,7 @@
         </div>
         {{else}}
             {{range $ridx, $reply := .replies}}
-                <div class="reply_box">
+                <div class="reply_box" id="reply_id_{{$reply.Id}}">
                     <table cellpadding="0" cellspacing="0" width="100%">
                         <tbody>
                             <tr>
@@ -40,7 +40,11 @@
                                         {{if gt $.user.Permission 3}}
                                         <a href="javascript:void(0)" class="fa fa-remove" title="删除该回复" replyid="{{$reply.Id}}" onclick="deleteReply(this, '{{$reply.Id}}')" ></a>
                                         {{end}}
-                                        <a href="javascript:void(0)" class="fa fa-mail-reply" title="回复该帖" onclick="replyArticle('{{$reply.Uid}}')" ></a>
+                                        {{if ne $reply.Uid 0}}
+                                        {{if ne $reply.Uid $.user.Uid}}
+                                        <a href="javascript:void(0)" class="fa fa-mail-reply" title="回复该帖" onclick="replyArticle('{{$reply.ReplyUser}}')" ></a>
+                                        {{end}}
+                                        {{end}}
                                         {{end}}
                                         &nbsp;&nbsp;<span><label class="badge">{{addInt $ridx 1}}</label></span>
                                     </div>
@@ -79,7 +83,7 @@
             <input type="email" class="form-control input-md" placeholder="游客请输入 昵称/Email" name="mail" id="user_login" />
             <div class="sep5"></div>
             {{end}}
-            <textarea name="content" maxlength="512" class="reply_edit" style="overflow: hidden; word-wrap:break-word; resize: none; height: 112px;"></textarea>
+            <textarea id="comment_input" name="content" maxlength="512" class="reply_edit" style="overflow: hidden; word-wrap:break-word; resize: none; height: 112px;"></textarea>
             <div class="sep10"></div>
             <div class="form-group">
 				<div class="input-group">

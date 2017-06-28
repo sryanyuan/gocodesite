@@ -75,17 +75,17 @@ func modelReplyGetArticleReply(uri string, page int, limit int) ([]*ReplyModel, 
 	return replys, nil
 }
 
-func modelReplyNew(uri string, user *WebUser, comment string) error {
+func modelReplyNew(uri string, user *WebUser, comment string) (int64, error) {
 	db, err := getRawDB()
 	if nil != err {
-		return err
+		return 0, err
 	}
 
 	if len(comment) > maxReplyLength {
-		return errors.New("Reply max length is 512 characters")
+		return 0, errors.New("Reply max length is 512 characters")
 	}
 	if len(uri) == 0 {
-		return errors.New("Invalid url for reply")
+		return 0, errors.New("Invalid url for reply")
 	}
 
 	var reply ReplyModel
@@ -96,14 +96,15 @@ func modelReplyNew(uri string, user *WebUser, comment string) error {
 	reply.ReplyUser = user.UserName
 	reply.Uri = uri
 
-	if _, err = db.Exec("INSERT INTO reply (uid, reply_user, is_deleted, uri, comment, create_time) VALUES (?, ?, ?, ?, ?, ?)",
+	if ret, err := db.Exec("INSERT INTO reply (uid, reply_user, is_deleted, uri, comment, create_time) VALUES (?, ?, ?, ?, ?, ?)",
 		reply.Uid, reply.ReplyUser, false, reply.Uri, reply.Comment, reply.CreateTime); nil != err {
-		return err
+		return 0, err
+	} else {
+		return ret.LastInsertId()
 	}
-	return nil
 }
 
-func modelReplyGetCount(uri string) (int, error) {
+func modelReplyGetCountByURI(uri string) (int, error) {
 	db, err := getRawDB()
 	if nil != err {
 		return 0, err
@@ -111,6 +112,21 @@ func modelReplyGetCount(uri string) (int, error) {
 
 	var cnt int
 	row := db.QueryRow("SELECT COUNT(*) FROM reply WHERE uri = ?", uri)
+	if err = row.Scan(&cnt); nil != err {
+		return 0, err
+	}
+
+	return cnt, nil
+}
+
+func modelReplyGetCount() (int, error) {
+	db, err := getRawDB()
+	if nil != err {
+		return 0, err
+	}
+
+	var cnt int
+	row := db.QueryRow("SELECT COUNT(*) FROM reply")
 	if err = row.Scan(&cnt); nil != err {
 		return 0, err
 	}

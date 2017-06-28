@@ -1,6 +1,11 @@
 package gocodecc
 
-import "github.com/dchest/captcha"
+import (
+	"strconv"
+
+	"github.com/cihub/seelog"
+	"github.com/dchest/captcha"
+)
 
 var guestbookRenderTpls = []string{
 	"template/guestbook.html",
@@ -13,6 +18,22 @@ var guestbookRenderTpls = []string{
 }
 
 func guestbookHandler(ctx *RequestContext) {
+	// Mark message read?
+	ctx.r.ParseForm()
+	messageIDStr := ctx.r.Form.Get("messageid")
+	if len(messageIDStr) != 0 {
+		messageID, err := strconv.Atoi(messageIDStr)
+		if nil != err {
+			ctx.RenderMessagePage("错误", err.Error(), false)
+			return
+		}
+		if err = markMessageURLRead(ctx.user, messageID, ctx.r.URL.Path); nil != err {
+			seelog.Error(err)
+		} else {
+			modelMessageDelete(messageID)
+		}
+	}
+
 	tplData := make(map[string]interface{})
 	tplData["active"] = "guestbook"
 	tplData["commentID"] = "guestbook"

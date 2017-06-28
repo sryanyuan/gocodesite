@@ -93,7 +93,7 @@
 									</div>
 									<div class="recent-article-info">
 										<span class="member-post-info">发表于 {{getTimeGapString $v.PostTime}}</span>
-										   • <span class="member-post-reply-count" id="member-post-reply-count-{{$v.Id}}" articleId="{{$v.Id}}">0</span> 个回复
+										   • <span class="member-post-reply-count" id="member-post-reply-count-{{$v.Id}}" articleId="{{$v.Id}}">{{$v.ReplyCount}}</span> 个回复
 									</div>
 								</li>
 								{{end}}
@@ -104,7 +104,10 @@
 						</div>
 					</div>
 					<div class="tab-pane fade" id="id-member-tab-reply">
+						{{if eq .config.CommentProvider "native"}}
+						{{else}}
 						<p>Nothing</p>
+						{{end}}
 					</div>
 				</div>
 			</div>

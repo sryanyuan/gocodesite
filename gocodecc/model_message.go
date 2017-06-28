@@ -8,19 +8,22 @@ import (
 
 const (
 	_ = iota
+	MessageTypeComment
 	MessageTypeReply
 	MessageTypeMail
 )
 
 type MessageModel struct {
-	Id         int `orm:pk;auto`
+	Id         int `orm:"pk;auto"`
 	Receiver   uint32
 	Sender     uint32
-	SenderName string `orm:size(21)`
+	SenderName string `orm:"size(21)"`
 	Type       int
 	Message    string
 	Url        string
+	Title      string `orm:"-"`
 	Read       int
+	SourceId   int
 	CreateTime int64
 }
 
@@ -36,14 +39,14 @@ func init() {
 	orm.RegisterModel(new(MessageModel))
 }
 
-func modelMessageNew(receiver uint32, tp int, msg string, url string, sender *WebUser) error {
+func modelMessageNew(receiver uint32, tp int, msg string, url string, sender *WebUser, sourceID int) error {
 	db, err := getRawDB()
 	if nil != err {
 		return err
 	}
 
-	_, err = db.Exec("INSERT INTO message (receiver, sender, sender_name, type, message, url, read, create_time) VALUES (?, ?, ?, ?, ?, ?, ?, 0)",
-		receiver, sender.Uid, sender.UserName, tp, msg, url, time.Now().Unix())
+	_, err = db.Exec("INSERT INTO message (receiver, sender, sender_name, type, message, url, read, source_id, create_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+		receiver, sender.Uid, sender.UserName, tp, msg, url, 0, sourceID, time.Now().Unix())
 	return err
 }
 
@@ -69,14 +72,15 @@ func modelMessageGetByID(id int) (*MessageModel, error) {
 		return nil, err
 	}
 
-	row := db.QueryRow("SELECT type, receiver, message, url, sender, sender_name FROM message WHERE id = ?", id)
+	row := db.QueryRow("SELECT type, receiver, message, url, sender, sender_name, source_id FROM message WHERE id = ?", id)
 	var message MessageModel
 	if err = row.Scan(&message.Type,
 		&message.Receiver,
 		&message.Message,
 		&message.Url,
 		&message.Sender,
-		&message.SenderName); nil != err {
+		&message.SenderName,
+		&message.SourceId); nil != err {
 		return nil, err
 	}
 	message.Id = id
@@ -91,7 +95,7 @@ func modelMessageGetByReceiver(receiver uint32, page, limit int) ([]*MessageMode
 
 	args := make([]interface{}, 0, 3)
 	args = append(args, receiver)
-	sqlExpr := "SELECT id, type, message, url, sender, sender_name FROM message WHERE receiver = ? AND read = 0 ORDER BY create_time DESC "
+	sqlExpr := "SELECT id, type, message, url, sender, sender_name, source_id FROM message WHERE receiver = ? AND read = 0 ORDER BY create_time DESC "
 	if limit != 0 {
 		sqlExpr += " LIMIT ? "
 		args = append(args, limit)
@@ -112,7 +116,7 @@ func modelMessageGetByReceiver(receiver uint32, page, limit int) ([]*MessageMode
 		var msg MessageModel
 		msg.Receiver = receiver
 
-		if err = rows.Scan(&msg.Id, &msg.Type, &msg.Message, &msg.Url, &msg.Sender, &msg.SenderName); nil != err {
+		if err = rows.Scan(&msg.Id, &msg.Type, &msg.Message, &msg.Url, &msg.Sender, &msg.SenderName, &msg.SourceId); nil != err {
 			return nil, err
 		}
 		messages = append(messages, &msg)
@@ -128,5 +132,15 @@ func modelMessageMarkRead(uid uint32, id int) error {
 	}
 
 	_, err = db.Exec("UPDATE message SET read = 1 WHERE id = ? AND receiver = ?", id, uid)
+	return err
+}
+
+func modelMessageDelete(id int) error {
+	db, err := getRawDB()
+	if nil != err {
+		return err
+	}
+
+	_, err = db.Exec("DELETE FROM message WHERE id = ?", id)
 	return err
 }

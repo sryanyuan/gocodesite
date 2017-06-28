@@ -169,3 +169,10 @@ background-color:rgb(225,236,245);
 	text-align: center;
 	text-decoration: none;
 }
+
+#id_message_pop_container {
+	font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+	font-size: 13px;
+	line-height: 1.7;
+	word-wrap: break-word;
+}

@@ -17,6 +17,13 @@ var memberArticlesRenderTpls = []string{
 	"template/component/article_detail_display.html",
 }
 
+type memberReplyInfo struct {
+	ReplyURI     string
+	ReplyTime    int64
+	ReplyContent string
+	ReplyTitle   string
+}
+
 func memberInfoHandler(ctx *RequestContext) {
 	watchedUser := ctx.user
 	vars := mux.Vars(ctx.r)
@@ -34,8 +41,6 @@ func memberInfoHandler(ctx *RequestContext) {
 	}
 
 	socialInfo, _ := modelSocialInfoGet(watchedUser.Uid)
-	//socialInfo.Weibo = "hh"
-	//socialInfo.Github = "hh"
 
 	//	get articles
 	articles, err := modelProjectArticleGetByAuthor(watchedUser.NickName, 0, 10)
@@ -61,11 +66,12 @@ func memberInfoHandler(ctx *RequestContext) {
 	if ctx.config.CommentProvider == "native" {
 		// Get all comment count
 		for _, v := range articles {
-			cnt, err := modelReplyGetCount(fmt.Sprintf("/project/%d/article/%d", v.ProjectId, v.Id))
+			cnt, err := modelReplyGetCountByURI(fmt.Sprintf("/project/%d/article/%d", v.ProjectId, v.Id))
 			if nil == err {
 				v.ReplyCount = cnt
 			}
 		}
+		// TODO:Get all replies
 	}
 	data := renderTemplate(ctx, memberInfoRenderTpls, tplData)
 	ctx.w.Write(data)

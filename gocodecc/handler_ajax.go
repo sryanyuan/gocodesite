@@ -699,8 +699,12 @@ func ajaxHandler(ctx *RequestContext) {
 			seelog.Debugf("reply_add url %s", url)
 			var article *ProjectArticleItem
 			// Check if url is valid, maybe project article or guestbook
+			selfComment := false
 			if url == "/guestbook" {
 				// ok
+				if ctx.user.Uid == 1 {
+					selfComment = true
+				}
 			} else {
 				substrs := projectArticleReg.FindStringSubmatch(url)
 				if nil == substrs ||
@@ -726,6 +730,15 @@ func ajaxHandler(ctx *RequestContext) {
 					result.CaptchaId = captcha.NewLen(4)
 					return
 				}
+				// Get article author
+				author := modelWebUserGetUserByUserName(article.ArticleAuthor)
+				if nil == author {
+					ctx.RenderMessagePage("错误", "无作者的文章", false)
+					return
+				}
+				if author.Uid == ctx.user.Uid {
+					selfComment = true
+				}
 			}
 
 			comment := ctx.r.PostForm.Get("content")
@@ -750,19 +763,49 @@ func ajaxHandler(ctx *RequestContext) {
 				user.UserName = mail
 			}
 
-			err = modelReplyNew(url, user, comment)
+			replyID, err := modelReplyNew(url, user, comment)
 			if nil != err {
 				result.Msg = err.Error()
 				return
 			}
-
-			// Add message tip
-			if url != "/guestbook" {
-				articleAuthor := modelWebUserGetUserByUserName(article.ArticleAuthor)
-				if nil != articleAuthor {
-					err = modelMessageNew(articleAuthor.Uid, MessageTypeReply, comment, url, user)
+			// Self to self comment will not send message tip
+			if !selfComment {
+				// Add message tip, if message is reply for guestbook, tip will send to admin
+				receiverUid := uint32(1)
+				if url != "/guestbook" {
+					articleAuthor := modelWebUserGetUserByUserName(article.ArticleAuthor)
+					if nil != articleAuthor {
+						receiverUid = articleAuthor.Uid
+					} else {
+						receiverUid = 0
+					}
+				}
+				if 0 != receiverUid {
+					err = modelMessageNew(receiverUid, MessageTypeComment, comment, url, user, int(replyID))
 					if nil != err {
-						seelog.Errorf("Add reply message error:%s", err.Error())
+						seelog.Errorf("Add comment message error:%s", err.Error())
+					}
+				} else {
+					seelog.Errorf("Get receiver uid failed, url %s", url)
+				}
+			}
+			// Find all people mentioned
+			if user.Uid != 0 {
+				substrs := mentionPeopleReg.FindAllString(comment, -1)
+				if nil != substrs {
+					for _, v := range substrs {
+						username := strings.TrimSpace(v[1:])
+						atUser := modelWebUserGetUserByUserName(username)
+						if nil == atUser {
+							continue
+						}
+						if atUser.Uid == user.Uid {
+							continue
+						}
+						if err = modelMessageNew(atUser.Uid, MessageTypeReply, "", url, user, int(replyID)); nil != err {
+							seelog.Errorf("Add reply message error:%s", err.Error())
+						}
+						seelog.Debugf("Add reply message for user %s success", username)
 					}
 				}
 			}
@@ -830,6 +873,31 @@ func ajaxHandler(ctx *RequestContext) {
 			if nil != err {
 				result.Msg = err.Error()
 				return
+			}
+			for _, m := range messages {
+				if m.Url == "/guestbook" {
+					m.Title = "留言板"
+				} else {
+					substrs := projectArticleReg.FindStringSubmatch(m.Url)
+					if nil == substrs ||
+						2 != len(substrs) {
+						m.Title = "N/A"
+						continue
+					}
+					articleId, err := strconv.Atoi(substrs[1])
+					if nil != err {
+						seelog.Error("Fetch url articleid error:", err)
+						m.Title = "N/A"
+						continue
+					}
+					article, err := modelProjectArticleGet(articleId)
+					if nil != err {
+						seelog.Errorf("Get article %d error:%s", articleId, err.Error())
+						m.Title = "N/A"
+						continue
+					}
+					m.Title = article.ArticleTitle
+				}
 			}
 
 			jsonBytes, err := json.Marshal(messages)

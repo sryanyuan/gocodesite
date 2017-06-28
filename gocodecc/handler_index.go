@@ -42,6 +42,13 @@ func indexHandler(ctx *RequestContext) {
 		return
 	}
 
+	// Get reply count
+	replyCount, err := modelReplyGetCount()
+	if nil != err {
+		ctx.RenderMessagePage("错误", err.Error(), false)
+		return
+	}
+
 	dataCtx := map[string]interface{}{
 		"active":         "home",
 		"topArticles":    topArticles,
@@ -50,17 +57,18 @@ func indexHandler(ctx *RequestContext) {
 		"category":       category,
 		"memberCount":    memberCount,
 		"createSiteTime": metaInfoCreateSiteTime,
+		"replyCount":     replyCount,
 	}
 	if ctx.config.CommentProvider == "native" {
 		// Get all comment count
 		for _, v := range topArticles {
-			cnt, err := modelReplyGetCount(fmt.Sprintf("/project/%d/article/%d", v.ProjectId, v.Id))
+			cnt, err := modelReplyGetCountByURI(fmt.Sprintf("/project/%d/article/%d", v.ProjectId, v.Id))
 			if nil == err {
 				v.ReplyCount = cnt
 			}
 		}
 		for _, v := range recentArticles {
-			cnt, err := modelReplyGetCount(fmt.Sprintf("/project/%d/article/%d", v.ProjectId, v.Id))
+			cnt, err := modelReplyGetCountByURI(fmt.Sprintf("/project/%d/article/%d", v.ProjectId, v.Id))
 			if nil == err {
 				v.ReplyCount = cnt
 			}

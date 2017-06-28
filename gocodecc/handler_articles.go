@@ -70,7 +70,7 @@ func articlesHandler(ctx *RequestContext) {
 	if ctx.config.CommentProvider == "native" {
 		// Get all comment count
 		for _, v := range articles {
-			cnt, err := modelReplyGetCount(fmt.Sprintf("/project/%d/article/%d", v.ProjectId, v.Id))
+			cnt, err := modelReplyGetCountByURI(fmt.Sprintf("/project/%d/article/%d", v.ProjectId, v.Id))
 			if nil == err {
 				v.ReplyCount = cnt
 			}

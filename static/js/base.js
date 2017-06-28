@@ -66,22 +66,27 @@ function formatMessageHTML() {
 			setTimeout(function(){
 				var container = $("#id_message_pop_container");
 				for (var i in messages) {
+					var action = ""
 					if (messages[i].Type == 1) {
-						if (messages[i].Sender == 0) {
-							// 游客
-							var item = '<div style="border-bottom: 1px solid #e2e2e2;min-width: 250px;padding-bottom: 3px;"><span style="color: #3e3e3e;">游客</span>' + ' 评论了 ' +
-							'<a href="' + messages[i].Url + '?messageid=' + messages[i].Id + '">' + messages[i].Message + '</a></div>';
-							container.append(item);
-						} else {
-							var item = '<div style="border-bottom: 1px solid #e2e2e2;min-width: 250px;padding-bottom: 3px;"><a href="/member/' + messages[i].SenderName + '">' + messages[i].SenderName + '</a>' + ' 评论了 ' +
-							'<a href="' + messages[i].Url + '?messageid=' + messages[i].Id + '">' + messages[i].Message + '</a></div>';
-							container.append(item);
-						}
+						action = " 评论了 "
+					} else if (messages[i].Type == 2) {
+						action = " 回复了 "
+					}
+
+					if (messages[i].Sender == 0) {
+						// 游客
+						var item = '<div style="border-bottom: 1px solid #e2e2e2;min-width: 250px;padding-bottom: 3px;"><span style="color: #3e3e3e;">游客</span>' + action +
+						'<a target="_blank" href="' + messages[i].Url + '?messageid=' + messages[i].Id + '#reply_id_' + messages[i].SourceId + '">' + messages[i].Title + '</a></div>';
+						container.append(item);
+					} else {
+						var item = '<div style="border-bottom: 1px solid #e2e2e2;min-width: 250px;padding-bottom: 3px;"><a href="/member/' + messages[i].SenderName + '">' + messages[i].SenderName + '</a>' + action +
+						'<a target="_blank" href="' + messages[i].Url + '?messageid=' + messages[i].Id + '#reply_id_' + messages[i].SourceId + '">' + messages[i].Title + '</a></div>';
+						container.append(item);
 					}
 				}
 				// Max tip
 				if (totalMessageCnt > 8) {
-					var item = '<div style="border-bottom: 1px solid #e2e2e2;min-width: 250px;padding-bottom: 3px;">评论太多了，请先阅读上面的吧...</div>';
+					var item = '<div style="border-bottom: 1px solid #e2e2e2;min-width: 250px;padding-bottom: 3px;color:#a2a2a2;">评论太多了，请先阅读上面的吧...</div>';
 					container.append(item);
 				}
 			}, 10)

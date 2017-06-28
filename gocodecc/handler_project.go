@@ -144,6 +144,8 @@ func projectArticleHandler(ctx *RequestContext) {
 		}
 		if err = markMessageURLRead(ctx.user, messageID, ctx.r.URL.Path); nil != err {
 			seelog.Error(err)
+		} else {
+			modelMessageDelete(messageID)
 		}
 	}
 
