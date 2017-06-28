@@ -42,7 +42,7 @@
                                         {{end}}
                                         {{if ne $reply.Uid 0}}
                                         {{if ne $reply.Uid $.user.Uid}}
-                                        <a href="javascript:void(0)" class="fa fa-mail-reply" title="回复该帖" onclick="replyArticle('{{$reply.ReplyUser}}')" ></a>
+                                        <a href="javascript:void(0)" class="fa fa-mail-reply" title="回复该帖" onclick="replyArticle({{addInt $ridx 1}}, '{{$reply.ReplyUser}}')" ></a>
                                         {{end}}
                                         {{end}}
                                         {{end}}

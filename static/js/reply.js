@@ -57,8 +57,8 @@ function submitDeleteReply(obj, action) {
 	});
 }
 
-function replyArticle(username) {
+function replyArticle(floor, username) {
 	var commentInput = $("#comment_input");
-	commentInput.append("@"+username+" \r\n");
+	commentInput.append("#" + floor + " @"+username+" ");
 	commentInput.focus();
 }
