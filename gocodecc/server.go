@@ -78,6 +78,7 @@ func (s *Site) NewAdmin() (string, error) {
 
 // Start start the http server
 func (s *Site) Start() error {
+	seelog.Info("Start with config ", s.config)
 	var err error
 
 	// In debug mode, auto initialize model
@@ -103,6 +104,9 @@ func (s *Site) Start() error {
 	r := mux.NewRouter()
 	InitRouters(s.config, r)
 	http.Handle("/", r)
+
+	// Set donate call
+	initDonateCall(s.config.DonateCall, s.config.CallSecret)
 
 	// Run the server
 	ls, err := net.Listen("tcp", s.config.ListenAddress)

@@ -16,7 +16,7 @@ type AppConfig struct {
 	HomeTitle       string            `json:"home-title" toml:"home-title"`
 	BannerImage     string            `json:"banner-image" toml:"banner-image"`
 	BannerText      string            `json:"banner-text" toml:"banner-text"`
-	FooterCopyright      string            `json:"footer-copyright" toml:"footer-copyright"`
+	FooterCopyright string            `json:"footer-copyright" toml:"footer-copyright"`
 	AboutHTMLFile   string            `json:"about-html-file" toml:"about-html-file"`
 	ListenAddress   string            `json:"listen-address" toml:"listen-address" validate:"nonzero"`
 	WeiboAddress    string            `json:"weibo-address" toml:"weibo-address"`
@@ -25,6 +25,8 @@ type AppConfig struct {
 	Timezone        string            `json:"timezone" toml:"timezone"`
 	CommentProvider string            `json:"comment-provider" toml:"comment-provider"`
 	CommentContext  map[string]string `json:"comment-context" toml:"comment-context"`
+	CallSecret      string            `json:"call-secret" toml:"call-secret"`
+	DonateCall      string            `json:"donate-call" toml:"donate-call"`
 }
 
 // ReadJSONConfig returns config object loading from json format config file

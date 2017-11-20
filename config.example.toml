@@ -25,6 +25,9 @@ weibo-address = ""
 github-address = ""
 # Comment provider, now supports duoshuo(unavailable), livere, 163, native
 comment-provider = ""
+# Support alipay donate
+call-secret = "123"
+donate-call = "http://localhost:8100"
 # Comment context
 [comment-context]
 # If comment is livere, data_uid field must be set

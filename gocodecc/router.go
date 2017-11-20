@@ -222,6 +222,7 @@ var routerItems = []RouterItem{
 	{"/", kPermission_Guest, indexHandler},
 	{"/about", kPermission_Guest, aboutHander},
 	{"/guestbook", kPermission_Guest, guestbookHandler},
+	{"/donate", kPermission_Guest, donateHander},
 	{"/account/signup", kPermission_Guest, signupHandler},
 	{"/signin", kPermission_Guest, signinHandler},
 	{"/signout", kPermission_User, signOutHandler},

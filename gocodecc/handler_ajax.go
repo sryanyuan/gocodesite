@@ -935,6 +935,51 @@ func ajaxHandler(ctx *RequestContext) {
 
 			result.Result = 0
 		}
+	case "zfbqr_pay":
+		{
+			ctx.r.ParseForm()
+			donateAccount := ctx.r.Form.Get("user[account]")
+			if donateAccount == "" {
+				result.Msg = "请输入账户"
+				return
+			}
+			donateValueStr := ctx.r.Form.Get("user[value]")
+			if "" == donateValueStr {
+				result.Msg = "请输入点数"
+				return
+			}
+			donateValue, err := strconv.Atoi(donateValueStr)
+			if nil != err {
+				result.Msg = "错误的金额格式"
+				return
+			}
+
+			orderInfo, err := createDonateOrder(donateAccount, donateValue)
+			if nil != err {
+				result.Msg = err.Error()
+				return
+			}
+
+			// Append a iframe into front
+			seelog.Info("Order info ", orderInfo)
+			result.Result = 0
+		}
+	case "zfbqr_pay_confirm":
+		{
+			ctx.r.ParseForm()
+			orderID := ctx.r.FormValue("addnum")
+			apikey := ctx.r.FormValue("apikey")
+			totalStr := ctx.r.FormValue("total")
+			total, _ := strconv.Atoi(totalStr)
+
+			err := confirmDonateOrder(orderID, apikey, total)
+			if nil != err {
+				result.Msg = err.Error()
+				return
+			}
+
+			result.Result = 0
+		}
 	default:
 		{
 			result.Msg = "invalid ajax request"
