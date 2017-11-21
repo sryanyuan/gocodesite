@@ -61,7 +61,8 @@ $(document).ready(function(){
 						// Show pay iframe
 						var payWindow = $("#alipay_qr_iframe");
 						var paysrc = "https://api.jsjapp.com/plugin.php?id=add:alipay2&addnum=" + orderInfo.OrderID + "&total=" + orderInfo.NumFloat + "&apiid=" + orderInfo.ApiID + "&apikey=" + orderInfo.ApiKey + "&uid=" + orderInfo.Uid + "&showurl=";
-						var cburl = orderInfo.CallHost + "/ctrl?cmd=insertdonatecb&secret=" + orderInfo.CallSecret;
+						//var cburl = orderInfo.CallHost + "/ctrl?cmd=insertdonatecb&secret=" + orderInfo.CallSecret;
+						var cburl = "http://" + window.location.host + "/ajax/zfbqr_pay_confirm";
 						paysrc = paysrc + cburl;
 						payWindow.attr("src", paysrc);
 						payWindow.removeClass("hidden");

@@ -108,12 +108,12 @@ func createDonateOrder(user string, num int, debug bool) (*orderCreateInfo, erro
 	return &orderInfo, nil
 }
 
-func confirmDonateOrder(orderID string, apikey string, total int) error {
+func confirmDonateOrder(uid string, orderID string, apikey string, total int) error {
 	if "" == donateCall {
 		return errors.New("Donate not enabled")
 	}
 
-	requestURL := fmt.Sprintf("%s/ctrl?cmd=insertdonatecb&secret=%v&addnum=%v&total=%v&apikey=%v", donateCall, callSecret, orderID, total, apikey)
+	requestURL := fmt.Sprintf("%s/ctrl?cmd=insertdonatecb&secret=%v&addnum=%v&total=%v&apikey=%v&uid=%v", donateCall, callSecret, orderID, total, apikey, uid)
 	rspData, err := doGet(requestURL, nil)
 	if nil != err {
 		return err

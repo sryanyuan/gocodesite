@@ -30,6 +30,7 @@ type ArticleImageUploadResult struct {
 	Message string `json:"message"`
 }
 
+var successData = []byte("success")
 var projectArticleReg = regexp.MustCompile("^/project/\\d+/article/(\\d+)$")
 
 func ajaxHandler(ctx *RequestContext) {
@@ -40,6 +41,7 @@ func ajaxHandler(ctx *RequestContext) {
 
 	//	for article upload image
 	var uploadResult ArticleImageUploadResult
+	autoRender := true
 
 	defer func() {
 		if action == "upload" {
@@ -61,7 +63,9 @@ func ajaxHandler(ctx *RequestContext) {
 		} else if action == "article_image_upload" {
 			ctx.RenderJson(&uploadResult)
 		} else {
-			renderJson(ctx, &result)
+			if autoRender {
+				renderJson(ctx, &result)
+			}
 		}
 	}()
 
@@ -969,22 +973,65 @@ func ajaxHandler(ctx *RequestContext) {
 	case "zfbqr_pay_confirm":
 		{
 			ctx.r.ParseForm()
-			orderID := ctx.r.FormValue("addnum")
-			apikey := ctx.r.FormValue("apikey")
-			totalStr := ctx.r.FormValue("total")
-			total, _ := strconv.Atoi(totalStr)
+			ctx.r.ParseMultipartForm(10 * 1024)
 
-			err := confirmDonateOrder(orderID, apikey, total)
+			orderID := getFormValueAllMethod(ctx.r, "addnum")
+			apikey := getFormValueAllMethod(ctx.r, "apikey")
+			totalStr := getFormValueAllMethod(ctx.r, "total")
+			uid := getFormValueAllMethod(ctx.r, "uid")
+
+			if "" == orderID {
+				result.Msg = "Invalid order id"
+				return
+			}
+
+			if "" == apikey {
+				result.Msg = "Invalid apikey"
+				return
+			}
+
+			if "" == totalStr {
+				result.Msg = "Invalid total"
+				return
+			}
+
+			if "" == uid {
+				result.Msg = "Invalid uid"
+				return
+			}
+
+			totalF, err := strconv.ParseFloat(totalStr, 32)
 			if nil != err {
 				result.Msg = err.Error()
 				return
 			}
 
-			result.Result = 0
+			err = confirmDonateOrder(uid, orderID, apikey, int(totalF))
+			if nil != err {
+				result.Msg = err.Error()
+				return
+			}
+
+			autoRender = false
+			ctx.w.Write(successData)
 		}
 	default:
 		{
 			result.Msg = "invalid ajax request"
 		}
 	}
+}
+
+func getFormValueAllMethod(r *http.Request, key string) string {
+	value := r.FormValue(key)
+	if "" != value {
+		return value
+	}
+
+	value = r.PostFormValue(key)
+	if "" != value {
+		return value
+	}
+
+	return ""
 }
