@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/cihub/seelog"
+	"github.com/gorilla/mux"
 )
 
 type DonateRsp struct {
@@ -18,11 +19,15 @@ type DonateRsp struct {
 }
 
 type orderCreateInfo struct {
-	OrderID string
-	ApiID   string
-	ApiKey  string
-	Uid     int
-	Num     int
+	OrderID  string
+	ApiID    string
+	ApiKey   string
+	Uid      int
+	Num      int
+	NumFloat float64
+	// Config field
+	CallHost   string
+	CallSecret string
 }
 
 var (
@@ -43,7 +48,33 @@ func donateHander(ctx *RequestContext) {
 	ctx.w.Write(dataHTML)
 }
 
-func createDonateOrder(user string, num int) (*orderCreateInfo, error) {
+func donateCheckHandler(ctx *RequestContext) {
+	var rsp DonateRsp
+	rsp.Result = 1
+
+	defer func() {
+		jsonBytes, _ := json.Marshal(&rsp)
+		ctx.w.Write(jsonBytes)
+	}()
+
+	vars := mux.Vars(ctx.r)
+	orderID := vars["orderid"]
+
+	if "" == orderID {
+		rsp.Msg = "Invalid order id"
+		return
+	}
+	orderStatus, err := checkDonateOrder(orderID)
+	if nil != err {
+		rsp.Msg = err.Error()
+		return
+	}
+
+	rsp.Result = 0
+	rsp.Msg = orderStatus
+}
+
+func createDonateOrder(user string, num int, debug bool) (*orderCreateInfo, error) {
 	if "" == donateCall {
 		return nil, errors.New("Donate not enabled")
 	}
@@ -67,6 +98,12 @@ func createDonateOrder(user string, num int) (*orderCreateInfo, error) {
 	var orderInfo orderCreateInfo
 	if err = json.Unmarshal([]byte(rsp.Msg), &orderInfo); nil != err {
 		return nil, err
+	}
+	orderInfo.CallHost = donateCall
+	orderInfo.CallSecret = callSecret
+	orderInfo.NumFloat = float64(num)
+	if debug {
+		orderInfo.NumFloat = 0.01
 	}
 	return &orderInfo, nil
 }
@@ -92,6 +129,29 @@ func confirmDonateOrder(orderID string, apikey string, total int) error {
 	}
 
 	return nil
+}
+
+func checkDonateOrder(orderID string) (string, error) {
+	if "" == donateCall {
+		return "", errors.New("Donate not enabled")
+	}
+
+	requestURL := fmt.Sprintf("%s/ctrl?cmd=donatecheck&orderid=%v&secret=%v", donateCall, orderID, callSecret)
+	rspData, err := doGet(requestURL, nil)
+	if nil != err {
+		return "", err
+	}
+
+	var rsp DonateRsp
+	if err = json.Unmarshal(rspData, &rsp); nil != err {
+		return "", err
+	}
+
+	if 0 != rsp.Result {
+		return "", errors.New(rsp.Msg)
+	}
+
+	return rsp.Msg, nil
 }
 
 func doGet(reqUrl string, args map[string]string) ([]byte, error) {

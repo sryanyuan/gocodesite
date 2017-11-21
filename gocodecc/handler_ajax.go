@@ -954,7 +954,7 @@ func ajaxHandler(ctx *RequestContext) {
 				return
 			}
 
-			orderInfo, err := createDonateOrder(donateAccount, donateValue)
+			orderInfo, err := createDonateOrder(donateAccount, donateValue, ctx.config.Debug)
 			if nil != err {
 				result.Msg = err.Error()
 				return
@@ -962,7 +962,9 @@ func ajaxHandler(ctx *RequestContext) {
 
 			// Append a iframe into front
 			seelog.Info("Order info ", orderInfo)
+			jsonBytes, _ := json.Marshal(orderInfo)
 			result.Result = 0
+			result.Msg = string(jsonBytes)
 		}
 	case "zfbqr_pay_confirm":
 		{
