@@ -119,6 +119,10 @@ func confirmDonateOrder(uid string, orderID string, apikey string, total int) er
 		return err
 	}
 
+	if string(rspData) == "success" {
+		return nil
+	}
+
 	var rsp DonateRsp
 	if err = json.Unmarshal(rspData, &rsp); nil != err {
 		return err
