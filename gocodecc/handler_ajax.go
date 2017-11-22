@@ -957,6 +957,10 @@ func ajaxHandler(ctx *RequestContext) {
 				result.Msg = "错误的金额格式"
 				return
 			}
+			if donateValue != 10 {
+				result.Msg = "金额必须为10"
+				return
+			}
 
 			orderInfo, err := createDonateOrder(donateAccount, donateValue, ctx.config.Debug)
 			if nil != err {
