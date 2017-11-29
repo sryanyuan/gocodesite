@@ -44,7 +44,7 @@ var timeHandle = null;
 $(document).ready(function(){
     var donateForm = $("#id-form-charge");
 	var donateBtnID = "#id-charge-zfbqr";
-	var donateWxBtnID = "#id-charge_wxqr";
+	var donateWxBtnID = "#id-charge-wxqr";
 	if(null != donateForm){
 		donateForm.submit(function(event){
 			event.preventDefault();
