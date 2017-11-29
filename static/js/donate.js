@@ -81,10 +81,10 @@ $(document).ready(function(){
 						var paysrc = "";
 						if ("0" == payMethod) {
 							paysrc = "https://api.jsjapp.com/plugin.php?id=add:alipay2&addnum=" + orderInfo.OrderID + "&total=" + orderInfo.NumFloat + "&apiid=" + orderInfo.ApiID + "&apikey=" + orderInfo.ApiKey + "&uid=" + orderInfo.Uid + "&showurl=";
-							$("#id-charge-hinttext").html("订单号<" + orderInfo.OrderID + "> (请牢记)，请用支付宝钱包扫码支付，成功后请不要关闭本页面，直到跳转");
+							$("#id-charge-hinttext").html("订单号[" + orderInfo.OrderID + "] (请牢记)，请用支付宝钱包扫码支付，成功后请不要关闭本页面，直到跳转");
 						} else if ("1" == payMethod) {
 							paysrc = "https://pay.maweiwangluo.com/pay/wx/native.php?addnum=" + orderInfo.OrderID + "&total=" + orderInfo.NumFloat + "&apiid=" + orderInfo.ApiID + "&apikey=" + orderInfo.ApiKey + "&uid=" + orderInfo.Uid + "&showurl=";
-							$("#id-charge-hinttext").html("订单号<" + orderInfo.OrderID + "> (请牢记)，请用微信扫码支付，成功后请不要关闭本页面，直到跳转");
+							$("#id-charge-hinttext").html("订单号[" + orderInfo.OrderID + "] (请牢记)，请用微信扫码支付，成功后请不要关闭本页面，直到跳转");
 						} else {
 							changeAlertLook(chargeHint, 1);
 							$("#id-charge-hinttext").html("非法的url");
