@@ -125,7 +125,7 @@ function _checkPaymentResult(timer, orderID, calladdr) {
 		var orderStatus = JSON.parse(result);
 		if (orderStatus.Msg == "OK") {
 			changeAlertLook(chargeHint, 0);
-			$("#id-charge-hinttext").html("订单支付成功 <" + orderID + ">");
+			$("#id-charge-hinttext").html("订单支付成功 [" + orderID + "]");
 			clearInterval(timeHandle);
 			$(donateWxBtnID).removeClass("disabled");
 			$(donateBtnID).removeClass("disabled");
@@ -133,7 +133,7 @@ function _checkPaymentResult(timer, orderID, calladdr) {
 			// Nothing
 		} else {
 			changeAlertLook(chargeHint, 1);
-			$("#id-charge-hinttext").html("订单支付失败 <" + orderID + "> " + orderStatus.Msg + " , 请联系管理员");
+			$("#id-charge-hinttext").html("订单支付失败 [" + orderID + "] " + orderStatus.Msg + " , 请联系管理员");
 			clearInterval(timeHandle);
 		}
 	})
