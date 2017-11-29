@@ -958,11 +958,32 @@ func ajaxHandler(ctx *RequestContext) {
 				return
 			}
 			if donateValue != 10 {
-				result.Msg = "金额必须为10"
+				//result.Msg = "金额必须为10"
+				//return
+			}
+			if donateValue < 10 ||
+				donateValue > 500 {
+				result.Msg = "点数范围(10-500)"
+				return
+			}
+			payMethodStr := ctx.r.Form.Get("paymethod")
+			payMethod := payMethodAlipayQR
+			if "" != payMethodStr {
+				payMethod, err = strconv.Atoi(payMethodStr)
+				if nil != err {
+					result.Msg = "无效的支付方式"
+					return
+				}
+			}
+			if payMethod != payMethodWxQR &&
+				payMethod != payMethodAlipayQR {
+				result.Msg = "无效的支付方式"
 				return
 			}
 
-			orderInfo, err := createDonateOrder(donateAccount, donateValue, ctx.config.Debug)
+			seelog.Infof("Request to create order, account=%v, value=%v, pm=%v, debug=%v",
+				donateAccount, donateValue, payMethod, ctx.config.Debug)
+			orderInfo, err := createDonateOrder(donateAccount, donateValue, payMethod, ctx.config.Debug)
 			if nil != err {
 				result.Msg = err.Error()
 				return

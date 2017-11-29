@@ -21,7 +21,7 @@
 					  </div>
 					  <form id="id-form-charge" class="simple_form " novalidate="novalidate" id="new_user" action="/ajax/zfbqr_pay" accept-charset="UTF-8" method="post">
 						<input name="utf8" type="hidden" value="&#x2713;" />
-						<input type="hidden" name="authenticity_token" value="hVFHgkLJmc9/lZRLf31GJ4pqNZ3rAaJL0AAQgc6/0zK2y4xx1UzC3HDPUTineI8+Ypre/ZK7Db64vYA5fRb6yQ==" />
+						<input id="id-pay-method" name="paymethod" type="hidden" name="pay_method" value="0" />
 						<div class="form-group">
 							<div class="input-group">
 								<div class="input-group-addon">
@@ -39,7 +39,8 @@
 							</div>
 						</div>
 						<div class="form-group">
-							<input id="id-charge-zfbqr" type="submit" name="commit" value="支付宝二维码支付" class="btn btn-primary" data-disable-with="正在支付...请不要关闭页面" />
+							<input id="id-charge-zfbqr" onclick="zfbpay();" type="submit" name="commit" value="支付宝二维码支付" class="btn btn-primary" data-disable-with="正在支付...请不要关闭页面" />
+							<input id="id-charge-wxqr" onclick="wxpay();" type="submit" name="commit" value="微信二维码支付" class="btn btn-primary" data-disable-with="正在支付...请不要关闭页面" />
 						</div>
 					</form>
 					<div>

@@ -27,11 +27,24 @@ function changeAlertLook(widget, err) {
 	}
 }
 
+function zfbpay(){
+	$("#id-pay-method").val("0");
+	var donateForm = $("#id-form-charge");
+	donateForm.submit();
+}
+
+function wxpay() {
+	$("#id-pay-method").val("1");
+	var donateForm = $("#id-form-charge");
+	donateForm.submit();
+}
+
 var timeHandle = null;
 
 $(document).ready(function(){
     var donateForm = $("#id-form-charge");
-    var donateBtnID = "#id-charge-zfbqr";
+	var donateBtnID = "#id-charge-zfbqr";
+	var donateWxBtnID = "#id-charge_wxqr";
 	if(null != donateForm){
 		donateForm.submit(function(event){
 			event.preventDefault();
@@ -59,8 +72,19 @@ $(document).ready(function(){
                         $("#id-charge-hinttext").html("订单号<" + orderInfo.OrderID + "> (请牢记)，请用支付宝钱包扫码支付，成功后请不要关闭本页面，直到跳转");
 						//location.href = ret.Msg;
 						// Show pay iframe
+						var payMethod = $("#id-pay-method").val();
 						var payWindow = $("#alipay_qr_iframe");
-						var paysrc = "https://api.jsjapp.com/plugin.php?id=add:alipay2&addnum=" + orderInfo.OrderID + "&total=" + orderInfo.NumFloat + "&apiid=" + orderInfo.ApiID + "&apikey=" + orderInfo.ApiKey + "&uid=" + orderInfo.Uid + "&showurl=";
+						var paysrc = "";
+						if ("0" == payMethod) {
+							paysrc = "https://api.jsjapp.com/plugin.php?id=add:alipay2&addnum=" + orderInfo.OrderID + "&total=" + orderInfo.NumFloat + "&apiid=" + orderInfo.ApiID + "&apikey=" + orderInfo.ApiKey + "&uid=" + orderInfo.Uid + "&showurl=";
+						} else if ("1" == payMethod) {
+							paysrc = "https://pay.maweiwangluo.com/pay/wx/native.php?addnum=" + orderInfo.OrderID + "&total=" + orderInfo.NumFloat + "&apiid=" + orderInfo.ApiID + "&apikey=" + orderInfo.ApiKey + "&uid=" + orderInfo.Uid + "&showurl=";
+						} else {
+							changeAlertLook(chargeHint, 1);
+							$("#id-charge-hinttext").html("非法的url");
+							return;
+						}
+						//var paysrc = "https://api.jsjapp.com/plugin.php?id=add:alipay2&addnum=" + orderInfo.OrderID + "&total=" + orderInfo.NumFloat + "&apiid=" + orderInfo.ApiID + "&apikey=" + orderInfo.ApiKey + "&uid=" + orderInfo.Uid + "&showurl=";
 						//var cburl = orderInfo.CallHost + "/ctrl?cmd=insertdonatecb&secret=" + orderInfo.CallSecret;
 						var cburl = "http://" + window.location.host + "/ajax/zfbqr_pay_confirm";
 						paysrc = paysrc + cburl;

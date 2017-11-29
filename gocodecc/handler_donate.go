@@ -30,6 +30,11 @@ type orderCreateInfo struct {
 	CallSecret string
 }
 
+const (
+	payMethodAlipayQR = iota
+	payMethodWxQR
+)
+
 var (
 	donateCall string
 	callSecret string
@@ -74,12 +79,12 @@ func donateCheckHandler(ctx *RequestContext) {
 	rsp.Msg = orderStatus
 }
 
-func createDonateOrder(user string, num int, debug bool) (*orderCreateInfo, error) {
+func createDonateOrder(user string, num int, pm int, debug bool) (*orderCreateInfo, error) {
 	if "" == donateCall {
 		return nil, errors.New("Donate not enabled")
 	}
 
-	requestURL := fmt.Sprintf("%s/ctrl?cmd=preinsertdonate&secret=%v&userid=%v&num=%v", donateCall, callSecret, user, num)
+	requestURL := fmt.Sprintf("%s/ctrl?cmd=preinsertdonate&secret=%v&userid=%v&num=%v&pm=%v", donateCall, callSecret, user, num, pm)
 	rspData, err := doGet(requestURL, nil)
 	if nil != err {
 		return nil, err
