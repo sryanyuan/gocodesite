@@ -53,8 +53,12 @@ $(document).ready(function(){
 			if($(donateBtnID).hasClass("disabled")){
 				return;
 			}
+			if($(donateWxBtnID).hasClass("disabled")){
+				return;
+			}
 
 			$(donateBtnID).addClass("disabled");
+			$(donateWxBtnID).addClass("disabled");
 			$.post(action, $(target).serialize(), function(ret){
 				$("#id-charge-submit").removeClass("disabled");
 				var chargeHint = $("#id-charge-hint");
@@ -63,7 +67,8 @@ $(document).ready(function(){
 						chargeHint.removeClass("hidden");
 						changeAlertLook(chargeHint, 1);
                         $("#id-charge-hinttext").html(ret.Msg);
-                        $(donateBtnID).removeClass("disabled");
+						$(donateBtnID).removeClass("disabled");
+						$(donateWxBtnID).removeClass("disabled");
 					}else{
 						chargeHint.removeClass("hidden");
 						changeAlertLook(chargeHint, 0);
@@ -121,6 +126,8 @@ function _checkPaymentResult(timer, orderID, calladdr) {
 			changeAlertLook(chargeHint, 0);
 			$("#id-charge-hinttext").html("订单支付成功 <" + orderID + ">");
 			clearInterval(timeHandle);
+			$(donateWxBtnID).removeClass("disabled");
+			$(donateBtnID).removeClass("disabled");
 		} else if (orderStatus.Msg.indexOf("wait")) {
 			// Nothing
 		} else {
