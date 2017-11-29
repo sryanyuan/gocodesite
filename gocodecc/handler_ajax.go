@@ -980,6 +980,12 @@ func ajaxHandler(ctx *RequestContext) {
 				result.Msg = "无效的支付方式"
 				return
 			}
+			if payMethod == payMethodWxQR {
+				if donateValue < 100 {
+					result.Msg = "微信支付仅支持100元以上金额，小金额请使用支付宝"
+					return
+				}
+			}
 
 			seelog.Infof("Request to create order, account=%v, value=%v, pm=%v, debug=%v",
 				donateAccount, donateValue, payMethod, ctx.config.Debug)
