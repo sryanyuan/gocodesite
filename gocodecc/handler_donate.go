@@ -84,7 +84,7 @@ func createDonateOrder(user string, num int, pm int, debug bool) (*orderCreateIn
 		return nil, errors.New("Donate not enabled")
 	}
 
-	requestURL := fmt.Sprintf("%s/ctrl?cmd=preinsertdonate&secret=%v&userid=%v&num=%v&pm=%v", donateCall, callSecret, user, num, pm)
+	requestURL := fmt.Sprintf("%s/ctrl?cmd=preinsertdonate&secret=%v&userid=%v&num=%v&paymethod=%v", donateCall, callSecret, user, num, pm)
 	rspData, err := doGet(requestURL, nil)
 	if nil != err {
 		return nil, err
