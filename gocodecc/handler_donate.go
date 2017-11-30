@@ -121,7 +121,7 @@ func confirmDonateOrder(uid string, orderID string, apikey string, total int) er
 	}
 
 	if string(rspData) == "success" {
-		PushMessage("OrderConfirmed", fmt.Sprintf("[%v]%v_pay_%v", orderID, uid, total))
+		PushMessage("OrderConfirmed", fmt.Sprintf("%v_%v_pay_%v", orderID, uid, total))
 		return nil
 	}
 
