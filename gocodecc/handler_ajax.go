@@ -1046,6 +1046,19 @@ func ajaxHandler(ctx *RequestContext) {
 			autoRender = false
 			ctx.w.Write(successData)
 		}
+	case "pushmessage":
+		{
+			ctx.r.ParseForm()
+			title := ctx.r.FormValue("title")
+			body := ctx.r.FormValue("body")
+			err := PushMessage(title, body)
+			if nil != err {
+				result.Msg = err.Error()
+				return
+			}
+
+			result.Result = 0
+		}
 	default:
 		{
 			result.Msg = "invalid ajax request"

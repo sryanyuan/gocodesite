@@ -4,10 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
-	"net/http"
-	"net/url"
-	"strings"
 
 	"github.com/cihub/seelog"
 	"github.com/gorilla/mux"
@@ -125,6 +121,7 @@ func confirmDonateOrder(uid string, orderID string, apikey string, total int) er
 	}
 
 	if string(rspData) == "success" {
+		PushMessage("OrderConfirmed", fmt.Sprintf("[%v]%v_pay_%v", orderID, uid, total))
 		return nil
 	}
 
@@ -161,32 +158,4 @@ func checkDonateOrder(orderID string) (string, error) {
 	}
 
 	return rsp.Msg, nil
-}
-
-func doGet(reqUrl string, args map[string]string) ([]byte, error) {
-	u, _ := url.Parse(strings.Trim(reqUrl, "/"))
-	q := u.Query()
-	if nil != args {
-		for arg, val := range args {
-			q.Add(arg, val)
-		}
-	}
-
-	u.RawQuery = q.Encode()
-	res, err := http.Get(u.String())
-	if err != nil {
-		return nil, err
-	}
-
-	if res.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf(fmt.Sprintf("Http statusCode:%d", res.StatusCode))
-	}
-
-	result, err := ioutil.ReadAll(res.Body)
-	res.Body.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	return result, nil
 }

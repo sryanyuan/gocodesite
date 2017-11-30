@@ -2,7 +2,10 @@ package gocodecc
 
 import (
 	"bytes"
+	"fmt"
 	"io/ioutil"
+	"net/http"
+	"net/url"
 	"os"
 	"regexp"
 	"strings"
@@ -93,4 +96,46 @@ func getOneImageFromHtml(html string) string {
 		}
 	}
 	return ""
+}
+
+func doGet(reqUrl string, args map[string]string) ([]byte, error) {
+	u, _ := url.Parse(strings.Trim(reqUrl, "/"))
+	q := u.Query()
+	if nil != args {
+		for arg, val := range args {
+			q.Add(arg, val)
+		}
+	}
+
+	u.RawQuery = q.Encode()
+	res, err := http.Get(u.String())
+	if err != nil {
+		return nil, err
+	}
+
+	if res.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf(fmt.Sprintf("Http statusCode:%d", res.StatusCode))
+	}
+
+	result, err := ioutil.ReadAll(res.Body)
+	res.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+func doFormPost(reqURL string, kv url.Values) (int, []byte, error) {
+	rsp, err := http.PostForm(reqURL, kv)
+	if nil != err {
+		return 0, nil, err
+	}
+
+	defer rsp.Body.Close()
+	body, err := ioutil.ReadAll(rsp.Body)
+	if nil != err {
+		return 0, nil, err
+	}
+	return rsp.StatusCode, body, nil
 }

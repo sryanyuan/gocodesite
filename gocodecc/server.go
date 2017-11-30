@@ -108,6 +108,12 @@ func (s *Site) Start() error {
 	// Set donate call
 	initDonateCall(s.config.DonateCall, s.config.CallSecret)
 
+	// Push message
+	if "" != s.config.MsgPush.Host &&
+		"" != s.config.MsgPush.SCKey {
+		globalMsgPushConfig = &s.config.MsgPush
+	}
+
 	// Run the server
 	ls, err := net.Listen("tcp", s.config.ListenAddress)
 	if nil != err {

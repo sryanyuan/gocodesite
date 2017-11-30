@@ -27,6 +27,7 @@ type AppConfig struct {
 	CommentContext  map[string]string `json:"comment-context" toml:"comment-context"`
 	CallSecret      string            `json:"call-secret" toml:"call-secret"`
 	DonateCall      string            `json:"donate-call" toml:"donate-call"`
+	MsgPush         MsgPushConfig     `toml:"msg-push"`
 }
 
 // ReadJSONConfig returns config object loading from json format config file
