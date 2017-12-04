@@ -2,7 +2,11 @@
 {{define "importcss"}}
 {{end}}
 {{define "importjs"}}
+<script type="text/javascript" src="/static/js/jquery.placeholder.min.js"></script>
 <script src="/static/js/donate.js"></script>
+<script type="text/javascript">
+$(function(){ $('input, textarea').placeholder(); });
+</script>
 {{end}}
 {{define "content"}}
 <div id="id-content" class="container">
