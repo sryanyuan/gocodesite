@@ -10,12 +10,13 @@ import (
 )
 
 type CDNConfig struct {
-	JQueryJS          string `json:"jquery-js" toml:"jquery-js"`
-	JQueryCSS         string `json:"jquery-css" toml:"jquery-css"`
-	BootstrapJS       string `json:"bootstrap-js" toml:"bootstrap-js"`
-	BootstrapCSS      string `json:"bootstrap-css" toml:"bootstrap-css"`
-	BootstrapThemeCSS string `json:"bootstrap-theme-css" toml:"bootstrap-theme-css"`
-	FontAwesomeCSS    string `json:"font-awesome-css" toml:"font-awesome-css"`
+	JQueryJS            string `json:"jquery-js" toml:"jquery-js"`
+	JQueryCSS           string `json:"jquery-css" toml:"jquery-css"`
+	JQueryPlaceholderJS string `json:"jquery-placeholder-js" toml:"jquery-placeholder-js"`
+	BootstrapJS         string `json:"bootstrap-js" toml:"bootstrap-js"`
+	BootstrapCSS        string `json:"bootstrap-css" toml:"bootstrap-css"`
+	BootstrapThemeCSS   string `json:"bootstrap-theme-css" toml:"bootstrap-theme-css"`
+	FontAwesomeCSS      string `json:"font-awesome-css" toml:"font-awesome-css"`
 }
 
 type AppConfig struct {

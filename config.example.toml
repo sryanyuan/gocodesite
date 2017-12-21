@@ -33,6 +33,7 @@ bootstrap-css = "http://apps.bdimg.com/libs/bootstrap/3.3.4/css/bootstrap.min.cs
 bootstrap-theme-css = "http://apps.bdimg.com/libs/bootstrap/3.3.4/css/bootstrap-theme.min.css"
 bootstrap-js = "http://apps.bdimg.com/libs/bootstrap/3.3.4/js/bootstrap.min.js"
 jquery-js = "http://apps.bdimg.com/libs/jquery/1.11.3/jquery.min.js"
+jquery-placeholder-js = "https://cdn.bootcss.com/jquery-placeholder/2.0.7/jquery.placeholder.min.js"
 font-awesome-css = "http://apps.bdimg.com/libs/fontawesome/4.4.0/css/font-awesome.min.css"
 [msg-push]
 host = ""

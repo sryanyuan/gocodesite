@@ -2,7 +2,11 @@
 {{define "importcss"}}
 {{end}}
 {{define "importjs"}}
+{{if eq .config.CDN.JQueryPlaceholderJS ""}}
 <script type="text/javascript" src="/static/js/jquery.placeholder.min.js"></script>
+{{else}}
+<script type="text/javascript" src="{{.config.CDN.JQueryPlaceholderJS}}"></script>
+{{end}}
 <script src="/static/js/donate.js"></script>
 <script type="text/javascript">
 $(function(){ $('input, textarea').placeholder(); });
