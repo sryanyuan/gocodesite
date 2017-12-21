@@ -99,7 +99,8 @@ function wrapPaymentResult(timer, orderID, calladdr) {
 }
 
 function _checkPaymentResult(timer, orderID, calladdr) {
-	var rurl = "/donate/" + orderID;
+	var dt = new Date();
+	var rurl = "/donate/" + orderID + "?ts=" + dt.getTime();
 	var chargeHint = $("#id-charge-hint");
 
 	$.get(rurl, function(result) {
