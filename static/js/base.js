@@ -21,10 +21,6 @@ function adjustBodyMinHeight() {
 	} else {
 		$("body").css("min-height", "none");
 	}
-	
-	//	set background-color
-	/*$("body").css("background","#e5e5e5;-moz-linear-gradient(top,  #e5e5e5 0%, #ffffff 100%);-webkit-linear-gradient(top,  #e5e5e5 0%,#ffffff 100%);linear-gradient(to bottom,  #e5e5e5 0%,#ffffff 100%);");
-	$("body").css("filter", "progid:DXImageTransform.Microsoft.gradient( startColorstr='#e5e5e5', endColorstr='#ffffff',GradientType=0 );");*/
 }
 
 var totalMessageCnt = 0;
@@ -104,7 +100,6 @@ $(document).ready(function(){
 	$("#navbar_message_popover").popover({
 		html:true,
 		title: "消息",
-		//delay: {show:500, hide:100000},
 		content: formatMessageHTML
 	});
 })

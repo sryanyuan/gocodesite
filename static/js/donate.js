@@ -1,20 +1,3 @@
-function showMsgTip(id, err, msg) {
-	var widget = $(id);
-	if (nil == widget) {
-		console.debug("id ", id, " not found");
-		return
-	}
-	if (err == 0) {
-		widget.removeClass("alert-danger");
-		widget.addClass("alert-info");
-	} else {
-		widget.removeClass("alert-info");
-		widget.addClass("alert-danger");
-	}
-	widget.removeClass("hidden");
-	widget.html(ret.Msg);
-}
-
 function changeAlertLook(widget, err) {
 	widget.removeClass("alert-danger");
 	widget.removeClass("alert-info");
@@ -74,7 +57,6 @@ $(document).ready(function(){
 						changeAlertLook(chargeHint, 0);
 
 						var orderInfo = JSON.parse(ret.Msg);
-						//location.href = ret.Msg;
 						// Show pay iframe
 						var payMethod = $("#id-pay-method").val();
 						var payWindow = $("#alipay_qr_iframe");
@@ -90,8 +72,7 @@ $(document).ready(function(){
 							$("#id-charge-hinttext").html("非法的url");
 							return;
 						}
-						//var paysrc = "https://api.jsjapp.com/plugin.php?id=add:alipay2&addnum=" + orderInfo.OrderID + "&total=" + orderInfo.NumFloat + "&apiid=" + orderInfo.ApiID + "&apikey=" + orderInfo.ApiKey + "&uid=" + orderInfo.Uid + "&showurl=";
-						//var cburl = orderInfo.CallHost + "/ctrl?cmd=insertdonatecb&secret=" + orderInfo.CallSecret;
+
 						var cburl = "http://" + window.location.host + "/ajax/zfbqr_pay_confirm";
 						paysrc = paysrc + cburl;
 						payWindow.attr("src", paysrc);
