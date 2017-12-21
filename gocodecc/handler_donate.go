@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strconv"
 
 	"github.com/cihub/seelog"
 	"github.com/gorilla/mux"
@@ -42,8 +43,21 @@ func initDonateCall(addr string, secret string) {
 }
 
 func donateHander(ctx *RequestContext) {
+	ctx.r.ParseForm()
+	account := ctx.r.FormValue("account")
+	valueStr := ctx.r.FormValue("value")
+	value := 0
+	var err error
+	if "" != valueStr {
+		value, err = strconv.Atoi(valueStr)
+		if nil != err {
+			value = 0
+		}
+	}
 	dataCtx := map[string]interface{}{
-		"active": "donate",
+		"active":  "donate",
+		"account": account,
+		"value":   value,
 	}
 	dataHTML := renderTemplate(ctx, []string{"template/donate.html"}, dataCtx)
 	ctx.w.Write(dataHTML)
