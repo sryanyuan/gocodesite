@@ -7,11 +7,23 @@
 		<!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
 		<title>{{template "Title" .}} - {{.config.SiteTitle}}</title>
 		<!-- Bootstrap -->
+		{{if eq .config.CDN.BootstrapCSS ""}}
 		<link href="/static/css/bootstrap.min.css" rel="stylesheet" />
+		{{else}}
+		<link href="{{.config.CDN.BootstrapCSS}}" rel="stylesheet" />
+		{{end}}
 		<!-- Bootstrap theme -->
+		{{if eq .config.CDN.BootstrapThemeCSS ""}}
 		<link href="/static/css/bootstrap-theme.min.css" rel="stylesheet" />
+		{{else}}
+		<link href="{{.config.CDN.BootstrapThemeCSS}}" rel="stylesheet" />
+		{{end}}
 		<!-- Font awesome -->
+		{{if eq .config.CDN.FontAwesomeCSS ""}}
 		<link href="/static/css/font-awesome.min.css" rel="stylesheet" />
+		{{else}}
+		<link href="{{.config.CDN.FontAwesomeCSS}}" rel="stylesheet" />
+		{{end}}
 		<!-- Custom css -->
 		<link href="/static/css/base.css" rel="stylesheet" />
 		{{template "importcss" .}}
@@ -27,9 +39,17 @@
 		{{template "content" .}}
 		{{template "footer" .}}
 		<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+		{{if eq .config.CDN.JQueryJS ""}}
 		<script src="/static/js/jquery.min.js"></script> 
+		{{else}}
+		<script src="{{.config.CDN.JQueryJS}}"></script> 
+		{{end}}
 		<!-- Include all compiled plugins (below), or include individual files as needed -->
+		{{if eq .config.CDN.BootstrapJS ""}}
 		<script src="/static/js/bootstrap.min.js"></script>
+		{{else}}
+		<script src="{{.config.CDN.BootstrapJS}}"></script> 
+		{{end}}
 		<!-- Custom js -->
 		<script src="/static/js/base.js"></script>
 		{{template "importjs" .}}

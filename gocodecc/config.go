@@ -9,6 +9,15 @@ import (
 	"github.com/go-validator/validator"
 )
 
+type CDNConfig struct {
+	JQueryJS          string `json:"jquery-js" toml:"jquery-js"`
+	JQueryCSS         string `json:"jquery-css" toml:"jquery-css"`
+	BootstrapJS       string `json:"bootstrap-js" toml:"bootstrap-js"`
+	BootstrapCSS      string `json:"bootstrap-css" toml:"bootstrap-css"`
+	BootstrapThemeCSS string `json:"bootstrap-theme-css" toml:"bootstrap-theme-css"`
+	FontAwesomeCSS    string `json:"font-awesome-css" toml:"font-awesome-css"`
+}
+
 type AppConfig struct {
 	Debug           bool              `json:"debug" toml:"debug"`
 	DBAddress       string            `json:"db-address" toml:"db-address" validate:"nonzero"`
@@ -28,6 +37,7 @@ type AppConfig struct {
 	CallSecret      string            `json:"call-secret" toml:"call-secret"`
 	DonateCall      string            `json:"donate-call" toml:"donate-call"`
 	MsgPush         MsgPushConfig     `toml:"msg-push"`
+	CDN             CDNConfig         `json:"cdn" toml:"cdn"`
 }
 
 // ReadJSONConfig returns config object loading from json format config file

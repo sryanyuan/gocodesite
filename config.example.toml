@@ -28,6 +28,12 @@ comment-provider = ""
 # Support alipay or wxpay donate
 call-secret = ""
 donate-call = ""
+[cdn]
+bootstrap-css = "http://apps.bdimg.com/libs/bootstrap/3.3.4/css/bootstrap.min.css"
+bootstrap-theme-css = "http://apps.bdimg.com/libs/bootstrap/3.3.4/css/bootstrap-theme.min.css"
+bootstrap-js = "http://apps.bdimg.com/libs/bootstrap/3.3.4/js/bootstrap.min.js"
+jquery-js = "http://apps.bdimg.com/libs/jquery/1.11.3/jquery.min.js"
+font-awesome-css = "http://apps.bdimg.com/libs/fontawesome/4.4.0/css/font-awesome.min.css"
 [msg-push]
 host = ""
 sc-key = ""
