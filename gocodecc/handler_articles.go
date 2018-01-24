@@ -3,6 +3,8 @@ package gocodecc
 import (
 	"fmt"
 	"strconv"
+
+	"github.com/cihub/seelog"
 )
 
 var articlesRenderTpls = []string{
@@ -73,6 +75,8 @@ func articlesHandler(ctx *RequestContext) {
 			cnt, err := modelReplyGetCountByURI(fmt.Sprintf("/project/%d/article/%d", v.ProjectId, v.Id))
 			if nil == err {
 				v.ReplyCount = cnt
+			} else {
+				seelog.Errorf("Get article %v reply count error %v", v.Id, err)
 			}
 		}
 	}

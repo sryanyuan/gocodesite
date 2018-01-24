@@ -10,6 +10,7 @@ import (
 
 	"github.com/cihub/seelog"
 	"github.com/dchest/captcha"
+	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 )
@@ -175,6 +176,9 @@ func responseWithAccessDenied(w http.ResponseWriter) {
 
 func wrapHandler(config *AppConfig, item *RouterItem) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		// NOTE: gorilla mux do not clear the request after go1.7
+		defer context.Clear(r)
+
 		requestCtx := RequestContext{
 			w:         w,
 			r:         r,

@@ -14,3 +14,4 @@ debug
 *.dev.json
 *.dev.toml
 *.dev.html
+debug.test
