@@ -49,6 +49,14 @@ func indexHandler(ctx *RequestContext) {
 		return
 	}
 
+	// Handle private article
+	for _, article := range recentArticles {
+		articleApplyPrivate(ctx.user, article)
+	}
+	for _, article := range topArticles {
+		articleApplyPrivate(ctx.user, article)
+	}
+
 	dataCtx := map[string]interface{}{
 		"active":         "home",
 		"topArticles":    topArticles,

@@ -47,6 +47,15 @@ const (
 	kArticleContentLimit = 0xffff
 )
 
+const (
+	ArticleFlagNone = 0
+)
+
+const (
+	ArticleFlagPrivate = 1 << iota
+)
+
+// ProjectArticleItem, ReplyTime is used as a article flag
 type ProjectArticleItem struct {
 	Id                     int    `orm:"pk;auto;index"`
 	ProjectName            string `orm:"size(128)"`
@@ -65,10 +74,16 @@ type ProjectArticleItem struct {
 	ProjectId              int    `orm:"index"`
 	CoverImage             string `orm:"size(128)"`
 	ReplyCount             int    `orm:"-"`
+	Private                bool   `orm:"-"`
+	PrivateInvisible       bool   `orm:"-"`
 }
 
 func (m *ProjectArticleItem) TableName() string {
 	return projectArticleItemTableName
+}
+
+func (m *ProjectArticleItem) IsArticlePrivate() bool {
+	return 0 != (m.ReplyTime & ArticleFlagPrivate)
 }
 
 func init() {
@@ -461,6 +476,28 @@ func modelProjectArticleSetTop(articleId int, top bool) error {
 		return err
 	}
 	return err
+}
+
+func modelProjectArticleMarkPrivate(articleID int, private bool) error {
+	o := orm.NewOrm()
+	var article ProjectArticleItem
+	article.Id = articleID
+	err := o.Read(&article)
+	if nil != err {
+		return err
+	}
+
+	if private {
+		article.ReplyTime |= ArticleFlagPrivate
+	} else {
+		article.ReplyTime &= (^ArticleFlagPrivate)
+	}
+
+	_, err = o.Update(&article, "reply_time")
+	if nil != err {
+		return err
+	}
+	return nil
 }
 
 func modelProjectArticleGet(articleId int) (*ProjectArticleItem, error) {

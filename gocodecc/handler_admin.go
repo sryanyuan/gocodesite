@@ -36,7 +36,7 @@ func adminHandler(ctx *RequestContext) {
 				ctx.RenderMessagePage("错误", err.Error(), false)
 				return
 			}
-			ctx.RenderDownloadPage("成功", "文件已打包入:"+zipPath, "/download/"+filepath.Base(zipPath)+"?t=markdown")
+			ctx.RenderDownloadPage("成功", "文件已打包入:"+zipPath, "/download/"+filepath.Base(zipPath)+"?t=markdown_zip")
 		}
 	case "clean_markdown":
 		{

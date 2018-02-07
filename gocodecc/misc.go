@@ -26,3 +26,33 @@ func Krand(size int, kind int) []byte {
 	}
 	return result
 }
+
+func articleApplyPrivate(user *WebUser, article *ProjectArticleItem) {
+	if !article.IsArticlePrivate() {
+		return
+	}
+	article.Private = true
+
+	// Super admin can see all articles
+	if user.Permission >= kPermission_SuperAdmin {
+		return
+	}
+	// Self can see self article
+	if user.Uid != 0 {
+		if user.UserName == article.ArticleAuthor {
+			return
+		}
+	}
+	// Hide the article content
+	article.PrivateInvisible = true
+}
+
+func articleAccessible(user *WebUser, article *ProjectArticleItem) bool {
+	if user.Permission >= kPermission_SuperAdmin {
+		return true
+	}
+	if user.UserName == article.ArticleAuthor {
+		return true
+	}
+	return false
+}

@@ -91,6 +91,10 @@ func projectArticlesHandler(ctx *RequestContext) {
 		panic(err)
 	}
 
+	for _, article := range articles {
+		articleApplyPrivate(ctx.user, article)
+	}
+
 	tplData := make(map[string]interface{})
 	tplData["articles"] = articles
 	tplData["active"] = "project"
@@ -182,6 +186,9 @@ func projectArticleHandler(ctx *RequestContext) {
 			return
 		}
 	}
+
+	// Is a private article
+	articleApplyPrivate(ctx.user, article)
 
 	tplData := make(map[string]interface{})
 	tplData["active"] = "project"

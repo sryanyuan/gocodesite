@@ -46,3 +46,25 @@ function topArticle(obj, top, articleId) {
 		showAlert("请求超时");
 	});
 }
+
+function markArticlePrivate(obj, private, articleId) {
+	var action = "/ajax/article_mark_private";
+	var privateStr = ""
+	if (private) {
+		privateStr = "1"
+	}
+	var postData = "private=" + privateStr + "&articleId="+articleId;
+	
+	if (!top) {
+		postData = "top=0&articleId="+articleId;
+	}
+	$.post(action, postData, function(ret){
+		if (ret.Result == 0) {
+			location.reload();
+		} else {
+			showAlert(ret.Msg);
+		}
+	}).error(function(e){
+		showAlert("请求超时");
+	});
+}

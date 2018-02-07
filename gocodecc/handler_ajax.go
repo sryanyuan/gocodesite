@@ -496,8 +496,12 @@ func ajaxHandler(ctx *RequestContext) {
 				return
 			}
 
+			if ctx.user.Permission < kPermission_SuperAdmin {
+				result.Msg = "access denied"
+				return
+			}
+
 			ctx.r.ParseForm()
-			fmt.Println(ctx.r.Form)
 			defer ctx.r.Body.Close()
 			articleId, err := strconv.Atoi(ctx.r.Form.Get("articleId"))
 			if err != nil ||
@@ -523,6 +527,48 @@ func ajaxHandler(ctx *RequestContext) {
 			}
 
 			//	done
+			result.Result = 0
+		}
+	case "article_mark_private":
+		{
+			if ctx.r.Method != "POST" {
+				result.Msg = "invalid method"
+				return
+			}
+
+			ctx.r.ParseForm()
+			articleId, err := strconv.Atoi(ctx.r.Form.Get("articleId"))
+			if err != nil ||
+				0 == articleId {
+				result.Msg = "invalid articleId"
+				return
+			}
+			privateStr := ctx.r.Form.Get("private")
+			private := true
+			if "" == privateStr {
+				// Clear private flag
+				private = false
+			}
+			// Check can modify private flag
+			if ctx.user.Uid == 0 {
+				result.Msg = "permission denied"
+				return
+			}
+			article, err := modelProjectArticleGet(articleId)
+			if nil != err {
+				result.Msg = err.Error()
+				return
+			}
+			if ctx.user.Permission < kPermission_SuperAdmin &&
+				ctx.user.UserName != article.ArticleAuthor {
+				result.Msg = "permission denied"
+				return
+			}
+			if err = modelProjectArticleMarkPrivate(articleId, private); nil != err {
+				result.Msg = err.Error()
+				return
+			}
+
 			result.Result = 0
 		}
 	case "article_image_upload":

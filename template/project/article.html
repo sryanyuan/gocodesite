@@ -6,11 +6,14 @@
 <link href="/static/css/guestbook.css" rel="stylesheet" />
 <link href="/static/css/google-code-prettify/prettify.css" rel="stylesheet" />
 {{end}}
+
 {{define "importjs"}}
 <script src="/static/js/editormd.min.js"></script>
 <script src="/static/js/article.js"></script>
 <script src="/static/js/reply.js"></script>
+{{if eq .config.CommentProvider "duoshuo"}}
 <script src="/static/js/comment_load.js"></script>
+{{end}}
 <script src="/static/js/google-code-prettify/prettify.js"></script>
 <script type="text/javascript">
 	$(document).ready(function(e){
@@ -61,11 +64,21 @@
 				<button id="id-article-top" type="button" articleId="{{.article.Id}}" articleTitle="{{.article.ArticleTitle}}" onclick="topArticle(this, false, {{.article.Id}})" class="btn btn-sm btn-success">取消置顶</button>
 				{{end}}
 				<button id="id-article-del" type="button" articleId="{{.article.Id}}" articleTitle="{{.article.ArticleTitle}}" onclick="deleteArticle(this, {{.article.Id}})" class="btn btn-sm btn-danger">删除文章</button>
+				{{if isArticlePrivate .article}}
+				<button id="id-article-private" type="button" articleId="{{.article.Id}}" articleTitle="{{.article.ArticleTitle}}" onclick="markArticlePrivate(this, false, {{.article.Id}})" class="btn btn-sm btn-danger">取消私密</button>
+				{{else}}
+				<button id="id-article-private" type="button" articleId="{{.article.Id}}" articleTitle="{{.article.ArticleTitle}}" onclick="markArticlePrivate(this, true, {{.article.Id}})" class="btn btn-sm btn-danger">启用私密</button>
+				{{end}}
 			</p>
 			<hr/>
 			{{else if eq .user.NickName .article.ArticleAuthor}}
 			<p>
 				<a href="/project/{{.article.ProjectId}}/cmd/edit_article?articleId={{.article.Id}}"><button type="button" class="btn btn-sm btn-success">编辑文章</button></a>
+				{{if isArticlePrivate .article}}
+				<button id="id-article-private" type="button" articleId="{{.article.Id}}" articleTitle="{{.article.ArticleTitle}}" onclick="markArticlePrivate(this, false, {{.article.Id}})" class="btn btn-sm btn-danger">取消私密</button>
+				{{else}}
+				<button id="id-article-private" type="button" articleId="{{.article.Id}}" articleTitle="{{.article.ArticleTitle}}" onclick="markArticlePrivate(this, true, {{.article.Id}})" class="btn btn-sm btn-danger">启用私密</button>
+				{{end}}
 			</p>
 			<hr/>
 			{{end}}
@@ -95,7 +108,10 @@
 							<i class="fa fa-heart"></i>
 							{{.article.Like}}
 						</a-->
-						<a href="/ajax/article_fav/{{.article.Id}}" class="btn btn-default" title="收藏">
+						<a href="/download/{{.article.ArticleTitle}}.md?t=markdown&articleid={{.article.Id}}" class="btn btn-default" title="收藏">
+							<i class="fa fa-download"></i>
+						</a>
+						<a href="/ajax/article_fav/{{.article.Id}}" class="btn btn-default" title="下载">
 							<i class="fa fa-star"></i>
 						</a>
 					</div>
@@ -104,8 +120,12 @@
 					</div>
 				</div>
 				<div class="body editormd-preview-container prettify-body">
+					{{if not .article.PrivateInvisible}}
 					{{$content := .article.ArticleContentHtml}}
 					{{convertToHtml $content}}
+					{{else}}
+					<span style="color:grey;">该文章为私密文章</span>
+					{{end}}
 				</div>
 			</div>
 			<div id="comment-container" class="shadow-box white-box">

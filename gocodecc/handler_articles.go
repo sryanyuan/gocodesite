@@ -63,6 +63,11 @@ func articlesHandler(ctx *RequestContext) {
 		}
 	}
 
+	// Check if article is a private article
+	for _, article := range articles {
+		articleApplyPrivate(ctx.user, article)
+	}
+
 	tplData := make(map[string]interface{})
 	tplData["active"] = "articles"
 	tplData["articles"] = articles

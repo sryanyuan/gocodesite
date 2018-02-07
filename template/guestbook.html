@@ -4,8 +4,10 @@
 <link href="/static/css/reply.css" rel="stylesheet" />
 {{end}}
 {{define "importjs"}}
+{{if eq .config.CommentProvider "duoshuo"}}
 <script src="/static/js/comment_load.js"></script>
 <script src="/static/js/comment_recent_visitors.js"></script>
+{{end}}
 <script src="/static/js/reply.js"></script>
 {{end}}
 {{define "content"}}

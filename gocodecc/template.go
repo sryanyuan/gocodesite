@@ -40,6 +40,7 @@ var tplFuncMap = template.FuncMap{
 	"getCategoryCoverImagePath": tplfn_getCategoryCoverImagePath,
 	"getMoodImagePath":          tplfn_getMoodImagePath,
 	"readFileData":              tplfn_readFileData,
+	"isArticlePrivate":          tplfn_isArticlePrivate,
 }
 
 func init() {
@@ -156,7 +157,8 @@ func tplfn_addInt(val int, step int) int {
 }
 
 func tplfn_getThumb(str string, charCount int) string {
-	text := trimHtmlLabel(str)
+	text := str
+	text = trimHtmlLabel(str)
 	text = strings.TrimSpace(text)
 
 	//	using rune
@@ -223,6 +225,10 @@ func tplfn_getMoodImagePath(path string) string {
 	path = strings.Trim(path, "/")
 	path = strings.Trim(path, "\\")
 	return kPrefixImagePath + "/mood-images/" + path
+}
+
+func tplfn_isArticlePrivate(article *ProjectArticleItem) bool {
+	return 0 != (article.ReplyTime & ArticleFlagPrivate)
 }
 
 var readFileCacheMap = make(map[string]template.HTML)
