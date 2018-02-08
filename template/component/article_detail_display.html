@@ -20,7 +20,7 @@
 			{{if not .PrivateInvisible}}
 			<p>{{getThumb .ArticleContentHtml 100}}</p>
 			{{else}}
-			<p><span style="color:grey;">该文章为私密文章</span></p>
+			<p>{{template "article_private_summary"}}</p>
 			{{end}}
 		</div>
 		<div style="border-bottom:1px solid #EEEEEE;margin-top:20px;margin-bottom:5px;"></div>

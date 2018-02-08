@@ -20,6 +20,7 @@ var projectCategoryRenderTpls = []string{
 
 var projectArticlesRenderTpls = []string{
 	"template/project/articles.html",
+	"template/component/article_private_summary.html",
 	"template/component/article_detail_display.html",
 }
 
@@ -28,6 +29,7 @@ var projectArticleNewArticleTpls = []string{
 }
 
 var projectArticleRenderTpls = []string{
+	"template/component/article_private_summary.html",
 	"template/project/article.html",
 	"template/component/comment_embed.html",
 	"template/component/comment_duoshuo.html",

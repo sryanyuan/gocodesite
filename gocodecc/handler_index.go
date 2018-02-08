@@ -3,6 +3,7 @@ package gocodecc
 import "fmt"
 
 var homeRenderTpls []string = []string{
+	"template/component/article_private_summary.html",
 	"template/component/article_detail_display.html",
 	"template/home.html",
 }

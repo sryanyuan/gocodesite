@@ -14,6 +14,7 @@ var memberInfoRenderTpls = []string{
 
 var memberArticlesRenderTpls = []string{
 	"template/member/member_articles.html",
+	"template/component/article_private_summary.html",
 	"template/component/article_detail_display.html",
 }
 

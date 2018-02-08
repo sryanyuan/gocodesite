@@ -9,6 +9,7 @@ import (
 
 var articlesRenderTpls = []string{
 	"template/articles.html",
+	"template/component/article_private_summary.html",
 	"template/component/article_detail_display.html",
 }
 

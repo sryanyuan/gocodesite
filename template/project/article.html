@@ -124,7 +124,7 @@
 					{{$content := .article.ArticleContentHtml}}
 					{{convertToHtml $content}}
 					{{else}}
-					<span style="color:grey;">该文章为私密文章</span>
+					{{template "article_private_summary"}}
 					{{end}}
 				</div>
 			</div>
