@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/cihub/seelog"
 	"github.com/gorilla/mux"
@@ -22,6 +23,7 @@ type orderCreateInfo struct {
 	Uid      int
 	Num      int
 	NumFloat float64
+	QRUrl    string
 	// Config field
 	CallHost   string
 	CallSecret string
@@ -30,6 +32,7 @@ type orderCreateInfo struct {
 const (
 	payMethodAlipayQR = iota
 	payMethodWxQR
+	payMethodUnion
 )
 
 var (
@@ -87,6 +90,25 @@ func donateCheckHandler(ctx *RequestContext) {
 
 	rsp.Result = 0
 	rsp.Msg = orderStatus
+}
+
+func requestForPaymentURL(info *orderCreateInfo, config *AppConfig) (string, error) {
+	urlBase := "https://yun.maweiwangluo.com/pay/union/submit.php"
+	args := map[string]string{
+		"addnum":  info.OrderID,
+		"total":   fmt.Sprintf("%.2f", info.NumFloat),
+		"apiid":   info.ApiID,
+		"apikey":  info.ApiKey,
+		"showurl": fmt.Sprintf("%s/ajax/zfbqr_pay_confirm", config.Domain),
+		"uid":     strconv.Itoa(info.Uid),
+	}
+	rspData, err := doGet(urlBase, args)
+	if nil != err {
+		return "", err
+	}
+	res := string(rspData)
+	res = strings.Trim(res, "\xEF\xBB\xBF")
+	return res, nil
 }
 
 func createDonateOrder(user string, num int, pm int, debug bool) (*orderCreateInfo, error) {

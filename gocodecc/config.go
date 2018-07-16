@@ -17,6 +17,7 @@ type CDNConfig struct {
 	BootstrapCSS        string `json:"bootstrap-css" toml:"bootstrap-css"`
 	BootstrapThemeCSS   string `json:"bootstrap-theme-css" toml:"bootstrap-theme-css"`
 	FontAwesomeCSS      string `json:"font-awesome-css" toml:"font-awesome-css"`
+	JQueryQRCodeJS      string `json:"jquery-qrcode-js" toml:"jquery-qrcode-js"`
 }
 
 type AppConfig struct {
@@ -39,6 +40,7 @@ type AppConfig struct {
 	DonateCall      string            `json:"donate-call" toml:"donate-call"`
 	MsgPush         MsgPushConfig     `toml:"msg-push"`
 	CDN             CDNConfig         `json:"cdn" toml:"cdn"`
+	Domain          string            `json:"domain" toml:"domain"`
 }
 
 // ReadJSONConfig returns config object loading from json format config file

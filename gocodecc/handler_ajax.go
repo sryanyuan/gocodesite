@@ -1022,7 +1022,8 @@ func ajaxHandler(ctx *RequestContext) {
 				}
 			}
 			if payMethod != payMethodWxQR &&
-				payMethod != payMethodAlipayQR {
+				payMethod != payMethodAlipayQR &&
+				payMethod != payMethodUnion {
 				result.Msg = "无效的支付方式"
 				return
 			}
@@ -1039,6 +1040,15 @@ func ajaxHandler(ctx *RequestContext) {
 			if nil != err {
 				result.Msg = err.Error()
 				return
+			}
+			// Request for payment url when paymethod is union pay
+			if payMethodUnion == payMethod {
+				qrURL, err := requestForPaymentURL(orderInfo, ctx.config)
+				if nil != err {
+					result.Msg = err.Error()
+					return
+				}
+				orderInfo.QRUrl = qrURL
 			}
 
 			// Append a iframe into front

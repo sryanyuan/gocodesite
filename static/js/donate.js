@@ -22,6 +22,12 @@ function wxpay() {
 	donateForm.submit();
 }
 
+function unionpay() {
+	$("#id-pay-method").val("2");
+	var donateForm = $("#id-form-charge");
+	donateForm.submit();
+}
+
 var timeHandle = null;
 
 $(document).ready(function(){
@@ -67,16 +73,23 @@ $(document).ready(function(){
 						} else if ("1" == payMethod) {
 							paysrc = "https://pay.maweiwangluo.com/pay/wx/native.php?addnum=" + orderInfo.OrderID + "&total=" + orderInfo.NumFloat + "&apiid=" + orderInfo.ApiID + "&apikey=" + orderInfo.ApiKey + "&uid=" + orderInfo.Uid + "&showurl=";
 							$("#id-charge-hinttext").html("订单号[" + orderInfo.OrderID + "] (请牢记)，请用微信扫码支付，成功后请不要关闭本页面，直到跳转");
+						} else if ("2" == payMethod) {
+							$("#id-charge-hinttext").html("订单号[" + orderInfo.OrderID + "] (请牢记)，请扫码支付，成功后请不要关闭本页面，直到跳转");
 						} else {
 							changeAlertLook(chargeHint, 1);
 							$("#id-charge-hinttext").html("非法的url");
 							return;
 						}
 
-						var cburl = "http://" + window.location.host + "/ajax/zfbqr_pay_confirm";
-						paysrc = paysrc + cburl;
-						payWindow.attr("src", paysrc);
-						payWindow.removeClass("hidden");
+						if ("1" == payMethod || "0" == payMethod) {
+							var cburl = "http://" + window.location.host + "/ajax/zfbqr_pay_confirm";
+							paysrc = paysrc + cburl;
+							payWindow.attr("src", paysrc);
+							payWindow.removeClass("hidden");
+						} else if ("2" == payMethod) {
+							// Draw QR code
+							$("#pay_qrcode").qrcode(orderInfo.QRUrl);
+						}
 
 						// Payment result check
 						timeHandle = window.setInterval(wrapPaymentResult(null, orderInfo.OrderID, orderInfo.CallHost), 2000);

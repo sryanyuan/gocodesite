@@ -7,6 +7,11 @@
 {{else}}
 <script type="text/javascript" src="{{.config.CDN.JQueryPlaceholderJS}}"></script>
 {{end}}
+{{if eq .config.CDN.JQueryQRCodeJS ""}}
+<script type="text/javascript" src="/static/js/jquery.qrcode.min.js"></script>
+{{else}}
+<script type="text/javascript" src="{{.config.CDN.JQueryQRCodeJS}}"></script>
+{{end}}
 <script src="/static/js/donate.js"></script>
 <script type="text/javascript">
 $(function(){ $('input, textarea').placeholder(); });
@@ -47,11 +52,13 @@ $(function(){ $('input, textarea').placeholder(); });
 							</div>
 						</div>
 						<div class="form-group">
-							<input id="id-charge-zfbqr" onclick="zfbpay();" type="submit" name="commit" value="支付宝二维码支付" class="btn btn-primary" data-disable-with="正在支付...请不要关闭页面" />
-							<input id="id-charge-wxqr" onclick="wxpay();" type="submit" name="commit" value="微信二维码支付" class="btn btn-primary" data-disable-with="正在支付...请不要关闭页面" />
+							<input id="id-charge-zfbqr" onclick="zfbpay();" type="submit" name="commit" value="支付宝二维码支付" class="btn btn-primary hidden" data-disable-with="正在支付...请不要关闭页面" />
+							<input id="id-charge-wxqr" onclick="wxpay();" type="submit" name="commit" value="微信二维码支付" class="btn btn-primary hidden" data-disable-with="正在支付...请不要关闭页面" />
+							<input id="id-charge-union" onclick="unionpay();" type="submit" name="commit" value="扫码支付" class="btn btn-primary" data-disable-with="正在支付...请不要关闭页面" />
 						</div>
 					</form>
 					<div>
+						<div id="pay_qrcode"></div>
 						<iframe id="alipay_qr_iframe" class="hidden" width="250" height="250" src="">
 						</iframe>
 					</div>
