@@ -145,7 +145,7 @@ func createDonateOrder(user string, num int, pm int, debug bool) (*orderCreateIn
 	return &orderInfo, nil
 }
 
-func confirmDonateOrder(uid string, orderID string, apikey string, total float32) error {
+func confirmDonateOrder(uid string, orderID string, apikey string, total float64) error {
 	if "" == donateCall {
 		return errors.New("Donate not enabled")
 	}
