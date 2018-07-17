@@ -1094,7 +1094,7 @@ func ajaxHandler(ctx *RequestContext) {
 				return
 			}
 
-			err = confirmDonateOrder(uid, orderID, apikey, int(totalF))
+			err = confirmDonateOrder(uid, orderID, apikey, totalF)
 			if nil != err {
 				result.Msg = err.Error()
 				seelog.Errorf("Confirm failed by remote server, error = %v", err)
