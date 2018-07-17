@@ -1066,6 +1066,7 @@ func ajaxHandler(ctx *RequestContext) {
 			apikey := getFormValueAllMethod(ctx.r, "apikey")
 			totalStr := getFormValueAllMethod(ctx.r, "total")
 			uid := getFormValueAllMethod(ctx.r, "uid")
+			seelog.Infof("Confirm order with orderID %s, apikey %s, total %s, uid %s", orderID, apikey, totalStr, uid)
 
 			if "" == orderID {
 				result.Msg = "Invalid order id"
@@ -1096,8 +1097,10 @@ func ajaxHandler(ctx *RequestContext) {
 			err = confirmDonateOrder(uid, orderID, apikey, int(totalF))
 			if nil != err {
 				result.Msg = err.Error()
+				seelog.Errorf("Confirm failed by remote server, error = %v", err)
 				return
 			}
+			seelog.Infof("Confirm done by remote server, order id = %v", orderID)
 
 			autoRender = false
 			ctx.w.Write(successData)
