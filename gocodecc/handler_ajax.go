@@ -711,16 +711,24 @@ func ajaxHandler(ctx *RequestContext) {
 
 			//	check with path
 			pathSel := ctx.r.Form.Get("dst")
+			pathBase := ""
 			if pathSel == "static" {
-				pathSel = "./static/"
+				pathBase = "./static/"
 			} else if pathSel == "tpl" {
-				pathSel = "./template/"
+				pathBase = "./template/"
+			} else if pathSel == "resume" {
+				pathBase = ctx.config.ResumeFile
 			} else {
 				result.Msg = "Invalid file type"
 				return
 			}
 
-			f, err := os.OpenFile(pathSel+path+handler.Filename, os.O_WRONLY|os.O_CREATE, 0666)
+			var f *os.File
+			if pathSel == "resume" {
+				f, err = os.OpenFile(pathBase, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0666)
+			} else {
+				f, err = os.OpenFile(pathBase+path+handler.Filename, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0666)
+			}
 			if err != nil {
 				result.Msg = err.Error()
 				return
@@ -728,6 +736,13 @@ func ajaxHandler(ctx *RequestContext) {
 			defer f.Close()
 			io.Copy(f, file)
 			result.Result = 0
+
+			// Clear file cache
+			if pathSel == "resume" {
+				readFileLock.Lock()
+				delete(readFileCacheMap, pathSel)
+				readFileLock.Unlock()
+			}
 		}
 	case "reply_add":
 		{

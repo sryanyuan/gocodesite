@@ -24,6 +24,16 @@
 					{{end}}
 				</div>
 			</div>
+			<h2 class="section-title-s3">个人简历</h2>
+			<div class="shadow-box white-box">
+				<div class="panel-body">
+					{{if ne .config.ResumeFile ""}}
+					{{readMarkdownFileData .config.ResumeFile}}
+					{{else}}
+					Resume file is not specified, please set the .ResumeFile config field
+					{{end}}
+				</div>
+			</div>
 		</div>
 	</div>
 </div>

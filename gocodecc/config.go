@@ -29,6 +29,7 @@ type AppConfig struct {
 	BannerText      string            `json:"banner-text" toml:"banner-text"`
 	FooterCopyright string            `json:"footer-copyright" toml:"footer-copyright"`
 	AboutHTMLFile   string            `json:"about-html-file" toml:"about-html-file"`
+	ResumeFile      string            `json:"resume-file" toml:"resume-file"`
 	ListenAddress   string            `json:"listen-address" toml:"listen-address" validate:"nonzero"`
 	WeiboAddress    string            `json:"weibo-address" toml:"weibo-address"`
 	GithubAddress   string            `json:"github-address" toml:"github-address"`

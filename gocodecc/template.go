@@ -16,6 +16,7 @@ import (
 	"sync"
 
 	"github.com/cihub/seelog"
+	"github.com/russross/blackfriday"
 )
 
 var goVersion = runtime.Version()
@@ -41,6 +42,7 @@ var tplFuncMap = template.FuncMap{
 	"getMoodImagePath":          tplfn_getMoodImagePath,
 	"readFileData":              tplfn_readFileData,
 	"isArticlePrivate":          tplfn_isArticlePrivate,
+	"readMarkdownFileData":      tplfn_readMarkdownFileData,
 }
 
 func init() {
@@ -257,6 +259,39 @@ func tplfn_readFileData(path string) template.HTML {
 		seelog.Error(errMsg)
 		return template.HTML(errMsg)
 	}
+
+	fileStr := template.HTML(fileBytes)
+	readFileCacheMap[path] = fileStr
+
+	return fileStr
+}
+
+func tplfn_readMarkdownFileData(path string) template.HTML {
+	readFileLock.Lock()
+	defer readFileLock.Unlock()
+
+	// Find in cache
+	if data, ok := readFileCacheMap[path]; ok {
+		return data
+	}
+
+	// Open and cache
+	f, err := os.Open(path)
+	if nil != err {
+		errMsg := fmt.Sprintf("Open file data error, file=%s, error=%s", path, err.Error())
+		return template.HTML(errMsg)
+	}
+	defer f.Close()
+
+	fileBytes, err := ioutil.ReadAll(f)
+	if nil != err {
+		errMsg := fmt.Sprintf("Read file data error, file=%s, error=%s", path, err.Error())
+		seelog.Error(errMsg)
+		return template.HTML(errMsg)
+	}
+
+	// Convert to html
+	fileBytes = blackfriday.MarkdownCommon(fileBytes)
 
 	fileStr := template.HTML(fileBytes)
 	readFileCacheMap[path] = fileStr

@@ -2,6 +2,9 @@ package gocodecc
 
 import (
 	"bytes"
+	"io/ioutil"
+	"os"
+	"path"
 	"path/filepath"
 	"strconv"
 	"time"
@@ -22,6 +25,27 @@ func adminHandler(ctx *RequestContext) {
 		{
 			data := renderTemplate(ctx, adminUploadRenderTpls, nil)
 			ctx.w.Write(data)
+		}
+	case "resume_download":
+		{
+			if ctx.user.Permission < kPermission_SuperAdmin {
+				ctx.RenderMessagePage("错误", "access denied", false)
+				return
+			}
+			if ctx.config.ResumeFile == "" {
+				ctx.RenderMessagePage("错误", "Resume file empty", false)
+				return
+			}
+			f, err := os.Open(ctx.config.ResumeFile)
+			if nil != err {
+				ctx.RenderMessagePage("错误", err.Error(), false)
+				return
+			}
+			defer f.Close()
+			content, _ := ioutil.ReadAll(f)
+			ctx.w.Header().Set("Content-Type", "text/plain")
+			ctx.w.Header().Set("Content-Disposition", "attachment;filename="+path.Base(ctx.config.ResumeFile))
+			ctx.w.Write(content)
 		}
 	case "pack_markdown":
 		{

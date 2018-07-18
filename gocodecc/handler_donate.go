@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/cihub/seelog"
 	"github.com/gorilla/mux"
@@ -145,6 +146,11 @@ func createDonateOrder(user string, num int, pm int, debug bool) (*orderCreateIn
 	return &orderInfo, nil
 }
 
+var (
+	orderConfirmedMap  = make(map[string]struct{})
+	orderConfirmedLock sync.Mutex
+)
+
 func confirmDonateOrder(uid string, orderID string, apikey string, total float64) error {
 	if "" == donateCall {
 		return errors.New("Donate not enabled")
@@ -157,7 +163,17 @@ func confirmDonateOrder(uid string, orderID string, apikey string, total float64
 	}
 
 	if string(rspData) == "success" {
-		PushMessage("OrderConfirmed", fmt.Sprintf("%v_%v_pay_%v", orderID, uid, total))
+		pushMsg := fmt.Sprintf("%v_%v_pay_%v", orderID, uid, total)
+		var pushed bool
+		orderConfirmedLock.Lock()
+		_, pushed = orderConfirmedMap[pushMsg]
+		if !pushed {
+			orderConfirmedMap[pushMsg] = struct{}{}
+		}
+		orderConfirmedLock.Unlock()
+		if !pushed {
+			PushMessage("OrderConfirmed", pushMsg)
+		}
 		return nil
 	}
 
