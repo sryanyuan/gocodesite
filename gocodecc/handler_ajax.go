@@ -740,7 +740,7 @@ func ajaxHandler(ctx *RequestContext) {
 			// Clear file cache
 			if pathSel == "resume" {
 				readFileLock.Lock()
-				delete(readFileCacheMap, pathSel)
+				delete(readFileCacheMap, pathBase)
 				readFileLock.Unlock()
 			}
 		}
