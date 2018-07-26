@@ -2,6 +2,7 @@ package gocodecc
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -138,4 +139,21 @@ func doFormPost(reqURL string, kv url.Values) (int, []byte, error) {
 		return 0, nil, err
 	}
 	return rsp.StatusCode, body, nil
+}
+
+func rawReadFileData(path string) ([]byte, error) {
+	// Open and cache
+	f, err := os.Open(path)
+	if nil != err {
+		errMsg := fmt.Sprintf("Open file data error, file=%s, error=%s", path, err.Error())
+		return nil, errors.New(errMsg)
+	}
+	defer f.Close()
+
+	fileBytes, err := ioutil.ReadAll(f)
+	if nil != err {
+		errMsg := fmt.Sprintf("Read file data error, file=%s, error=%s", path, err.Error())
+		return nil, errors.New(errMsg)
+	}
+	return fileBytes, nil
 }

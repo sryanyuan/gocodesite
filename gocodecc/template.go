@@ -276,14 +276,7 @@ func tplfn_readMarkdownFileData(path string) template.HTML {
 	}
 
 	// Open and cache
-	f, err := os.Open(path)
-	if nil != err {
-		errMsg := fmt.Sprintf("Open file data error, file=%s, error=%s", path, err.Error())
-		return template.HTML(errMsg)
-	}
-	defer f.Close()
-
-	fileBytes, err := ioutil.ReadAll(f)
+	fileBytes, err := rawReadFileData(path)
 	if nil != err {
 		errMsg := fmt.Sprintf("Read file data error, file=%s, error=%s", path, err.Error())
 		seelog.Error(errMsg)

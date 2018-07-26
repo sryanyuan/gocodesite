@@ -225,6 +225,7 @@ type RouterItem struct {
 var routerItems = []RouterItem{
 	{"/", kPermission_Guest, indexHandler},
 	{"/about", kPermission_Guest, aboutHander},
+	{"/about/edit/{section}", kPermission_SuperAdmin, aboutEditSectionHander},
 	{"/guestbook", kPermission_Guest, guestbookHandler},
 	{"/donate", kPermission_Guest, donateHander},
 	{"/donate/{orderid:[a-zA-Z0-9]*}", kPermission_Guest, donateCheckHandler},

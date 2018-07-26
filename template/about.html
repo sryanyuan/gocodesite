@@ -24,7 +24,7 @@
 					{{end}}
 				</div>
 			</div>
-			<h2 class="section-title-s3">个人简历</h2>
+			<h2 class="section-title-s3">{{if gt .user.Permission 3}}<a href="/about/edit/resume">{{end}}个人简历{{if gt .user.Permission 3}}</a>{{end}}</h2>
 			<div class="shadow-box white-box">
 				<div class="panel-body">
 					{{if ne .config.ResumeFile ""}}
