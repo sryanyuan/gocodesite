@@ -78,7 +78,7 @@ func aboutResumePost(ctx *RequestContext) {
 	// Write into file
 	readFileLock.Lock()
 	err := ioutil.WriteFile(ctx.config.ResumeFile, []byte(contentMarkdown), 0644)
-	if nil != err {
+	if nil == err {
 		delete(readFileCacheMap, ctx.config.ResumeFile)
 	}
 	readFileLock.Unlock()
