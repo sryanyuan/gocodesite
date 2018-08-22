@@ -2,6 +2,7 @@ package gocodecc
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -54,6 +55,19 @@ type RequestContext struct {
 	config    *AppConfig
 }
 type HttpHandler func(*RequestContext)
+
+const (
+	statusBad = 480
+)
+
+const (
+	rspCodeInternalError = 1
+)
+
+type APIRsp struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+}
 
 func (c *RequestContext) GetNginxRealIP() string {
 	return c.r.Header.Get("X-real-ip")
@@ -167,6 +181,92 @@ func (c *RequestContext) ClearWebUser() {
 	session.Save(c.r, c.w)
 }
 
+func (c *RequestContext) WriteAPIRsp(header int, rsp *APIRsp) error {
+	if header != http.StatusOK {
+		seelog.Debugf("Rsp status bad with msg: %v", rsp)
+	}
+
+	jbytes, err := json.Marshal(rsp)
+	if nil != err {
+		return err
+	}
+	c.WriteHeader(header)
+	c.WriteResponse(jbytes)
+	return nil
+}
+
+func (c *RequestContext) WriteAPIRspOK(rsp *APIRsp) error {
+	return c.WriteAPIRsp(http.StatusOK, rsp)
+}
+
+func (c *RequestContext) WriteAPIRspOKWithMessage(msg interface{}) error {
+	var rsp APIRsp
+	if nil != msg {
+		jbytes, err := json.Marshal(msg)
+		if nil != err {
+			return err
+		}
+		rsp.Message = string(jbytes)
+	}
+	return c.WriteAPIRsp(http.StatusOK, &rsp)
+}
+
+func (c *RequestContext) WriteAPIRspBad(rsp *APIRsp) error {
+	return c.WriteAPIRsp(statusBad, rsp)
+}
+
+func (c *RequestContext) WriteAPIRspBadInternalError(msg string) error {
+	var rsp APIRsp
+	rsp.Code = rspCodeInternalError
+	rsp.Message = msg
+	return c.WriteAPIRsp(statusBad, &rsp)
+}
+
+func (c *RequestContext) GetURLVarString(variable string) string {
+	vars := mux.Vars(c.r)
+	return strings.TrimSpace(vars[variable])
+}
+
+func (c *RequestContext) GetURLVarInt64(variable string, def int64) int64 {
+	vars := mux.Vars(c.r)
+	val := strings.TrimSpace(vars[variable])
+	ival, err := strconv.ParseInt(val, 10, 64)
+	if nil != err {
+		return def
+	}
+	return ival
+}
+
+func (c *RequestContext) parseForm() error {
+	return c.r.ParseForm()
+}
+
+func (c *RequestContext) GetFormValueString(key string) string {
+	c.parseForm()
+	return strings.Trim(c.r.Form.Get(key), " ")
+}
+
+func (c *RequestContext) GetFormValueInt(key string, def int) int {
+	c.parseForm()
+	val := c.GetFormValueString(key)
+	if len(val) == 0 {
+		// empty input
+		return def
+	}
+
+	ival, err := strconv.Atoi(val)
+	if nil != err {
+		return def
+	}
+
+	// check max
+	if ival > 0x7fffffff {
+		return def
+	}
+
+	return ival
+}
+
 /*
 	Handler warper
 */
@@ -220,34 +320,44 @@ type RouterItem struct {
 	Url        string      // 路由的url
 	Permission uint32      // url访问权限
 	Handler    HttpHandler // 处理器
+	Methods    []string
 }
 
 var routerItems = []RouterItem{
-	{"/", kPermission_Guest, indexHandler},
-	{"/about", kPermission_Guest, aboutHander},
-	{"/about/edit/{section}", kPermission_SuperAdmin, aboutEditSectionHander},
-	{"/guestbook", kPermission_Guest, guestbookHandler},
-	{"/donate", kPermission_Guest, donateHander},
-	{"/donate/{orderid:[a-zA-Z0-9]*}", kPermission_Guest, donateCheckHandler},
-	{"/account/signup", kPermission_Guest, signupHandler},
-	{"/signin", kPermission_Guest, signinHandler},
-	{"/signout", kPermission_User, signOutHandler},
-	{"/articles", kPermission_Guest, articlesHandler},
-	{"/mood", kPermission_Guest, moodHandler},
-	{"/account/signupsuccess", kPermission_Guest, signupSuccessHandler},
-	{"/member/{username}", kPermission_Guest, memberInfoHandler},
-	{"/member/{username}/articles", kPermission_Guest, memberArticlesHandler},
-	{"/project", kPermission_Guest, projectCategoryHandler},
-	{"/project/{projectid:[0-9]*}/page/{page:[0-9]*}", kPermission_Guest, projectArticlesHandler},
-	{"/project/{projectid:[0-9]*}/cmd/{cmd}", kPermission_Guest, projectArticleCmdHandler},
-	{"/project/{projectid:[0-9]*}/article/{articleid:[0-9]*}/reply}", kPermission_User, projectArticleReplyHandler},
-	{"/project/{projectid:[0-9]*}/article/{articleid:[0-9]*}", kPermission_Guest, projectArticleHandler},
-	{"/ajax/{action}", kPermission_Guest, ajaxHandler},
-	{"/admin/{action}", kPermission_SuperAdmin, adminHandler},
-	{"/common/{action}", kPermission_Guest, commonHandler},
-	{"/download/{filename}", kPermission_Guest, downloadHandler},
-	{"/manager/{panel}", kPermission_SuperAdmin, managerPanelHandler},
-	{"/manager", kPermission_SuperAdmin, managerHandler},
+	{"/", kPermission_Guest, indexHandler, []string{http.MethodGet}},
+	{"/about", kPermission_Guest, aboutHander, []string{http.MethodGet}},
+	{"/about/edit/{section}", kPermission_SuperAdmin, aboutEditSectionHander, nil},
+	{"/guestbook", kPermission_Guest, guestbookHandler, []string{http.MethodGet}},
+	{"/donate", kPermission_Guest, donateHander, []string{http.MethodGet}},
+	{"/donate/{orderid:[a-zA-Z0-9]*}", kPermission_Guest, donateCheckHandler, []string{http.MethodGet}},
+	{"/account/signup", kPermission_Guest, signupHandler, nil},
+	{"/signin", kPermission_Guest, signinHandler, nil},
+	{"/signout", kPermission_User, signOutHandler, nil},
+	{"/articles", kPermission_Guest, articlesHandler, []string{http.MethodGet}},
+	{"/mood", kPermission_Guest, moodHandler, []string{http.MethodGet}},
+	{"/account/signupsuccess", kPermission_Guest, signupSuccessHandler, []string{http.MethodGet}},
+	{"/member/{username}", kPermission_Guest, memberInfoHandler, []string{http.MethodGet}},
+	{"/member/{username}/articles", kPermission_Guest, memberArticlesHandler, []string{http.MethodGet}},
+	{"/project", kPermission_Guest, projectCategoryHandler, []string{http.MethodGet}},
+	{"/project/{projectid:[0-9]*}/page/{page:[0-9]*}", kPermission_Guest, projectArticlesHandler, []string{http.MethodGet}},
+	{"/project/{projectid:[0-9]*}/cmd/{cmd}", kPermission_Guest, projectArticleCmdHandler, nil},
+	{"/project/{projectid:[0-9]*}/article/{articleid:[0-9]*}/reply}", kPermission_User, projectArticleReplyHandler, []string{http.MethodGet}},
+	{"/project/{projectid:[0-9]*}/article/{articleid:[0-9]*}", kPermission_Guest, projectArticleHandler, []string{http.MethodGet}},
+	{"/ajax/{action}", kPermission_Guest, ajaxHandler, nil},
+	{"/admin/{action}", kPermission_SuperAdmin, adminHandler, nil},
+	{"/common/{action}", kPermission_Guest, commonHandler, nil},
+	{"/download/{filename}", kPermission_Guest, downloadHandler, nil},
+	{"/manager/{panel}", kPermission_SuperAdmin, managerPanelHandler, nil},
+	{"/manager", kPermission_SuperAdmin, managerHandler, nil},
+}
+
+func registerRouter(path string, pem uint32, handler HttpHandler, methods []string) {
+	routerItems = append(routerItems, RouterItem{
+		Url:        path,
+		Permission: pem,
+		Handler:    handler,
+		Methods:    methods,
+	})
 }
 
 func fileHandler(w http.ResponseWriter, r *http.Request) {
@@ -260,7 +370,10 @@ func InitRouters(config *AppConfig, r *mux.Router) {
 	routersCount := len(routerItems)
 	for i := 0; i < routersCount; i++ {
 		seelog.Debugf("Register router path %s, permission %d", routerItems[i].Url, routerItems[i].Permission)
-		r.HandleFunc(routerItems[i].Url, wrapHandler(config, &routerItems[i]))
+		rt := r.HandleFunc(routerItems[i].Url, wrapHandler(config, &routerItems[i]))
+		if nil != routerItems[i].Methods && 0 != len(routerItems[i].Methods) {
+			rt.Methods(routerItems[i].Methods...)
+		}
 	}
 	captchaStorage := captcha.NewMemoryStore(captcha.CollectNum, time.Minute*time.Duration(2))
 	captcha.SetCustomStore(captchaStorage)

@@ -1,8 +1,14 @@
 package gocodecc
 
 import (
+	"bufio"
+	"bytes"
+	"io"
 	"math/rand"
+	"strings"
 	"time"
+
+	"github.com/russross/blackfriday"
 )
 
 const (
@@ -55,4 +61,36 @@ func articleAccessible(user *WebUser, article *ProjectArticleItem) bool {
 		return true
 	}
 	return false
+}
+
+func convertMarkdown2HTML(mk string, summaryLines int) (string, error) {
+	if 0 != summaryLines {
+		rd := bufio.NewReader(bytes.NewReader([]byte(mk)))
+		var summaryBytes bytes.Buffer
+		lineRead := 0
+		mkStart := false
+		for {
+			line, err := rd.ReadString('\n')
+			if nil != err {
+				if err == io.EOF {
+					if len(line) != 0 {
+						summaryBytes.WriteString(line)
+					}
+					break
+				}
+				return "", err
+			}
+			summaryBytes.WriteString(line)
+			lineRead++
+			// Check mk start
+			if strings.TrimSpace(line) == "```" {
+				mkStart = !mkStart
+			}
+			if lineRead >= summaryLines && !mkStart {
+				break
+			}
+		}
+		mk = summaryBytes.String()
+	}
+	return string(blackfriday.MarkdownCommon([]byte(mk))), nil
 }
