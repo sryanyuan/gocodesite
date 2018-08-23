@@ -12,6 +12,10 @@ const (
 	articlesGetModeTotal
 )
 
+const (
+	defaultArticleSummaryLines = 10
+)
+
 func init() {
 	registerRouter("/api/article", kPermission_Guest, apiArticlesGet, []string{http.MethodGet})
 	registerRouter("/api/article/{articleId}", kPermission_Guest, apiArticleGet, []string{http.MethodGet})
@@ -59,7 +63,6 @@ func apiArticlesGet(ctx *RequestContext) {
 				item.ArticleID = v.Id
 				item.Category = v.ProjectName
 				item.CategoryID = v.ProjectId
-				//item.Content, _ = convertMarkdown2HTML(v.ArticleContentMarkdown, 20)
 				item.PostDatetime = tplfn_getTimeGapString(v.PostTime)
 				item.Title = v.ArticleTitle
 				if v.Top != 0 {
@@ -72,7 +75,6 @@ func apiArticlesGet(ctx *RequestContext) {
 				item.ArticleID = v.Id
 				item.Category = v.ProjectName
 				item.CategoryID = v.ProjectId
-				//item.Content, _ = convertMarkdown2HTML(v.ArticleContentMarkdown, 20)
 				item.PostDatetime = tplfn_getTimeGapString(v.PostTime)
 				item.Title = v.ArticleTitle
 				if v.Top != 0 {
@@ -100,7 +102,6 @@ func apiArticlesGet(ctx *RequestContext) {
 				item.ArticleID = v.Id
 				item.Category = v.ProjectName
 				item.CategoryID = v.ProjectId
-				//item.Content, _ = convertMarkdown2HTML(v.ArticleContentMarkdown, 20)
 				item.PostDatetime = tplfn_getTimeGapString(v.PostTime)
 				item.Title = v.ArticleTitle
 				if v.Top != 0 {
@@ -146,7 +147,7 @@ func apiArticleGet(ctx *RequestContext) {
 	// Convert markdown to html
 	line := 0
 	if summary {
-		line = 20
+		line = defaultArticleSummaryLines
 	}
 	rsp.Content, err = convertMarkdown2HTML(article.ArticleContentMarkdown, line)
 	if nil != err {
