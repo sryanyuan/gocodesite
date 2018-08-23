@@ -1,6 +1,9 @@
 package gocodecc
 
-import "net/http"
+import (
+	"fmt"
+	"net/http"
+)
 
 const (
 	// Post time with limit articles show in index page
@@ -29,12 +32,31 @@ type apiArticleRsp struct {
 	Content      string `json:"content"`
 	Title        string `json:"title"`
 	PostDatetime string `json:"postDatetime"`
+	ReplyCount   int    `json:"replyCount"`
 }
 
 type apiArticlesRsp struct {
 	Articles []*apiArticleRsp `json:"articles"`
 	Total    int              `json:"total"`
 	Pages    int              `json:"pages"`
+}
+
+func fillArticleReplyCount(article *apiArticleRsp) error {
+	// Get all comment count
+	cnt, err := modelReplyGetCountByURI(fmt.Sprintf("/project/%d/article/%d", article.CategoryID, article.ArticleID))
+	if nil == err {
+		article.ReplyCount = cnt
+	}
+	return err
+}
+
+func fillArticlesReplyCount(articles *apiArticlesRsp) error {
+	for _, v := range articles.Articles {
+		if err := fillArticleReplyCount(v); nil != err {
+			return err
+		}
+	}
+	return nil
 }
 
 func apiArticlesGet(ctx *RequestContext) {
@@ -82,6 +104,12 @@ func apiArticlesGet(ctx *RequestContext) {
 				}
 				rsp.Articles = append(rsp.Articles, &item)
 			}
+			if ctx.config.CommentProvider == "native" {
+				if err = fillArticlesReplyCount(&rsp); nil != err {
+					ctx.WriteAPIRspBadInternalError(err.Error())
+					return
+				}
+			}
 			ctx.WriteAPIRspOKWithMessage(&rsp)
 		}
 	case articlesGetModeCategory:
@@ -108,6 +136,12 @@ func apiArticlesGet(ctx *RequestContext) {
 					item.Top = true
 				}
 				rsp.Articles = append(rsp.Articles, &item)
+			}
+			if ctx.config.CommentProvider == "native" {
+				if err = fillArticlesReplyCount(&rsp); nil != err {
+					ctx.WriteAPIRspBadInternalError(err.Error())
+					return
+				}
 			}
 			ctx.WriteAPIRspOKWithMessage(&rsp)
 		}
@@ -153,6 +187,12 @@ func apiArticleGet(ctx *RequestContext) {
 	if nil != err {
 		ctx.WriteAPIRspBadInternalError(err.Error())
 		return
+	}
+	if ctx.config.CommentProvider == "native" {
+		if err = fillArticleReplyCount(&rsp); nil != err {
+			ctx.WriteAPIRspBadInternalError(err.Error())
+			return
+		}
 	}
 
 	ctx.WriteAPIRspOKWithMessage(&rsp)
