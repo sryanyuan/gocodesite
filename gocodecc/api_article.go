@@ -140,6 +140,9 @@ func apiArticleGet(ctx *RequestContext) {
 	rsp.Category = article.ProjectName
 	rsp.Title = article.ArticleTitle
 	rsp.PostDatetime = tplfn_getTimeGapString(article.PostTime)
+	if article.Top != 0 {
+		rsp.Top = true
+	}
 	// Convert markdown to html
 	line := 0
 	if summary {
