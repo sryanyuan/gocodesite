@@ -13,14 +13,18 @@ var (
 )
 
 type ReplyModel struct {
-	Id         int `orm:pk;auto`
-	Uid        uint32
-	ReplyUser  string `orm:size(21)`
-	Uri        string `orm:"size(256)"`
+	Id        int `orm:pk;auto`
+	Uid       uint32
+	ReplyUser string `orm:size(21)`
+	// If a reply is a top reply, the url is without tag (|key:value+key:value)
+	// If a reply is a sub reply, the url is appended with reply to who (no tag if reply to the top reply author)
+	Uri string `orm:"size(256)"`
+	// Meaning is changed, change to if the reply is a sub reply
 	IsDeleted  bool
 	Comment    string `orm:"size(512)"`
 	CreateTime int64
 	UpdateTime int64
+	NoShow     bool `orm:"-"`
 }
 
 func (m *ReplyModel) TableName() string {
@@ -75,7 +79,12 @@ func modelReplyGetArticleReply(uri string, page int, limit int) ([]*ReplyModel, 
 	return replys, nil
 }
 
+// Insert a top reply
 func modelReplyNew(uri string, user *WebUser, comment string) (int64, error) {
+	return modelNewReply(uri, user, comment, false)
+}
+
+func modelNewReply(uri string, user *WebUser, comment string, sub bool) (int64, error) {
 	db, err := getRawDB()
 	if nil != err {
 		return 0, err
@@ -91,7 +100,7 @@ func modelReplyNew(uri string, user *WebUser, comment string) (int64, error) {
 	var reply ReplyModel
 	reply.Comment = comment
 	reply.CreateTime = time.Now().Unix()
-	reply.IsDeleted = false
+	reply.IsDeleted = sub
 	reply.Uid = user.Uid
 	reply.ReplyUser = user.UserName
 	reply.Uri = uri
@@ -134,16 +143,6 @@ func modelReplyGetCount() (int, error) {
 	return cnt, nil
 }
 
-func modelReplyMarkDelete(rid int) error {
-	db, err := getRawDB()
-	if nil != err {
-		return err
-	}
-
-	_, err = db.Exec("UPDATE reply SET is_deleted = 1 WHERE id = ?", rid)
-	return err
-}
-
 func modelReplyDelete(rid int) error {
 	db, err := getRawDB()
 	if nil != err {
@@ -152,4 +151,9 @@ func modelReplyDelete(rid int) error {
 
 	_, err = db.Exec("DELETE FROM reply WHERE id = ?", rid)
 	return err
+}
+
+// Insert a sub reply
+func modelSubRelyNew(uri string, user *WebUser, comment string) (int64, error) {
+	return modelNewReply(uri, user, comment, true)
 }

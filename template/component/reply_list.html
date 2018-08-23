@@ -36,7 +36,7 @@
                                 <td width="10" valign="top"></td>
                                 <td width="auto" valign="top" align="left">
                                     <div class="fr">
-                                        {{if eq $reply.IsDeleted false}}
+                                        {{if eq $reply.NoShow false}}
                                         {{if gt $.user.Permission 3}}
                                         <a href="javascript:void(0)" class="fa fa-remove" title="删除该回复" replyid="{{$reply.Id}}" onclick="deleteReply(this, '{{$reply.Id}}')" ></a>
                                         {{end}}
@@ -59,7 +59,7 @@
                                             {{end}}
                                         </strong>
                                         <div class="sep5"></div>
-                                        {{if $reply.IsDeleted}}
+                                        {{if $reply.NoShow}}
                                         <div class="reply_comment" style="color: #a3a3a3;"><strong>该回复已被删除</strong></div>
                                         {{else}}
                                         <div class="reply_comment">{{$reply.Comment}}</div>

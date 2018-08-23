@@ -384,4 +384,7 @@ func InitRouters(config *AppConfig, r *mux.Router) {
 	http.Handle("/static/js/", http.FileServer(http.Dir(".")))
 	http.Handle("/static/images/", http.FileServer(http.Dir(".")))
 	http.Handle("/static/fonts/", http.FileServer(http.Dir(".")))
+	http.Handle("/static/img/", http.FileServer(http.Dir(".")))
+	// New version frontend
+	http.Handle("/view/", http.FileServer(http.Dir(".")))
 }

@@ -158,10 +158,9 @@ func apiArticleGet(ctx *RequestContext) {
 		ctx.WriteAPIRspBadInternalError("invalid article id")
 		return
 	}
-	summaryInt := ctx.GetFormValueInt("summary", 0)
-	summary := false
-	if summaryInt != 0 {
-		summary = true
+	summary := ctx.GetFormValueInt("summary", 0)
+	if summary == 0 {
+		summary = defaultArticleSummaryLines
 	}
 	article, err := modelProjectArticleGet(int(articleId))
 	if nil != err {
@@ -179,11 +178,7 @@ func apiArticleGet(ctx *RequestContext) {
 		rsp.Top = true
 	}
 	// Convert markdown to html
-	line := 0
-	if summary {
-		line = defaultArticleSummaryLines
-	}
-	rsp.Content, err = convertMarkdown2HTML(article.ArticleContentMarkdown, line)
+	rsp.Content, err = convertMarkdown2HTML(article.ArticleContentMarkdown, summary)
 	if nil != err {
 		ctx.WriteAPIRspBadInternalError(err.Error())
 		return

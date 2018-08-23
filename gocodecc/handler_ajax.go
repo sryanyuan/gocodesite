@@ -897,7 +897,7 @@ func ajaxHandler(ctx *RequestContext) {
 				return
 			}
 			seelog.Debug(replyID)
-			if err = modelReplyMarkDelete(replyID); nil != err {
+			if err = modelReplyDelete(replyID); nil != err {
 				result.Msg = err.Error()
 				return
 			}
