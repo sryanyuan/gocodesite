@@ -15,10 +15,6 @@ const (
 	articlesGetModeTotal
 )
 
-const (
-	defaultArticleSummaryLines = 10
-)
-
 func init() {
 	registerRouter("/api/article", kPermission_Guest, apiArticlesGet, []string{http.MethodGet})
 	registerRouter("/api/article/{articleId}", kPermission_Guest, apiArticleGet, []string{http.MethodGet})
@@ -159,9 +155,6 @@ func apiArticleGet(ctx *RequestContext) {
 		return
 	}
 	summary := ctx.GetFormValueInt("summary", 0)
-	if summary == 0 {
-		summary = defaultArticleSummaryLines
-	}
 	article, err := modelProjectArticleGet(int(articleId))
 	if nil != err {
 		ctx.WriteAPIRspBadInternalError(err.Error())
