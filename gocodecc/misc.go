@@ -84,7 +84,7 @@ func convertMarkdown2HTML(mk string, summaryLines int) (string, error) {
 			lineRead++
 			// Check mk start
 			trimLine := strings.TrimSpace(line)
-			if strings.HasPrefix(trimLine, "```") && !strings.HasPrefix(trimLine, "```") {
+			if strings.HasPrefix(trimLine, "```") && !strings.HasSuffix(trimLine, "```") {
 				// Not in one line
 				mkStart = !mkStart
 			}

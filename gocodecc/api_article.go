@@ -21,6 +21,8 @@ func init() {
 }
 
 type apiArticleRsp struct {
+	AuthorID     int    `json:"authorId"`
+	AuthorName   string `json:"authorName"`
 	Top          bool   `json:"top"`
 	Category     string `json:"category"`
 	CategoryID   int    `json:"categoryId"`
@@ -82,6 +84,10 @@ func apiArticlesGet(ctx *RequestContext) {
 				item.Category = v.ProjectName
 				item.CategoryID = v.ProjectId
 				item.PostDatetime = tplfn_getTimeGapString(v.PostTime)
+				item.AuthorName = v.ArticleAuthor
+				if author := modelWebUserGetUserByUserName(v.ArticleAuthor); nil != author {
+					item.AuthorID = int(author.Uid)
+				}
 				item.Title = v.ArticleTitle
 				if v.Top != 0 {
 					item.Top = true
@@ -94,6 +100,10 @@ func apiArticlesGet(ctx *RequestContext) {
 				item.Category = v.ProjectName
 				item.CategoryID = v.ProjectId
 				item.PostDatetime = tplfn_getTimeGapString(v.PostTime)
+				item.AuthorName = v.ArticleAuthor
+				if author := modelWebUserGetUserByUserName(v.ArticleAuthor); nil != author {
+					item.AuthorID = int(author.Uid)
+				}
 				item.Title = v.ArticleTitle
 				if v.Top != 0 {
 					item.Top = true
@@ -127,6 +137,10 @@ func apiArticlesGet(ctx *RequestContext) {
 				item.Category = v.ProjectName
 				item.CategoryID = v.ProjectId
 				item.PostDatetime = tplfn_getTimeGapString(v.PostTime)
+				item.AuthorName = v.ArticleAuthor
+				if author := modelWebUserGetUserByUserName(v.ArticleAuthor); nil != author {
+					item.AuthorID = int(author.Uid)
+				}
 				item.Title = v.ArticleTitle
 				if v.Top != 0 {
 					item.Top = true
@@ -169,6 +183,10 @@ func apiArticleGet(ctx *RequestContext) {
 	rsp.PostDatetime = tplfn_getTimeGapString(article.PostTime)
 	if article.Top != 0 {
 		rsp.Top = true
+	}
+	rsp.AuthorName = article.ArticleAuthor
+	if author := modelWebUserGetUserByUserName(article.ArticleAuthor); nil != author {
+		rsp.AuthorID = int(author.Uid)
 	}
 	// Convert markdown to html
 	rsp.Content, err = convertMarkdown2HTML(article.ArticleContentMarkdown, summary)
