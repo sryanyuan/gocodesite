@@ -22,6 +22,8 @@ type CommentModel struct {
 	Comment    string `orm:"size(512)"`
 	CreateTime int64
 	UpdateTime int64
+	Agree      int
+	Oppose     int
 }
 
 func (m *CommentModel) TableName() string {
@@ -48,7 +50,9 @@ func modelCommentGet(id int) (*CommentModel, error) {
 				sub_to_user, 
 				comment, 
 				create_time, 
-				update_time FROM comment WHERE id = ?`
+				update_time,
+				agree,
+				oppose FROM comment WHERE id = ?`
 
 	row := db.QueryRow(sqlExpr, id)
 	var reply CommentModel
@@ -63,7 +67,9 @@ func modelCommentGet(id int) (*CommentModel, error) {
 		&reply.SubToUser,
 		&reply.Comment,
 		&reply.CreateTime,
-		&reply.UpdateTime); nil != err {
+		&reply.UpdateTime,
+		&reply.Agree,
+		&reply.Oppose); nil != err {
 		return nil, err
 	}
 	reply.Id = id
@@ -89,7 +95,9 @@ func modelCommentGetArticleReply(uri string, page int, limit int) ([]*CommentMod
 				sub_to_user, 
 				comment, 
 				create_time, 
-				update_time FROM comment WHERE uri = ? ORDER BY create_time `
+				update_time,
+				agree,
+				oppose FROM comment WHERE uri = ? ORDER BY create_time `
 	if limit != 0 {
 		sqlExpr += "LIMIT ? "
 		args = append(args, limit)
@@ -119,7 +127,9 @@ func modelCommentGetArticleReply(uri string, page int, limit int) ([]*CommentMod
 			&reply.SubToUser,
 			&reply.Comment,
 			&reply.CreateTime,
-			&reply.UpdateTime); nil != err {
+			&reply.UpdateTime,
+			&reply.Agree,
+			&reply.Oppose); nil != err {
 			return nil, err
 		}
 		replys = append(replys, &reply)
@@ -175,7 +185,9 @@ func modelNewComment(uri string, user *WebUser, comment string, parentId int, pa
 										sub_to_user, 
 										uri, 
 										comment, 
-										create_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+										create_time,
+										agree,
+										oppose) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 		reply.Uid,
 		reply.ReplyUser,
 		reply.IsSub,
@@ -184,7 +196,9 @@ func modelNewComment(uri string, user *WebUser, comment string, parentId int, pa
 		reply.SubToUser,
 		reply.Uri,
 		reply.Comment,
-		reply.CreateTime); nil != err {
+		reply.CreateTime,
+		reply.Agree,
+		reply.Oppose); nil != err {
 		return 0, err
 	} else {
 		return ret.LastInsertId()

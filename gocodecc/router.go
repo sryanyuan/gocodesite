@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"strconv"
 	"strings"
@@ -47,12 +48,13 @@ func checkPermission(perChecked uint32, want uint32) bool {
 
 // RequestContext wraps request and response
 type RequestContext struct {
-	w         http.ResponseWriter
-	r         *http.Request
-	dbSession *sql.DB
-	user      *WebUser
-	tmRequest time.Time
-	config    *AppConfig
+	w           http.ResponseWriter
+	r           *http.Request
+	dbSession   *sql.DB
+	user        *WebUser
+	tmRequest   time.Time
+	config      *AppConfig
+	requestBody []byte
 }
 type HttpHandler func(*RequestContext)
 
@@ -165,6 +167,7 @@ func (c *RequestContext) SaveWebUser(user *WebUser, saveDays int) {
 	session.Values["login-key"] = userinfokey
 	if 0 != saveDays {
 		session.Options = &sessions.Options{
+			Path:   "/",
 			MaxAge: saveDays * 24 * 60 * 60,
 		}
 	}
@@ -177,13 +180,21 @@ func (c *RequestContext) ClearWebUser() {
 		return
 	}
 
-	session.Options = &sessions.Options{MaxAge: -1}
+	session.Options = &sessions.Options{
+		Path:   "/",
+		MaxAge: -1,
+	}
 	session.Save(c.r, c.w)
 }
+
+var defaultOKRsp APIRsp
 
 func (c *RequestContext) WriteAPIRsp(header int, rsp *APIRsp) error {
 	if header != http.StatusOK {
 		seelog.Debugf("Rsp status bad with msg: %v", rsp)
+	}
+	if nil == rsp {
+		rsp = &defaultOKRsp
 	}
 
 	jbytes, err := json.Marshal(rsp)
@@ -265,6 +276,29 @@ func (c *RequestContext) GetFormValueInt(key string, def int) int {
 	}
 
 	return ival
+}
+
+func (c *RequestContext) readBody() ([]byte, error) {
+	if nil != c.requestBody {
+		return c.requestBody, nil
+	}
+
+	c.r.ParseForm()
+	data, err := ioutil.ReadAll(c.r.Body)
+	if nil != err {
+		return nil, err
+	}
+	c.requestBody = data
+
+	return data, nil
+}
+
+func (c *RequestContext) readFromBody(i interface{}) error {
+	body, err := c.readBody()
+	if nil != err {
+		return err
+	}
+	return json.Unmarshal(body, i)
 }
 
 /*
@@ -377,7 +411,9 @@ func InitRouters(config *AppConfig, r *mux.Router) {
 	}
 	captchaStorage := captcha.NewMemoryStore(captcha.CollectNum, time.Minute*time.Duration(2))
 	captcha.SetCustomStore(captchaStorage)
-	http.Handle("/captcha/", captcha.Server(100, 40))
+	captchaHandler := captcha.Server(100, 40)
+	http.Handle("/captcha/", captchaHandler)
+	http.Handle("/api/captcha/", captchaHandler)
 
 	//	static file
 	http.Handle("/static/css/", http.FileServer(http.Dir(".")))
