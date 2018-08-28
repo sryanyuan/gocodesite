@@ -9,10 +9,10 @@ import (
 )
 
 func init() {
-	registerRouter("/api/login/status", kPermission_Guest, apiLoginStatusGet, []string{http.MethodGet})
-	registerRouter("/api/login/captcha", kPermission_Guest, apiLoginCaptchaGet, []string{http.MethodGet})
-	registerRouter("/api/login", kPermission_Guest, apiLoginPost, []string{http.MethodPost})
-	registerRouter("/api/logout", kPermission_Guest, apiLogoutPost, []string{http.MethodPost})
+	registerApi("/api/login/status", kPermission_Guest, apiLoginStatusGet, []string{http.MethodGet})
+	registerApi("/api/login/captcha", kPermission_Guest, apiLoginCaptchaGet, []string{http.MethodGet})
+	registerApi("/api/login", kPermission_Guest, apiLoginPost, []string{http.MethodPost})
+	registerApi("/api/logout", kPermission_Guest, apiLogoutPost, []string{http.MethodPost})
 }
 
 type loginStatusRsp struct {

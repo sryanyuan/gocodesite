@@ -48,6 +48,7 @@ func checkPermission(perChecked uint32, want uint32) bool {
 
 // RequestContext wraps request and response
 type RequestContext struct {
+	ri          *RouterItem
 	w           http.ResponseWriter
 	r           *http.Request
 	dbSession   *sql.DB
@@ -64,6 +65,7 @@ const (
 
 const (
 	rspCodeInternalError = 1
+	rspCodeNeedLogin
 )
 
 type APIRsp struct {
@@ -233,6 +235,13 @@ func (c *RequestContext) WriteAPIRspBadInternalError(msg string) error {
 	return c.WriteAPIRsp(statusBad, &rsp)
 }
 
+func (c *RequestContext) WriteAPIRspBadNeedLogin(msg string) error {
+	var rsp APIRsp
+	rsp.Code = rspCodeNeedLogin
+	rsp.Message = msg
+	return c.WriteAPIRsp(statusBad, &rsp)
+}
+
 func (c *RequestContext) GetURLVarString(variable string) string {
 	vars := mux.Vars(c.r)
 	return strings.TrimSpace(vars[variable])
@@ -319,6 +328,7 @@ func wrapHandler(config *AppConfig, item *RouterItem) http.HandlerFunc {
 			dbSession: nil,
 			tmRequest: time.Now(),
 			config:    config,
+			ri:        item,
 		}
 
 		user := requestCtx.GetWebUser()
@@ -350,48 +360,190 @@ func wrapHandler(config *AppConfig, item *RouterItem) http.HandlerFunc {
 /*
 	Router item
 */
+// RouterMeta should be initialized before handler invoke
+type RouterMeta struct {
+	vals map[string]interface{}
+}
+
+func (m *RouterMeta) GetInt(key string) (int, bool) {
+	if nil == m.vals {
+		return 0, false
+	}
+	v, ok := m.vals[key]
+	if !ok {
+		return 0, false
+	}
+	iv, ok := v.(int)
+	if !ok {
+		return 0, false
+	}
+	return iv, true
+}
+
+func (m *RouterMeta) Init(mk map[string]interface{}) {
+	m.vals = mk
+}
+
 type RouterItem struct {
 	Url        string      // 路由的url
 	Permission uint32      // url访问权限
 	Handler    HttpHandler // 处理器
 	Methods    []string
+	Meta       RouterMeta
 }
 
 var routerItems = []RouterItem{
-	{"/", kPermission_Guest, indexHandler, []string{http.MethodGet}},
-	{"/about", kPermission_Guest, aboutHander, []string{http.MethodGet}},
-	{"/about/edit/{section}", kPermission_SuperAdmin, aboutEditSectionHander, nil},
-	{"/guestbook", kPermission_Guest, guestbookHandler, []string{http.MethodGet}},
-	{"/donate", kPermission_Guest, donateHander, []string{http.MethodGet}},
-	{"/donate/{orderid:[a-zA-Z0-9]*}", kPermission_Guest, donateCheckHandler, []string{http.MethodGet}},
-	{"/account/signup", kPermission_Guest, signupHandler, nil},
-	{"/signin", kPermission_Guest, signinHandler, nil},
-	{"/signout", kPermission_User, signOutHandler, nil},
-	{"/articles", kPermission_Guest, articlesHandler, []string{http.MethodGet}},
-	{"/mood", kPermission_Guest, moodHandler, []string{http.MethodGet}},
-	{"/account/signupsuccess", kPermission_Guest, signupSuccessHandler, []string{http.MethodGet}},
-	{"/member/{username}", kPermission_Guest, memberInfoHandler, []string{http.MethodGet}},
-	{"/member/{username}/articles", kPermission_Guest, memberArticlesHandler, []string{http.MethodGet}},
-	{"/project", kPermission_Guest, projectCategoryHandler, []string{http.MethodGet}},
-	{"/project/{projectid:[0-9]*}/page/{page:[0-9]*}", kPermission_Guest, projectArticlesHandler, []string{http.MethodGet}},
-	{"/project/{projectid:[0-9]*}/cmd/{cmd}", kPermission_Guest, projectArticleCmdHandler, nil},
-	{"/project/{projectid:[0-9]*}/article/{articleid:[0-9]*}/reply}", kPermission_User, projectArticleReplyHandler, []string{http.MethodGet}},
-	{"/project/{projectid:[0-9]*}/article/{articleid:[0-9]*}", kPermission_Guest, projectArticleHandler, []string{http.MethodGet}},
-	{"/ajax/{action}", kPermission_Guest, ajaxHandler, nil},
-	{"/admin/{action}", kPermission_SuperAdmin, adminHandler, nil},
-	{"/common/{action}", kPermission_Guest, commonHandler, nil},
-	{"/download/{filename}", kPermission_Guest, downloadHandler, nil},
-	{"/manager/{panel}", kPermission_SuperAdmin, managerPanelHandler, nil},
-	{"/manager", kPermission_SuperAdmin, managerHandler, nil},
+	{
+		Url:        "/",
+		Permission: kPermission_Guest,
+		Handler:    indexHandler,
+		Methods:    []string{http.MethodGet},
+	},
+	{
+		Url:        "/about",
+		Permission: kPermission_Guest,
+		Handler:    aboutHander,
+		Methods:    []string{http.MethodGet}},
+	{
+		Url:        "/about/edit/{section}",
+		Permission: kPermission_SuperAdmin,
+		Handler:    aboutEditSectionHander,
+	},
+	{
+		Url:        "/guestbook",
+		Permission: kPermission_Guest,
+		Handler:    guestbookHandler,
+		Methods:    []string{http.MethodGet},
+	},
+	{
+		Url:        "/donate",
+		Permission: kPermission_Guest,
+		Handler:    donateHander,
+		Methods:    []string{http.MethodGet},
+	},
+	{
+		Url:        "/donate/{orderid:[a-zA-Z0-9]*}",
+		Permission: kPermission_Guest,
+		Handler:    donateCheckHandler,
+		Methods:    []string{http.MethodGet},
+	},
+	{
+		Url:        "/account/signup",
+		Permission: kPermission_Guest,
+		Handler:    signupHandler,
+	},
+	{
+		Url:        "/signin",
+		Permission: kPermission_Guest,
+		Handler:    signinHandler,
+	},
+	{
+		Url:        "/signout",
+		Permission: kPermission_User,
+		Handler:    signOutHandler,
+	},
+	{
+		Url:        "/articles",
+		Permission: kPermission_Guest,
+		Handler:    articlesHandler,
+		Methods:    []string{http.MethodGet},
+	},
+	{
+		Url:        "/mood",
+		Permission: kPermission_Guest,
+		Handler:    moodHandler,
+		Methods:    []string{http.MethodGet},
+	},
+	{
+		Url:        "/account/signupsuccess",
+		Permission: kPermission_Guest,
+		Handler:    signupSuccessHandler,
+		Methods:    []string{http.MethodGet},
+	},
+	{
+		Url:        "/member/{username}",
+		Permission: kPermission_Guest,
+		Handler:    memberInfoHandler,
+		Methods:    []string{http.MethodGet},
+	},
+	{
+		Url:        "/member/{username}/articles",
+		Permission: kPermission_Guest,
+		Handler:    memberArticlesHandler,
+		Methods:    []string{http.MethodGet},
+	},
+	{
+		Url:        "/project",
+		Permission: kPermission_Guest,
+		Handler:    projectCategoryHandler,
+		Methods:    []string{http.MethodGet},
+	},
+	{
+		Url:        "/project/{projectid:[0-9]*}/page/{page:[0-9]*}",
+		Permission: kPermission_Guest,
+		Handler:    projectArticlesHandler,
+		Methods:    []string{http.MethodGet},
+	},
+	{
+		Url:        "/project/{projectid:[0-9]*}/cmd/{cmd}",
+		Permission: kPermission_Guest,
+		Handler:    projectArticleCmdHandler,
+	},
+	{
+		Url:        "/project/{projectid:[0-9]*}/article/{articleid:[0-9]*}/reply}",
+		Permission: kPermission_User,
+		Handler:    projectArticleReplyHandler,
+		Methods:    []string{http.MethodGet},
+	},
+	{
+		Url:        "/project/{projectid:[0-9]*}/article/{articleid:[0-9]*}",
+		Permission: kPermission_Guest,
+		Handler:    projectArticleHandler,
+		Methods:    []string{http.MethodGet},
+	},
+	{
+		Url:        "/ajax/{action}",
+		Permission: kPermission_Guest,
+		Handler:    ajaxHandler,
+	},
+	{
+		Url:        "/admin/{action}",
+		Permission: kPermission_SuperAdmin,
+		Handler:    adminHandler,
+	},
+	{
+		Url:        "/common/{action}",
+		Permission: kPermission_Guest,
+		Handler:    commonHandler,
+	},
+	{
+		Url:        "/download/{filename}",
+		Permission: kPermission_Guest,
+		Handler:    downloadHandler,
+	},
+	{
+		Url:        "/manager/{panel}",
+		Permission: kPermission_SuperAdmin,
+		Handler:    managerPanelHandler,
+	},
+	{
+		Url:        "/manager",
+		Permission: kPermission_SuperAdmin,
+		Handler:    managerHandler,
+	},
 }
 
-func registerRouter(path string, pem uint32, handler HttpHandler, methods []string) {
-	routerItems = append(routerItems, RouterItem{
+func registerRouter(path string, pem uint32, handler HttpHandler, methods []string, meta map[string]interface{}) {
+	ri := RouterItem{
 		Url:        path,
 		Permission: pem,
 		Handler:    handler,
 		Methods:    methods,
-	})
+	}
+	if nil != meta {
+		ri.Meta.Init(meta)
+	}
+	routerItems = append(routerItems, ri)
 }
 
 func fileHandler(w http.ResponseWriter, r *http.Request) {

@@ -3,6 +3,8 @@ package gocodecc
 import (
 	"errors"
 	"time"
+
+	"github.com/astaxie/beego/orm"
 )
 
 var (
@@ -31,7 +33,7 @@ func (m *CommentModel) TableName() string {
 }
 
 func init() {
-	//orm.RegisterModel(new(CommentModel))
+	orm.RegisterModel(new(CommentModel))
 }
 
 func modelCommentGet(id int) (*CommentModel, error) {
@@ -75,6 +77,80 @@ func modelCommentGet(id int) (*CommentModel, error) {
 	reply.Id = id
 
 	return &reply, nil
+}
+
+func modelCommentGetTopCount(uri string) (int, error) {
+	db, err := getRawDB()
+	if nil != err {
+		return 0, err
+	}
+	row := db.QueryRow("SELECT COUNT(*) FROM "+commentTableName+" WHERE uri = ?", uri)
+	var cnt int
+	if err := row.Scan(&cnt); nil != err {
+		return 0, err
+	}
+	return cnt, nil
+}
+
+func modelCommentGetSubs(uri string, subRefID int, page, limit int) ([]*CommentModel, error) {
+	db, err := getRawDB()
+	if nil != err {
+		return nil, err
+	}
+
+	args := make([]interface{}, 0, 3)
+	args = append(args, uri, subRefID)
+	sqlExpr := `SELECT 
+				id, 
+				uid,
+				reply_user, 
+				is_sub, 
+				sub_ref_id, 
+				sub_to_uid,
+				sub_to_user, 
+				comment, 
+				create_time, 
+				update_time,
+				agree,
+				oppose FROM comment WHERE uri = ? AND sub_ref_id = ? ORDER BY create_time `
+	if limit != 0 {
+		sqlExpr += "LIMIT ? "
+		args = append(args, limit)
+
+		if page != 0 {
+			sqlExpr += "OFFSET ? "
+			args = append(args, page*limit)
+		}
+	}
+
+	rows, err := db.Query(sqlExpr, args...)
+	if nil != err {
+		return nil, err
+	}
+	defer rows.Close()
+
+	replys := make([]*CommentModel, 0, 32)
+	for rows.Next() {
+		var reply CommentModel
+
+		if err = rows.Scan(&reply.Id,
+			&reply.Uid,
+			&reply.ReplyUser,
+			&reply.IsSub,
+			&reply.SubRefId,
+			&reply.SubToUid,
+			&reply.SubToUser,
+			&reply.Comment,
+			&reply.CreateTime,
+			&reply.UpdateTime,
+			&reply.Agree,
+			&reply.Oppose); nil != err {
+			return nil, err
+		}
+		replys = append(replys, &reply)
+	}
+
+	return replys, nil
 }
 
 func modelCommentGetArticleReply(uri string, page int, limit int) ([]*CommentModel, error) {
@@ -176,7 +252,7 @@ func modelNewComment(uri string, user *WebUser, comment string, parentId int, pa
 	reply.ReplyUser = user.UserName
 	reply.Uri = uri
 
-	if ret, err := db.Exec(`INSERT INTO reply (
+	if ret, err := db.Exec(`INSERT INTO comment (
 										uid, 
 										reply_user, 
 										is_sub,
@@ -212,5 +288,15 @@ func modelCommentDelete(rid int) error {
 	}
 
 	_, err = db.Exec("DELETE FROM comment WHERE id = ?", rid)
+	return err
+}
+
+func modelCommentDeleteSubRefID(srid int) error {
+	db, err := getRawDB()
+	if nil != err {
+		return err
+	}
+
+	_, err = db.Exec("DELETE FROM comment WHERE sub_ref_id = ?", srid)
 	return err
 }

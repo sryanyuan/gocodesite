@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/cihub/seelog"
+	"github.com/dchest/captcha"
 )
 
 const (
@@ -19,9 +20,12 @@ const (
 )
 
 func init() {
-	registerRouter("/api/article", kPermission_Guest, apiArticlesGet, []string{http.MethodGet})
-	registerRouter("/api/article/{articleId}", kPermission_Guest, apiArticleGet, []string{http.MethodGet})
-	registerRouter("/api/article/{articleId}/comment", kPermission_Guest, apiArticleCommentsGet, []string{http.MethodGet})
+	registerApi("/api/article", kPermission_Guest, apiArticlesGet, []string{http.MethodGet})
+	registerApi("/api/article/{articleId}", kPermission_Guest, apiArticleGet, []string{http.MethodGet})
+	registerApi("/api/article/{articleId}/comment", kPermission_Guest, apiArticleCommentsGet, []string{http.MethodGet})
+	registerApi("/api/article/{articleId}/comment/{commentId}", kPermission_Guest, apiArticleCommentGet, []string{http.MethodGet})
+	registerApi("/api/article/{articleId}/comment", kPermission_User, apiArticleCommentPost, []string{http.MethodPost})
+	registerApi("/api/comment/{commentId}", kPermission_SuperAdmin, apiArticleCommentDelete, []string{http.MethodDelete})
 }
 
 type apiArticleRsp struct {
@@ -45,7 +49,7 @@ type apiArticlesRsp struct {
 
 func fillArticleReplyCount(article *apiArticleRsp) error {
 	// Get all comment count
-	cnt, err := modelReplyGetCountByURI(fmt.Sprintf("/project/%d/article/%d", article.CategoryID, article.ArticleID))
+	cnt, err := modelCommentGetTopCount(fmt.Sprintf("article:%d", article.ArticleID))
 	if nil == err {
 		article.ReplyCount = cnt
 	}
@@ -208,41 +212,38 @@ func apiArticleGet(ctx *RequestContext) {
 	ctx.WriteAPIRspOKWithMessage(&rsp)
 }
 
-type apiArticleComment struct {
-	Id      int                  `json:"id"`
-	Uid     int                  `json:"uid"`
-	Name    string               `json:"name"`
-	Content string               `json:"content"`
-	Time    string               `json:"time"`
-	Agree   int                  `json:"agree"`
-	Oppose  int                  `json:"oppose"`
-	ToUid   int                  `json:"toUid"`
-	ToUser  string               `json:"toUser"`
-	Subs    []*apiArticleComment `json:"subs"`
+type apiArticleCommentRsp struct {
+	Id      int                     `json:"id"`
+	Uid     int                     `json:"uid"`
+	Name    string                  `json:"name"`
+	Content string                  `json:"content"`
+	Time    string                  `json:"time"`
+	Agree   int                     `json:"agree"`
+	Oppose  int                     `json:"oppose"`
+	ToUid   int                     `json:"toUid"`
+	ToUser  string                  `json:"toUser"`
+	Subs    []*apiArticleCommentRsp `json:"subs"`
 }
 
 type apiArticleCommentsRsp struct {
-	Replys []*apiArticleComment `json:"replys"`
+	Replys []*apiArticleCommentRsp `json:"replys"`
 }
 
 func apiArticleCommentsGet(ctx *RequestContext) {
-	uri := ctx.GetFormValueString("uri")
-	if "" == uri {
-		ctx.WriteAPIRspBadInternalError("invalid uri")
-	}
+	uri := fmt.Sprintf("article:%s", ctx.GetURLVarString("articleId"))
 	comments, err := modelCommentGetArticleReply(uri, 0, 0)
 	if nil != err {
 		ctx.WriteAPIRspBadInternalError(err.Error())
 		return
 	}
 	var rsp apiArticleCommentsRsp
-	rsp.Replys = make([]*apiArticleComment, 0, len(comments))
-	commentMap := make(map[int]*apiArticleComment)
+	rsp.Replys = make([]*apiArticleCommentRsp, 0, len(comments))
+	commentMap := make(map[int]*apiArticleCommentRsp)
 	// Merge comments
 	for _, comment := range comments {
 		if comment.SubRefId == 0 {
 			// Top comment
-			var topComment apiArticleComment
+			var topComment apiArticleCommentRsp
 			commentMap[comment.Id] = &topComment
 			topComment.Id = comment.Id
 			topComment.Uid = int(comment.Uid)
@@ -251,7 +252,7 @@ func apiArticleCommentsGet(ctx *RequestContext) {
 			topComment.Content = comment.Comment
 			topComment.Agree = comment.Agree
 			topComment.Oppose = comment.Oppose
-			topComment.Subs = make([]*apiArticleComment, 0, 32)
+			topComment.Subs = make([]*apiArticleCommentRsp, 0, 32)
 			topComment.Name = comment.ReplyUser
 			rsp.Replys = append(rsp.Replys, &topComment)
 		}
@@ -266,7 +267,7 @@ func apiArticleCommentsGet(ctx *RequestContext) {
 			seelog.Errorf("Can't find parent comment while finding sub comment %d 's parent", comment.SubRefId)
 			continue
 		}
-		var subComment apiArticleComment
+		var subComment apiArticleCommentRsp
 		subComment.Id = comment.Id
 		subComment.Uid = int(comment.Uid)
 		subComment.Name = comment.ReplyUser
@@ -280,4 +281,125 @@ func apiArticleCommentsGet(ctx *RequestContext) {
 		topComment.Subs = append(topComment.Subs, &subComment)
 	}
 	ctx.WriteAPIRspOKWithMessage(&rsp)
+}
+
+func apiArticleCommentGet(ctx *RequestContext) {
+	uri := fmt.Sprintf("article:%s", ctx.GetURLVarString("articleId"))
+	commentId := int(ctx.GetURLVarInt64("commentId", 0))
+	var rsp apiArticleCommentRsp
+	// Find parent first
+	topComment, err := modelCommentGet(commentId)
+	if nil != err {
+		ctx.WriteAPIRspBadInternalError(err.Error())
+		return
+	}
+	if nil != topComment {
+		rsp.Id = topComment.Id
+		rsp.Uid = int(topComment.Uid)
+		tm := time.Unix(topComment.CreateTime, 0)
+		rsp.Time = tm.Format("2006-01-02 15:04:05")
+		rsp.Content = topComment.Comment
+		rsp.Agree = topComment.Agree
+		rsp.Oppose = topComment.Oppose
+		rsp.Name = topComment.ReplyUser
+		// Get subs
+		subs, err := modelCommentGetSubs(uri, commentId, 0, 0)
+		if nil != err {
+			ctx.WriteAPIRspBadInternalError(err.Error())
+			return
+		}
+		if nil != subs {
+			rsp.Subs = make([]*apiArticleCommentRsp, 0, len(subs))
+			for _, comment := range subs {
+				// Top comment
+				var sub apiArticleCommentRsp
+				sub.Id = comment.Id
+				sub.Uid = int(comment.Uid)
+				tm := time.Unix(comment.CreateTime, 0)
+				sub.Time = tm.Format("2006-01-02 15:04:05")
+				sub.Content = comment.Comment
+				sub.Agree = comment.Agree
+				sub.Oppose = comment.Oppose
+				sub.Name = comment.ReplyUser
+				sub.ToUser = comment.SubToUser
+				sub.ToUid = int(comment.SubToUid)
+				rsp.Subs = append(rsp.Subs, &sub)
+			}
+		}
+	}
+	ctx.WriteAPIRspOKWithMessage(&rsp)
+}
+
+type apiArticleCommentPostArg struct {
+	Content   string `json:"content"`
+	URI       string `json:"uri"`
+	SubRefID  int    `json:"subRefID"`
+	ToUser    uint32 `json:"toUser"`
+	CaptchaId string `json:"captchaId"`
+	Solution  string `json:"solution"`
+}
+
+func apiArticleCommentPost(ctx *RequestContext) {
+	var arg apiArticleCommentPostArg
+	if err := ctx.readFromBody(&arg); nil != err {
+		ctx.WriteAPIRspBadInternalError(err.Error())
+		return
+	}
+	if arg.Solution == "" || arg.CaptchaId == "" {
+		ctx.WriteAPIRspBadInternalError("invalid captcha input")
+		return
+	}
+	if !captcha.VerifyString(arg.CaptchaId, arg.Solution) {
+		ctx.WriteAPIRspBadInternalError("invalid catpcha")
+		return
+	}
+	if len(arg.Content) < 5 || len(arg.Content) > 128 {
+		ctx.WriteAPIRspBadInternalError("content is too long")
+		return
+	}
+	// Check parent comment has same uri
+	if 0 != arg.SubRefID {
+		parentComment, err := modelCommentGet(arg.SubRefID)
+		if nil != err {
+			ctx.WriteAPIRspBadInternalError(err.Error())
+			return
+		}
+		if parentComment.IsSub {
+			ctx.WriteAPIRspBadInternalError("Can't reply to sub reply")
+			return
+		}
+		if parentComment.Uri != arg.URI {
+			ctx.WriteAPIRspBadInternalError("parent uri not equal")
+			return
+		}
+	}
+
+	if _, err := modelNewComment(arg.URI, ctx.user, arg.Content, arg.SubRefID, arg.ToUser); nil != err {
+		ctx.WriteAPIRspBadInternalError(err.Error())
+		return
+	}
+	ctx.WriteAPIRspOK(nil)
+}
+
+func apiArticleCommentDelete(ctx *RequestContext) {
+	commentId := ctx.GetURLVarInt64("commentId", 0)
+	comment, err := modelCommentGet(int(commentId))
+	if nil != err {
+		ctx.WriteAPIRspBadInternalError(err.Error())
+		return
+	}
+	if nil == comment {
+		ctx.WriteAPIRspOK(nil)
+		return
+	}
+	if err := modelCommentDelete(int(commentId)); nil != err {
+		ctx.WriteAPIRspBadInternalError(err.Error())
+		return
+	}
+	if err = modelCommentDeleteSubRefID(int(commentId)); nil != err {
+		ctx.WriteAPIRspBadInternalError(err.Error())
+		return
+	}
+
+	ctx.WriteAPIRspOK(nil)
 }

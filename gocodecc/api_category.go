@@ -3,7 +3,7 @@ package gocodecc
 import "net/http"
 
 func init() {
-	registerRouter("/api/category", kPermission_Guest, apiCategoriesGet, []string{http.MethodGet})
+	registerApi("/api/category", kPermission_Guest, apiCategoriesGet, []string{http.MethodGet})
 }
 
 type apiCategoryItem struct {

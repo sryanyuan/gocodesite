@@ -5,8 +5,8 @@ import (
 )
 
 func init() {
-	registerRouter("/api/about", kPermission_Guest, apiAboutGet, []string{http.MethodGet})
-	registerRouter("/api/about/resume", kPermission_SuperAdmin, apiAboutGet, []string{http.MethodPost})
+	registerApi("/api/about", kPermission_Guest, apiAboutGet, []string{http.MethodGet})
+	registerApi("/api/about/resume", kPermission_SuperAdmin, apiAboutGet, []string{http.MethodPost})
 }
 
 type aboutGetContext struct {
