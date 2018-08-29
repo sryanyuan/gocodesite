@@ -68,7 +68,7 @@ func convertMarkdown2HTML(mk string, summaryLines int) (string, error) {
 		rd := bufio.NewReader(bytes.NewReader([]byte(mk)))
 		var summaryBytes bytes.Buffer
 		lineRead := 0
-		mkStart := false
+		codeStart := false
 		for {
 			line, err := rd.ReadString('\n')
 			if nil != err {
@@ -82,13 +82,15 @@ func convertMarkdown2HTML(mk string, summaryLines int) (string, error) {
 			}
 			summaryBytes.WriteString(line)
 			lineRead++
-			// Check mk start
+			// Check code start
 			trimLine := strings.TrimSpace(line)
-			if strings.HasPrefix(trimLine, "```") && !strings.HasSuffix(trimLine, "```") {
+			if !codeStart && strings.HasPrefix(trimLine, "```") && !strings.HasSuffix(trimLine, "```") {
 				// Not in one line
-				mkStart = !mkStart
+				codeStart = true
+			} else if codeStart && strings.HasPrefix(trimLine, "```") {
+				codeStart = false
 			}
-			if lineRead >= summaryLines && !mkStart {
+			if lineRead >= summaryLines && !codeStart {
 				break
 			}
 		}
