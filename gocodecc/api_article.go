@@ -29,6 +29,7 @@ func init() {
 	registerApi("/api/article/{articleId}/comment/{commentId}", kPermission_Guest, apiArticleCommentGet, []string{http.MethodGet})
 	registerApi("/api/article/{articleId}/comment", kPermission_User, apiArticleCommentPost, []string{http.MethodPost})
 	registerApi("/api/comment/{commentId}", kPermission_SuperAdmin, apiArticleCommentDelete, []string{http.MethodDelete})
+	registerApi("/api/category", kPermission_SuperAdmin, apiCategoryPost, []string{http.MethodPost})
 }
 
 type apiArticleRsp struct {
@@ -246,6 +247,18 @@ func apiArticleDelete(ctx *RequestContext) {
 	if err = modelCommentDeleteByURI(fmt.Sprintf("article:%d", articleId)); nil != err {
 		ctx.WriteAPIRspBadInternalError(err.Error())
 		return
+	}
+	// Delete category if has no article
+	articleCnt, err := modelProjectCategoryGetArticleCount(article.ProjectId)
+	if nil != err {
+		ctx.WriteAPIRspBadInternalError(err.Error())
+		return
+	}
+	if 0 == articleCnt {
+		if err = modelProjectCategoryRemove(article.ProjectId); nil != err {
+			ctx.WriteAPIRspBadInternalError(err.Error())
+			return
+		}
 	}
 	ctx.WriteAPIRspOK(nil)
 }
@@ -538,4 +551,50 @@ func apiArticleCommentDelete(ctx *RequestContext) {
 	}
 
 	ctx.WriteAPIRspOK(nil)
+}
+
+type apiCategoryPostArg struct {
+	Image string `json:"image"`
+	Name  string `json:"name"`
+	Desc  string `json:"desc"`
+	Priv  int    `json:"priv"`
+}
+
+type apiCategoryPostRsp struct {
+	CategoryId int    `json:"categoryId"`
+	Name       string `json:"name"`
+}
+
+func apiCategoryPost(ctx *RequestContext) {
+	var arg apiCategoryPostArg
+	if err := ctx.readFromBody(&arg); nil != err {
+		ctx.WriteAPIRspBadInternalError(err.Error())
+		return
+	}
+	if len(arg.Name) == 0 ||
+		len(arg.Desc) == 0 ||
+		len(arg.Name) >= kCategoryNameLimit ||
+		len(arg.Desc) >= kCategoryDescribeLimit {
+		ctx.WriteAPIRspBadInternalError("invalid project name or project describe")
+		return
+	}
+
+	var project ProjectCategoryItem
+	project.Author = ctx.user.NickName
+	project.Image = arg.Image
+	project.ProjectName = arg.Name
+	project.ProjectDescribe = arg.Desc
+	project.PostPriv = uint32(kPermission_SuperAdmin)
+
+	var categoryId int64
+	var err error
+	if categoryId, err = modelProjectCategoryAddReturnId(&project); nil != err {
+		ctx.WriteAPIRspBadInternalError(err.Error())
+		return
+	}
+
+	var rsp apiCategoryPostRsp
+	rsp.CategoryId = int(categoryId)
+	rsp.Name = arg.Name
+	ctx.WriteAPIRspOKWithMessage(&rsp)
 }

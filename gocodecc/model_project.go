@@ -153,9 +153,9 @@ func modelProjectCategoryGetAll() ([]*ProjectCategoryItem, error) {
 	return resultSet, nil
 }
 
-func modelProjectCategoryAdd(item *ProjectCategoryItem) error {
+func modelProjectCategoryAddReturnId(item *ProjectCategoryItem) (int64, error) {
 	o := orm.NewOrm()
-	_, err := o.Insert(item)
+	insertId, err := o.Insert(item)
 
 	if nil == err {
 		categoryImagePath := "./" + kPrefixImagePath + "/category-images"
@@ -168,6 +168,11 @@ func modelProjectCategoryAdd(item *ProjectCategoryItem) error {
 		}
 	}
 
+	return insertId, err
+}
+
+func modelProjectCategoryAdd(item *ProjectCategoryItem) error {
+	_, err := modelProjectCategoryAddReturnId(item)
 	return err
 }
 
@@ -273,6 +278,20 @@ func modelProjectCategoryGetByProjectName(projectName string, prj *ProjectCatego
 		return err
 	}
 	return nil
+}
+
+func modelProjectCategoryGetArticleCount(cateId int) (int, error) {
+	db, err := getRawDB()
+	if nil != err {
+		return 0, err
+	}
+
+	row := db.QueryRow("SELECT COUNT(*) FROM "+projectArticleItemTableName+" WHERE project_id = ?", cateId)
+	var cnt int
+	if err = row.Scan(&cnt); nil != err {
+		return 0, err
+	}
+	return cnt, nil
 }
 
 func modelProjectCategoryGetByProjectId(projectId int, prj *ProjectCategoryItem) error {
