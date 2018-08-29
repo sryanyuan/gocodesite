@@ -28,6 +28,11 @@ comment-provider = ""
 # Support alipay or wxpay donate
 call-secret = ""
 donate-call = ""
+# Resume markdown path
+resume-file = ""
+# New blog entry
+new-blog = ""
+
 [cdn]
 bootstrap-css = "http://apps.bdimg.com/libs/bootstrap/3.3.4/css/bootstrap.min.css"
 bootstrap-theme-css = "http://apps.bdimg.com/libs/bootstrap/3.3.4/css/bootstrap-theme.min.css"

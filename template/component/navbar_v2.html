@@ -36,6 +36,11 @@
 				<li {{if eq .active "donate"}}class="donate"{{end}}>
 					<a href="/donate">捐助</a>
 				</li>
+				{{if ne .config.NewBlog ""}}
+				<li>
+					<a href="{{.config.NewBlog}}">新博客</a>
+				</li>
+				{{end}}
 				<!--If logined and has message, show message count info-->
 				<li id="navbar_message" class="hidden {{if eq .active "message"}}active{{end}}">
 					<a href="javascript:void(0)" id="navbar_message_popover" data-toggle="popover" data-placement="bottom" data-trigger="click">消息<label id="navbar_message_count" class="badge">0</label></a>

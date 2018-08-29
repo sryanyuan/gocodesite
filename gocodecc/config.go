@@ -42,6 +42,7 @@ type AppConfig struct {
 	MsgPush         MsgPushConfig     `toml:"msg-push"`
 	CDN             CDNConfig         `json:"cdn" toml:"cdn"`
 	Domain          string            `json:"domain" toml:"domain"`
+	NewBlog         string            `json:"new-blog" toml:"new-blog"`
 }
 
 // ReadJSONConfig returns config object loading from json format config file
