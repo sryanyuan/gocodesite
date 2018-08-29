@@ -291,6 +291,16 @@ func modelCommentDelete(rid int) error {
 	return err
 }
 
+func modelCommentDeleteByURI(uri string) error {
+	db, err := getRawDB()
+	if nil != err {
+		return err
+	}
+
+	_, err = db.Exec("DELETE FROM comment WHERE uri = ?", uri)
+	return err
+}
+
 func modelCommentDeleteSubRefID(srid int) error {
 	db, err := getRawDB()
 	if nil != err {

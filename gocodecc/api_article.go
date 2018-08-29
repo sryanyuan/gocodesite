@@ -242,6 +242,11 @@ func apiArticleDelete(ctx *RequestContext) {
 		ctx.WriteAPIRspBadInternalError(err.Error())
 		return
 	}
+	// Delete relative comments
+	if err = modelCommentDeleteByURI(fmt.Sprintf("article:%d", articleId)); nil != err {
+		ctx.WriteAPIRspBadInternalError(err.Error())
+		return
+	}
 	ctx.WriteAPIRspOK(nil)
 }
 
@@ -485,7 +490,7 @@ func apiArticleCommentPost(ctx *RequestContext) {
 		return
 	}
 	if len(arg.Content) < 5 || len(arg.Content) > 128 {
-		ctx.WriteAPIRspBadInternalError("content is too long")
+		ctx.WriteAPIRspBadInternalError("content is out of range")
 		return
 	}
 	// Check parent comment has same uri
