@@ -64,7 +64,7 @@ const (
 )
 
 const (
-	rspCodeInternalError = 1
+	rspCodeInternalError = 1 + iota
 	rspCodeNeedLogin
 )
 

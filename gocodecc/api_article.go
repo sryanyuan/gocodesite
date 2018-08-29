@@ -21,7 +21,10 @@ const (
 
 func init() {
 	registerApi("/api/article", kPermission_Guest, apiArticlesGet, []string{http.MethodGet})
+	registerApi("/api/article", kPermission_Guest, apiArticlePost, []string{http.MethodPost})
 	registerApi("/api/article/{articleId}", kPermission_Guest, apiArticleGet, []string{http.MethodGet})
+	registerApi("/api/article/{articleId}", kPermission_SuperAdmin, apiArticlePut, []string{http.MethodPut})
+	registerApi("/api/article/{articleId}", kPermission_SuperAdmin, apiArticleDelete, []string{http.MethodDelete})
 	registerApi("/api/article/{articleId}/comment", kPermission_Guest, apiArticleCommentsGet, []string{http.MethodGet})
 	registerApi("/api/article/{articleId}/comment/{commentId}", kPermission_Guest, apiArticleCommentGet, []string{http.MethodGet})
 	registerApi("/api/article/{articleId}/comment", kPermission_User, apiArticleCommentPost, []string{http.MethodPost})
@@ -170,6 +173,128 @@ func apiArticlesGet(ctx *RequestContext) {
 	}
 }
 
+type apiArticlePostArg struct {
+	CategoryId int    `json:"category"`
+	Title      string `json:"title"`
+	Content    string `json:"content"`
+	CoverImage string `json:"coverImage"`
+}
+
+type apiArticlePostRsp struct {
+	ArticleId int `json:"articleId"`
+}
+
+func apiArticlePost(ctx *RequestContext) {
+	var arg apiArticlePostArg
+	if err := ctx.readFromBody(&arg); nil != err {
+		ctx.WriteAPIRspBadInternalError(err.Error())
+		return
+	}
+
+	var prj ProjectCategoryItem
+	if err := modelProjectCategoryGetByProjectId(arg.CategoryId, &prj); nil != err {
+		ctx.WriteAPIRspBadInternalError(err.Error())
+		return
+	}
+
+	if len(arg.Title) == 0 || len(arg.Title) > kArticleTitleLimit {
+		ctx.WriteAPIRspBadInternalError("title length out of range")
+		return
+	}
+	if len(arg.Content) == 0 || len(arg.Content) > kArticleContentLimit {
+		ctx.WriteAPIRspBadInternalError("title content out of range")
+		return
+	}
+
+	var postArticle ProjectArticleItem
+	postArticle.ActiveTime = time.Now().Unix()
+	postArticle.PostTime = time.Now().Unix()
+	postArticle.ArticleTitle = arg.Title
+	postArticle.ArticleAuthor = ctx.user.NickName
+	postArticle.ArticleContentMarkdown = arg.Content
+	postArticle.ArticleContentHtml, _ = convertMarkdown2HTML(arg.Content, 0)
+	postArticle.ProjectName = prj.ProjectName
+	postArticle.ProjectId = prj.Id
+	postArticle.CoverImage = arg.CoverImage
+	articleId, err := modelProjectArticleNewArticle(&postArticle)
+	if nil != err {
+		ctx.WriteAPIRspBadInternalError(err.Error())
+		return
+	}
+	var rsp apiArticlePostRsp
+	rsp.ArticleId = int(articleId)
+	ctx.WriteAPIRspOKWithMessage(&rsp)
+}
+
+func apiArticleDelete(ctx *RequestContext) {
+	articleId := ctx.GetURLVarInt64("articleId", 0)
+	if 0 == articleId {
+		ctx.WriteAPIRspBadInternalError("invalid article id")
+		return
+	}
+	// Find article
+	article, err := modelProjectArticleGet(int(articleId))
+	if nil != err {
+		ctx.WriteAPIRspBadInternalError(err.Error())
+		return
+	}
+	if err = modelProjectArticleDelete(int(articleId), article.ProjectId); nil != err {
+		ctx.WriteAPIRspBadInternalError(err.Error())
+		return
+	}
+	ctx.WriteAPIRspOK(nil)
+}
+
+type apiArticlePutArg struct {
+	Title   string `json:"title"`
+	Content string `json:"content"`
+}
+
+func apiArticlePut(ctx *RequestContext) {
+	articleId := ctx.GetURLVarInt64("articleId", 0)
+	if 0 == articleId {
+		ctx.WriteAPIRspBadInternalError("invalid article id")
+		return
+	}
+	var arg apiArticlePutArg
+	if err := ctx.readFromBody(&arg); nil != err {
+		ctx.WriteAPIRspBadInternalError(err.Error())
+		return
+	}
+	if len(arg.Content) == 0 || len(arg.Content) > kArticleContentLimit {
+		ctx.WriteAPIRspBadInternalError("Content length out of range")
+		return
+	}
+	if len(arg.Title) == 0 || len(arg.Title) > kArticleTitleLimit {
+		ctx.WriteAPIRspBadInternalError("Title length out of range")
+		return
+	}
+	article, err := modelProjectArticleGet(int(articleId))
+	if nil != err {
+		ctx.WriteAPIRspBadInternalError(err.Error())
+		return
+	}
+	colsEdit := []string{"active_time", "edit_time"}
+	article.ActiveTime = time.Now().Unix()
+	article.EditTime = time.Now().Unix()
+	if article.ArticleTitle != arg.Title {
+		article.ArticleTitle = arg.Title
+		colsEdit = append(colsEdit, "article_title")
+	}
+	if article.ArticleContentMarkdown != arg.Content {
+		article.ArticleContentHtml, err = convertMarkdown2HTML(arg.Content, 0)
+		article.ArticleContentMarkdown = arg.Content
+		colsEdit = append(colsEdit, "article_content_html")
+		colsEdit = append(colsEdit, "article_content_markdown")
+	}
+	_, err = modelProjectArticleEditArticle(article, colsEdit)
+	if nil != err {
+		ctx.WriteAPIRspBadInternalError(err.Error())
+		return
+	}
+	ctx.WriteAPIRspOK(nil)
+}
+
 func apiArticleGet(ctx *RequestContext) {
 	articleId := ctx.GetURLVarInt64("articleId", 0)
 	if 0 == articleId {
@@ -182,6 +307,7 @@ func apiArticleGet(ctx *RequestContext) {
 		ctx.WriteAPIRspBadInternalError(err.Error())
 		return
 	}
+	mk := ctx.GetFormValueInt("mk", 0)
 
 	var rsp apiArticleRsp
 	rsp.ArticleID = article.Id
@@ -197,11 +323,16 @@ func apiArticleGet(ctx *RequestContext) {
 		rsp.AuthorID = int(author.Uid)
 	}
 	// Convert markdown to html
-	rsp.Content, err = convertMarkdown2HTML(article.ArticleContentMarkdown, summary)
-	if nil != err {
-		ctx.WriteAPIRspBadInternalError(err.Error())
-		return
+	if mk == 0 {
+		rsp.Content, err = convertMarkdown2HTML(article.ArticleContentMarkdown, summary)
+		if nil != err {
+			ctx.WriteAPIRspBadInternalError(err.Error())
+			return
+		}
+	} else {
+		rsp.Content = article.ArticleContentMarkdown
 	}
+
 	if ctx.config.CommentProvider == "native" {
 		if err = fillArticleReplyCount(&rsp); nil != err {
 			ctx.WriteAPIRspBadInternalError(err.Error())
