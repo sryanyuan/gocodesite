@@ -4,6 +4,8 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"net/http"
+	"regexp"
+	"time"
 
 	"github.com/dchest/captcha"
 )
@@ -11,6 +13,7 @@ import (
 func init() {
 	registerApi("/api/login/status", kPermission_Guest, apiLoginStatusGet, []string{http.MethodGet})
 	registerApi("/api/login/captcha", kPermission_Guest, apiLoginCaptchaGet, []string{http.MethodGet})
+	registerApi("/api/register", kPermission_Guest, apiRegisterPost, []string{http.MethodPost})
 	registerApi("/api/login", kPermission_Guest, apiLoginPost, []string{http.MethodPost})
 	registerApi("/api/logout", kPermission_Guest, apiLogoutPost, []string{http.MethodPost})
 }
@@ -101,5 +104,69 @@ func apiLoginPost(ctx *RequestContext) {
 
 func apiLogoutPost(ctx *RequestContext) {
 	ctx.ClearWebUser()
+	ctx.WriteAPIRspOK(nil)
+}
+
+type loginRegisterArg struct {
+	Username  string `json:"username"`
+	Password  string `json:"password"`
+	Mail      string `json:"mail"`
+	CaptchaID string `json:"captchaId"`
+	Solution  string `json:"solution"`
+}
+
+var (
+	regAccount = regexp.MustCompile("^[a-zA-Z0-9_]{5,20}$")
+	regMail    = regexp.MustCompile("^\\s*\\w+(?:\\.{0,1}[\\w-]+)*@[a-zA-Z0-9]+(?:[-.][a-zA-Z0-9]+)*\\.[a-zA-Z]+\\s*$")
+	regPass    = regexp.MustCompile("^[0-9a-zA-Z~!@$#%^]{5,20}$")
+)
+
+func apiRegisterPost(ctx *RequestContext) {
+	if ctx.user.Uid != 0 {
+		ctx.WriteAPIRspBadInternalError("Already logined")
+		return
+	}
+	var arg loginRegisterArg
+	if err := ctx.readFromBody(&arg); nil != err {
+		ctx.WriteAPIRspBadInternalError(err.Error())
+		return
+	}
+	if "" == arg.CaptchaID || "" == arg.Solution {
+		ctx.WriteAPIRspBadInternalError("invalid captcha input")
+		return
+	}
+	if !captcha.VerifyString(arg.CaptchaID, arg.Solution) {
+		ctx.WriteAPIRspBadInternalError("invalid catpcha")
+		return
+	}
+	if !regAccount.MatchString(arg.Username) {
+		ctx.WriteAPIRspBadInternalError("invalid username")
+		return
+	}
+	if !regMail.MatchString(arg.Mail) {
+		ctx.WriteAPIRspBadInternalError("invalid mail")
+		return
+	}
+	if !regPass.MatchString(arg.Password) {
+		ctx.WriteAPIRspBadInternalError("invalid password")
+		return
+	}
+
+	newuser := modelWebUserNew()
+	newuser.CreateTime = time.Now().Unix()
+	newuser.UserName = arg.Username
+	newuser.NickName = arg.Username
+	newuser.Permission = kPermission_User
+
+	md5calc := md5.New()
+	md5calc.Write([]byte(arg.Password))
+	newuser.PassToken = hex.EncodeToString(md5calc.Sum(nil))
+	newuser.EMail = arg.Mail
+
+	if err := modelWebUserInsert(newuser); nil != err {
+		ctx.WriteAPIRspBadInternalError(err.Error())
+		return
+	}
+
 	ctx.WriteAPIRspOK(nil)
 }
