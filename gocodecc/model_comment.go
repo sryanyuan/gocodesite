@@ -166,6 +166,20 @@ func modelCommentGetSubs(uri string, subRefID int, page, limit int, all bool) ([
 	return replys, nil
 }
 
+func modelCommentGetAllUnreviewedCount() (int, error) {
+	db, err := getRawDB()
+	if nil != err {
+		return 0, err
+	}
+
+	row := db.QueryRow("SELECT COUNT(*) FROM comment WHERE review = 0")
+	var cnt int
+	if err = row.Scan(&cnt); nil != err {
+		return 0, err
+	}
+	return cnt, nil
+}
+
 func modelCommentGetAllUnreviewed(page int, limit int) ([]*CommentModel, error) {
 	db, err := getRawDB()
 	if nil != err {

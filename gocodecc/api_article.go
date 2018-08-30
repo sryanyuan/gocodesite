@@ -30,6 +30,7 @@ func init() {
 	registerApi("/api/article/{articleId}/comment", kPermission_User, apiArticleCommentPost, []string{http.MethodPost})
 	registerApi("/api/article/{articleId}/top", kPermission_SuperAdmin, apiArticleTopPut, []string{http.MethodPut})
 	registerApi("/api/article/{articleId}/download", kPermission_SuperAdmin, apiArticleDownloadGet, []string{http.MethodGet})
+	registerApi("/api/comments/review/count", kPermission_SuperAdmin, apiArticleCommentReviewCountGet, []string{http.MethodGet})
 	registerApi("/api/comments/review", kPermission_SuperAdmin, apiArticleCommentReviewGet, []string{http.MethodGet})
 	registerApi("/api/comment/{commentId}/review", kPermission_SuperAdmin, apiArticleCommentReviewPut, []string{http.MethodPut})
 	registerApi("/api/comment/{commentId}", kPermission_SuperAdmin, apiArticleCommentDelete, []string{http.MethodDelete})
@@ -541,6 +542,21 @@ func apiArticleCommentPost(ctx *RequestContext) {
 		return
 	}
 	ctx.WriteAPIRspOK(nil)
+}
+
+type apiArticleCommentReviewCountRsp struct {
+	Count int `json:"count"`
+}
+
+func apiArticleCommentReviewCountGet(ctx *RequestContext) {
+	cnt, err := modelCommentGetAllUnreviewedCount()
+	if nil != err {
+		ctx.WriteAPIRspBadInternalError(err.Error())
+		return
+	}
+	var rsp apiArticleCommentReviewCountRsp
+	rsp.Count = cnt
+	ctx.WriteAPIRspOKWithMessage(&rsp)
 }
 
 func apiArticleCommentReviewGet(ctx *RequestContext) {
