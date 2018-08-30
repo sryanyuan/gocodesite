@@ -43,6 +43,7 @@ type AppConfig struct {
 	CDN             CDNConfig         `json:"cdn" toml:"cdn"`
 	Domain          string            `json:"domain" toml:"domain"`
 	NewBlog         string            `json:"new-blog" toml:"new-blog"`
+	EnableComment   bool              `json:"enable-comment" toml:"enable-comment"`
 }
 
 // ReadJSONConfig returns config object loading from json format config file

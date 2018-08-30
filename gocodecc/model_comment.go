@@ -26,6 +26,7 @@ type CommentModel struct {
 	UpdateTime int64
 	Agree      int
 	Oppose     int
+	Review     int
 }
 
 func (m *CommentModel) TableName() string {
@@ -54,7 +55,8 @@ func modelCommentGet(id int) (*CommentModel, error) {
 				create_time, 
 				update_time,
 				agree,
-				oppose FROM comment WHERE id = ?`
+				oppose,
+				review FROM comment WHERE id = ?`
 
 	row := db.QueryRow(sqlExpr, id)
 	var reply CommentModel
@@ -71,7 +73,8 @@ func modelCommentGet(id int) (*CommentModel, error) {
 		&reply.CreateTime,
 		&reply.UpdateTime,
 		&reply.Agree,
-		&reply.Oppose); nil != err {
+		&reply.Oppose,
+		&reply.Review); nil != err {
 		return nil, err
 	}
 	reply.Id = id
@@ -79,12 +82,16 @@ func modelCommentGet(id int) (*CommentModel, error) {
 	return &reply, nil
 }
 
-func modelCommentGetTopCount(uri string) (int, error) {
+func modelCommentGetTopCount(uri string, all bool) (int, error) {
 	db, err := getRawDB()
 	if nil != err {
 		return 0, err
 	}
-	row := db.QueryRow("SELECT COUNT(*) FROM "+commentTableName+" WHERE uri = ?", uri)
+	expr := "SELECT COUNT(*) FROM " + commentTableName + " WHERE uri = ?"
+	if !all {
+		expr += " AND review = 1 "
+	}
+	row := db.QueryRow(expr, uri)
 	var cnt int
 	if err := row.Scan(&cnt); nil != err {
 		return 0, err
@@ -92,7 +99,7 @@ func modelCommentGetTopCount(uri string) (int, error) {
 	return cnt, nil
 }
 
-func modelCommentGetSubs(uri string, subRefID int, page, limit int) ([]*CommentModel, error) {
+func modelCommentGetSubs(uri string, subRefID int, page, limit int, all bool) ([]*CommentModel, error) {
 	db, err := getRawDB()
 	if nil != err {
 		return nil, err
@@ -112,7 +119,12 @@ func modelCommentGetSubs(uri string, subRefID int, page, limit int) ([]*CommentM
 				create_time, 
 				update_time,
 				agree,
-				oppose FROM comment WHERE uri = ? AND sub_ref_id = ? ORDER BY create_time `
+				oppose,
+				review FROM comment WHERE uri = ? AND sub_ref_id = ?`
+	if !all {
+		sqlExpr += " AND review = 1 "
+	}
+	sqlExpr += " ORDER BY create_time "
 	if limit != 0 {
 		sqlExpr += "LIMIT ? "
 		args = append(args, limit)
@@ -144,7 +156,8 @@ func modelCommentGetSubs(uri string, subRefID int, page, limit int) ([]*CommentM
 			&reply.CreateTime,
 			&reply.UpdateTime,
 			&reply.Agree,
-			&reply.Oppose); nil != err {
+			&reply.Oppose,
+			&reply.Review); nil != err {
 			return nil, err
 		}
 		replys = append(replys, &reply)
@@ -153,7 +166,70 @@ func modelCommentGetSubs(uri string, subRefID int, page, limit int) ([]*CommentM
 	return replys, nil
 }
 
-func modelCommentGetArticleReply(uri string, page int, limit int) ([]*CommentModel, error) {
+func modelCommentGetAllUnreviewed(page int, limit int) ([]*CommentModel, error) {
+	db, err := getRawDB()
+	if nil != err {
+		return nil, err
+	}
+
+	args := make([]interface{}, 0, 3)
+	args = append(args)
+	sqlExpr := `SELECT 
+				id, 
+				uid,
+				reply_user, 
+				is_sub, 
+				sub_ref_id, 
+				sub_to_uid,
+				sub_to_user, 
+				comment, 
+				create_time, 
+				update_time,
+				agree,
+				oppose,
+				review FROM comment WHERE review = 0 ORDER BY create_time `
+	if limit != 0 {
+		sqlExpr += "LIMIT ? "
+		args = append(args, limit)
+
+		if page != 0 {
+			sqlExpr += "OFFSET ? "
+			args = append(args, page*limit)
+		}
+	}
+
+	rows, err := db.Query(sqlExpr, args...)
+	if nil != err {
+		return nil, err
+	}
+	defer rows.Close()
+
+	replys := make([]*CommentModel, 0, 32)
+	for rows.Next() {
+		var reply CommentModel
+
+		if err = rows.Scan(&reply.Id,
+			&reply.Uid,
+			&reply.ReplyUser,
+			&reply.IsSub,
+			&reply.SubRefId,
+			&reply.SubToUid,
+			&reply.SubToUser,
+			&reply.Comment,
+			&reply.CreateTime,
+			&reply.UpdateTime,
+			&reply.Agree,
+			&reply.Oppose,
+			&reply.Review); nil != err {
+			return nil, err
+		}
+		replys = append(replys, &reply)
+	}
+
+	return replys, nil
+}
+
+func modelCommentGetArticleReply(uri string, page int, limit int, all bool) ([]*CommentModel, error) {
 	db, err := getRawDB()
 	if nil != err {
 		return nil, err
@@ -173,7 +249,12 @@ func modelCommentGetArticleReply(uri string, page int, limit int) ([]*CommentMod
 				create_time, 
 				update_time,
 				agree,
-				oppose FROM comment WHERE uri = ? ORDER BY create_time `
+				oppose,
+				review FROM comment WHERE uri = ?`
+	if !all {
+		sqlExpr += " AND review = 1 "
+	}
+	sqlExpr += " ORDER BY create_time "
 	if limit != 0 {
 		sqlExpr += "LIMIT ? "
 		args = append(args, limit)
@@ -205,7 +286,8 @@ func modelCommentGetArticleReply(uri string, page int, limit int) ([]*CommentMod
 			&reply.CreateTime,
 			&reply.UpdateTime,
 			&reply.Agree,
-			&reply.Oppose); nil != err {
+			&reply.Oppose,
+			&reply.Review); nil != err {
 			return nil, err
 		}
 		replys = append(replys, &reply)
@@ -252,6 +334,11 @@ func modelNewComment(uri string, user *WebUser, comment string, parentId int, pa
 	reply.ReplyUser = user.UserName
 	reply.Uri = uri
 
+	review := 0
+	if user.Permission == kPermission_SuperAdmin {
+		review = 1
+	}
+
 	if ret, err := db.Exec(`INSERT INTO comment (
 										uid, 
 										reply_user, 
@@ -263,7 +350,8 @@ func modelNewComment(uri string, user *WebUser, comment string, parentId int, pa
 										comment, 
 										create_time,
 										agree,
-										oppose) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+										oppose,
+										review) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 		reply.Uid,
 		reply.ReplyUser,
 		reply.IsSub,
@@ -274,11 +362,22 @@ func modelNewComment(uri string, user *WebUser, comment string, parentId int, pa
 		reply.Comment,
 		reply.CreateTime,
 		reply.Agree,
-		reply.Oppose); nil != err {
+		reply.Oppose,
+		review); nil != err {
 		return 0, err
 	} else {
 		return ret.LastInsertId()
 	}
+}
+
+func modelCommentMarkReview(rid int) error {
+	db, err := getRawDB()
+	if nil != err {
+		return err
+	}
+
+	_, err = db.Exec("UPDATE comment SET review = 1 WHERE id = ?", rid)
+	return err
 }
 
 func modelCommentDelete(rid int) error {

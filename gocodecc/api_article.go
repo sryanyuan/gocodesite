@@ -30,6 +30,8 @@ func init() {
 	registerApi("/api/article/{articleId}/comment", kPermission_User, apiArticleCommentPost, []string{http.MethodPost})
 	registerApi("/api/article/{articleId}/top", kPermission_SuperAdmin, apiArticleTopPut, []string{http.MethodPut})
 	registerApi("/api/article/{articleId}/download", kPermission_SuperAdmin, apiArticleDownloadGet, []string{http.MethodGet})
+	registerApi("/api/comments/review", kPermission_SuperAdmin, apiArticleCommentReviewGet, []string{http.MethodGet})
+	registerApi("/api/comment/{commentId}/review", kPermission_SuperAdmin, apiArticleCommentReviewPut, []string{http.MethodPut})
 	registerApi("/api/comment/{commentId}", kPermission_SuperAdmin, apiArticleCommentDelete, []string{http.MethodDelete})
 	registerApi("/api/category", kPermission_SuperAdmin, apiCategoryPost, []string{http.MethodPost})
 }
@@ -53,18 +55,18 @@ type apiArticlesRsp struct {
 	Pages    int              `json:"pages"`
 }
 
-func fillArticleReplyCount(article *apiArticleRsp) error {
+func fillArticleReplyCount(article *apiArticleRsp, user *WebUser) error {
 	// Get all comment count
-	cnt, err := modelCommentGetTopCount(fmt.Sprintf("article:%d", article.ArticleID))
+	cnt, err := modelCommentGetTopCount(fmt.Sprintf("article:%d", article.ArticleID), user.Permission == kPermission_SuperAdmin)
 	if nil == err {
 		article.ReplyCount = cnt
 	}
 	return err
 }
 
-func fillArticlesReplyCount(articles *apiArticlesRsp) error {
+func fillArticlesReplyCount(articles *apiArticlesRsp, user *WebUser) error {
 	for _, v := range articles.Articles {
-		if err := fillArticleReplyCount(v); nil != err {
+		if err := fillArticleReplyCount(v, user); nil != err {
 			return err
 		}
 	}
@@ -125,7 +127,7 @@ func apiArticlesGet(ctx *RequestContext) {
 				rsp.Articles = append(rsp.Articles, &item)
 			}
 			if ctx.config.CommentProvider == "native" {
-				if err = fillArticlesReplyCount(&rsp); nil != err {
+				if err = fillArticlesReplyCount(&rsp, ctx.user); nil != err {
 					ctx.WriteAPIRspBadInternalError(err.Error())
 					return
 				}
@@ -162,7 +164,7 @@ func apiArticlesGet(ctx *RequestContext) {
 				rsp.Articles = append(rsp.Articles, &item)
 			}
 			if ctx.config.CommentProvider == "native" {
-				if err = fillArticlesReplyCount(&rsp); nil != err {
+				if err = fillArticlesReplyCount(&rsp, ctx.user); nil != err {
 					ctx.WriteAPIRspBadInternalError(err.Error())
 					return
 				}
@@ -354,7 +356,7 @@ func apiArticleGet(ctx *RequestContext) {
 	}
 
 	if ctx.config.CommentProvider == "native" {
-		if err = fillArticleReplyCount(&rsp); nil != err {
+		if err = fillArticleReplyCount(&rsp, ctx.user); nil != err {
 			ctx.WriteAPIRspBadInternalError(err.Error())
 			return
 		}
@@ -373,6 +375,7 @@ type apiArticleCommentRsp struct {
 	Oppose  int                     `json:"oppose"`
 	ToUid   int                     `json:"toUid"`
 	ToUser  string                  `json:"toUser"`
+	Review  int                     `json:"review"`
 	Subs    []*apiArticleCommentRsp `json:"subs"`
 }
 
@@ -382,7 +385,7 @@ type apiArticleCommentsRsp struct {
 
 func apiArticleCommentsGet(ctx *RequestContext) {
 	uri := fmt.Sprintf("article:%s", ctx.GetURLVarString("articleId"))
-	comments, err := modelCommentGetArticleReply(uri, 0, 0)
+	comments, err := modelCommentGetArticleReply(uri, 0, 0, ctx.user.Permission == kPermission_SuperAdmin)
 	if nil != err {
 		ctx.WriteAPIRspBadInternalError(err.Error())
 		return
@@ -405,6 +408,7 @@ func apiArticleCommentsGet(ctx *RequestContext) {
 			topComment.Oppose = comment.Oppose
 			topComment.Subs = make([]*apiArticleCommentRsp, 0, 32)
 			topComment.Name = comment.ReplyUser
+			topComment.Review = comment.Review
 			rsp.Replys = append(rsp.Replys, &topComment)
 		}
 	}
@@ -429,6 +433,7 @@ func apiArticleCommentsGet(ctx *RequestContext) {
 		subComment.Oppose = comment.Oppose
 		subComment.ToUid = int(comment.SubToUid)
 		subComment.ToUser = comment.SubToUser
+		subComment.Review = comment.Review
 		topComment.Subs = append(topComment.Subs, &subComment)
 	}
 	ctx.WriteAPIRspOKWithMessage(&rsp)
@@ -453,8 +458,9 @@ func apiArticleCommentGet(ctx *RequestContext) {
 		rsp.Agree = topComment.Agree
 		rsp.Oppose = topComment.Oppose
 		rsp.Name = topComment.ReplyUser
+		rsp.Review = topComment.Review
 		// Get subs
-		subs, err := modelCommentGetSubs(uri, commentId, 0, 0)
+		subs, err := modelCommentGetSubs(uri, commentId, 0, 0, ctx.user.Permission == kPermission_SuperAdmin)
 		if nil != err {
 			ctx.WriteAPIRspBadInternalError(err.Error())
 			return
@@ -474,6 +480,7 @@ func apiArticleCommentGet(ctx *RequestContext) {
 				sub.Name = comment.ReplyUser
 				sub.ToUser = comment.SubToUser
 				sub.ToUid = int(comment.SubToUid)
+				sub.Review = comment.Review
 				rsp.Subs = append(rsp.Subs, &sub)
 			}
 		}
@@ -491,6 +498,10 @@ type apiArticleCommentPostArg struct {
 }
 
 func apiArticleCommentPost(ctx *RequestContext) {
+	if !ctx.config.EnableComment {
+		ctx.WriteAPIRspBadInternalError("Comment disabled")
+		return
+	}
 	var arg apiArticleCommentPostArg
 	if err := ctx.readFromBody(&arg); nil != err {
 		ctx.WriteAPIRspBadInternalError(err.Error())
@@ -529,6 +540,54 @@ func apiArticleCommentPost(ctx *RequestContext) {
 		ctx.WriteAPIRspBadInternalError(err.Error())
 		return
 	}
+	ctx.WriteAPIRspOK(nil)
+}
+
+func apiArticleCommentReviewGet(ctx *RequestContext) {
+	comments, err := modelCommentGetAllUnreviewed(0, 0)
+	if nil != err {
+		ctx.WriteAPIRspBadInternalError(err.Error())
+		return
+	}
+
+	var rsp apiArticleCommentsRsp
+	rsp.Replys = make([]*apiArticleCommentRsp, 0, len(comments))
+	// Merge comments
+	for _, comment := range comments {
+		// Top comment
+		var topComment apiArticleCommentRsp
+		topComment.Id = comment.Id
+		topComment.Uid = int(comment.Uid)
+		tm := time.Unix(comment.CreateTime, 0)
+		topComment.Time = tm.Format("2006-01-02 15:04:05")
+		topComment.Content = comment.Comment
+		topComment.Agree = comment.Agree
+		topComment.Oppose = comment.Oppose
+		topComment.Subs = make([]*apiArticleCommentRsp, 0, 32)
+		topComment.Name = comment.ReplyUser
+		topComment.Review = comment.Review
+		rsp.Replys = append(rsp.Replys, &topComment)
+	}
+
+	ctx.WriteAPIRspOKWithMessage(&rsp)
+}
+
+func apiArticleCommentReviewPut(ctx *RequestContext) {
+	commentId := ctx.GetURLVarInt64("commentId", 0)
+	comment, err := modelCommentGet(int(commentId))
+	if nil != err {
+		ctx.WriteAPIRspBadInternalError(err.Error())
+		return
+	}
+	if nil == comment {
+		ctx.WriteAPIRspOK(nil)
+		return
+	}
+	if err := modelCommentMarkReview(int(commentId)); nil != err {
+		ctx.WriteAPIRspBadInternalError(err.Error())
+		return
+	}
+
 	ctx.WriteAPIRspOK(nil)
 }
 

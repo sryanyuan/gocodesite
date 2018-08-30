@@ -32,6 +32,8 @@ donate-call = ""
 resume-file = ""
 # New blog entry
 new-blog = ""
+# enable comment (new blog)
+enable-comment = true
 
 [cdn]
 bootstrap-css = "http://apps.bdimg.com/libs/bootstrap/3.3.4/css/bootstrap.min.css"
