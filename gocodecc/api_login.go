@@ -16,6 +16,7 @@ func init() {
 	registerApi("/api/register", kPermission_Guest, apiRegisterPost, []string{http.MethodPost})
 	registerApi("/api/login", kPermission_Guest, apiLoginPost, []string{http.MethodPost})
 	registerApi("/api/logout", kPermission_Guest, apiLogoutPost, []string{http.MethodPost})
+	registerApi("/api/superadmin", kPermission_Guest, apiSuperAdminGet, []string{http.MethodGet})
 }
 
 type loginStatusRsp struct {
@@ -169,4 +170,17 @@ func apiRegisterPost(ctx *RequestContext) {
 	}
 
 	ctx.WriteAPIRspOK(nil)
+}
+
+func apiSuperAdminGet(ctx *RequestContext) {
+	admin, err := modelWebUserGetSuperAdmin()
+	if nil != err {
+		ctx.WriteAPIRspBadInternalError(err.Error())
+		return
+	}
+
+	var rsp loginStatusRsp
+	rsp.Username = admin.UserName
+	rsp.Uid = admin.Uid
+	ctx.WriteAPIRspOKWithMessage(&rsp)
 }

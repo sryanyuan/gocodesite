@@ -97,6 +97,16 @@ func modelWebUserGetUserByUid(uid uint32) *WebUser {
 	return user
 }
 
+func modelWebUserGetSuperAdmin() (*WebUser, error) {
+	var user WebUser
+	o := orm.NewOrm()
+	err := o.Raw("SELECT * FROM web_user WHERE permission = ?", kPermission_SuperAdmin).QueryRow(&user)
+	if nil != err {
+		return nil, err
+	}
+	return &user, nil
+}
+
 func modelWebUserGetUserByUserName(userName string) *WebUser {
 	var user WebUser
 	o := orm.NewOrm()
