@@ -28,6 +28,8 @@ func init() {
 	registerApi("/api/article/{articleId}/comment", kPermission_Guest, apiArticleCommentsGet, []string{http.MethodGet})
 	registerApi("/api/article/{articleId}/comment/{commentId}", kPermission_Guest, apiArticleCommentGet, []string{http.MethodGet})
 	registerApi("/api/article/{articleId}/comment", kPermission_User, apiArticleCommentPost, []string{http.MethodPost})
+	registerApi("/api/article/{articleId}/top", kPermission_SuperAdmin, apiArticleTopPut, []string{http.MethodPut})
+	registerApi("/api/article/{articleId}/download", kPermission_SuperAdmin, apiArticleDownloadGet, []string{http.MethodGet})
 	registerApi("/api/comment/{commentId}", kPermission_SuperAdmin, apiArticleCommentDelete, []string{http.MethodDelete})
 	registerApi("/api/category", kPermission_SuperAdmin, apiCategoryPost, []string{http.MethodPost})
 }
@@ -597,4 +599,43 @@ func apiCategoryPost(ctx *RequestContext) {
 	rsp.CategoryId = int(categoryId)
 	rsp.Name = arg.Name
 	ctx.WriteAPIRspOKWithMessage(&rsp)
+}
+
+func apiArticleTopPut(ctx *RequestContext) {
+	articleId := ctx.GetURLVarInt64("articleId", 0)
+	if 0 == articleId {
+		ctx.WriteAPIRspBadInternalError("invalid article id")
+		return
+	}
+	article, err := modelProjectArticleGet(int(articleId))
+	if nil != err {
+		ctx.WriteAPIRspBadInternalError(err.Error())
+		return
+	}
+	ptop := false
+	if article.Top != 0 {
+		ptop = true
+	}
+	if err = modelProjectArticleSetTop(int(articleId), !ptop); nil != err {
+		ctx.WriteAPIRspBadInternalError(err.Error())
+		return
+	}
+	ctx.WriteAPIRspOK(nil)
+}
+
+func apiArticleDownloadGet(ctx *RequestContext) {
+	articleId := ctx.GetURLVarInt64("articleId", 0)
+	if 0 == articleId {
+		ctx.WriteAPIRspBadInternalError("invalid article id")
+		return
+	}
+	article, err := modelProjectArticleGet(int(articleId))
+	if nil != err {
+		ctx.WriteAPIRspBadInternalError(err.Error())
+		return
+	}
+	ctx.w.Header().Set("Content-Type", "text/plain")
+	ctx.w.Header().Set("Content-Disposition", "attachment;filename="+article.ArticleTitle+".md")
+	//ctx.w.Header().Set("Content-Length", len(fileBytes))
+	ctx.w.Write([]byte(article.ArticleContentMarkdown))
 }
