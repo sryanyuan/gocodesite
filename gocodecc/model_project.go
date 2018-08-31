@@ -1002,7 +1002,7 @@ func modelProjectArticleGetArticles(projectId int, page int, limit int) ([]*Proj
 		active_time,
 		click,
 		cover_image FROM `+projectArticleItemTableName+
-			" WHERE project_id = ? AND top = 0 ORDER BY active_time DESC LIMIT ? OFFSET ?", projectId, leftCount, offset); nil != err {
+			" WHERE project_id = ? AND top = 0 ORDER BY post_time DESC LIMIT ? OFFSET ?", projectId, leftCount, offset); nil != err {
 			return nil, 0, err
 		}
 
