@@ -6,6 +6,10 @@ import (
 	"github.com/cihub/seelog"
 )
 
+const (
+	timeFormat = "2006-01-02 15:04:05"
+)
+
 type apiArticleCommentRsp struct {
 	Id      int                     `json:"id"`
 	Uid     int                     `json:"uid"`

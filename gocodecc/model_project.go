@@ -949,6 +949,27 @@ func modelProjectArticleGetTopArticleCount(projectId int) (int, error) {
 	return articleCount, nil
 }
 
+func modelProjectArticleGetTitleAndPostTime() ([]*ProjectArticleItem, error) {
+	db, err := getRawDB()
+	if nil != err {
+		return nil, err
+	}
+	articles := make([]*ProjectArticleItem, 0, 32)
+	rows, err := db.Query("SELECT id, article_title, post_time FROM " + projectArticleItemTableName + `
+	ORDER BY post_time DESC`)
+	if nil != err {
+		return nil, err
+	}
+	for rows.Next() {
+		var article ProjectArticleItem
+		if err = rows.Scan(&article.Id, &article.ArticleTitle, &article.PostTime); nil != err {
+			return nil, err
+		}
+		articles = append(articles, &article)
+	}
+	return articles, nil
+}
+
 //	first, get top articles
 //	second, get the left articles if necessary
 func modelProjectArticleGetArticles(projectId int, page int, limit int) ([]*ProjectArticleItem, int, error) {
