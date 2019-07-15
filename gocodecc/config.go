@@ -39,6 +39,7 @@ type AppConfig struct {
 	CommentContext  map[string]string `json:"comment-context" toml:"comment-context"`
 	CallSecret      string            `json:"call-secret" toml:"call-secret"`
 	DonateCall      string            `json:"donate-call" toml:"donate-call"`
+	DonateUnionURL  string            `json:"donate-union-url" toml:"donate-union-url"`
 	MsgPush         MsgPushConfig     `toml:"msg-push"`
 	CDN             CDNConfig         `json:"cdn" toml:"cdn"`
 	Domain          string            `json:"domain" toml:"domain"`

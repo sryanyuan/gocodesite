@@ -95,6 +95,9 @@ func donateCheckHandler(ctx *RequestContext) {
 
 func requestForPaymentURL(info *orderCreateInfo, config *AppConfig) (string, error) {
 	urlBase := "https://yun.maweiwangluo.com/pay/union/submit.php"
+	if config.DonateUnionURL != "" {
+		urlBase = config.DonateUnionURL
+	}
 	args := map[string]string{
 		"addnum":  info.OrderID,
 		"total":   fmt.Sprintf("%.2f", info.NumFloat),
