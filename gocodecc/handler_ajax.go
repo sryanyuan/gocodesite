@@ -16,6 +16,7 @@ import (
 	"github.com/cihub/seelog"
 	"github.com/dchest/captcha"
 	"github.com/gorilla/mux"
+	"github.com/sryanyuan/bmservers/shareutils"
 )
 
 type AjaxResult struct {
@@ -1037,17 +1038,16 @@ func ajaxHandler(ctx *RequestContext) {
 				}
 			}
 			if payMethod != payMethodWxQR &&
-				payMethod != payMethodAlipayQR &&
-				payMethod != payMethodUnion {
+				payMethod != payMethodAlipayQR {
 				result.Msg = "无效的支付方式"
 				return
 			}
-			if payMethod == payMethodWxQR {
-				if donateValue < 100 {
-					result.Msg = "微信支付仅支持100元以上金额，小金额请使用支付宝"
-					return
-				}
-			}
+			// if payMethod == payMethodWxQR {
+			// 	if donateValue < 100 {
+			// 		result.Msg = "微信支付仅支持100元以上金额，小金额请使用支付宝"
+			// 		return
+			// 	}
+			// }
 
 			seelog.Infof("Request to create order, account=%v, value=%v, pm=%v, debug=%v",
 				donateAccount, donateValue, payMethod, ctx.config.Debug)
@@ -1057,14 +1057,22 @@ func ajaxHandler(ctx *RequestContext) {
 				return
 			}
 			// Request for payment url when paymethod is union pay
-			if payMethodUnion == payMethod {
-				qrURL, err := requestForPaymentURL(orderInfo, ctx.config)
-				if nil != err {
-					result.Msg = err.Error()
-					return
-				}
-				orderInfo.QRUrl = qrURL
+			// if payMethodUnion == payMethod {
+			// 	qrURL, err := requestForPaymentURL(orderInfo, ctx.config)
+			// 	if nil != err {
+			// 		result.Msg = err.Error()
+			// 		return
+			// 	}
+			// 	orderInfo.QRUrl = qrURL
+			// }
+			// Request order id
+			orderId, err := createDonateOrderPpay(ctx.config, payMethod, orderInfo)
+			if nil != err {
+				result.Msg = err.Error()
+				return
 			}
+			orderInfo.PpayOrderID = orderId
+			orderInfo.PpayURL = ctx.config.Ppay.PayURL
 
 			// Append a iframe into front
 			seelog.Info("Order info ", orderInfo)
@@ -1116,6 +1124,60 @@ func ajaxHandler(ctx *RequestContext) {
 				return
 			}
 			seelog.Infof("Confirm done by remote server, order id = %v", orderID)
+
+			autoRender = false
+			ctx.w.Write(successData)
+		}
+	case "ppay_confirm":
+		{
+			ctx.r.ParseForm()
+			ctx.r.ParseMultipartForm(10 * 1024)
+
+			payID := getFormValueAllMethod(ctx.r, "payId")
+			//typ := getFormValueAllMethod(ctx.r, "type")
+			totalStr := getFormValueAllMethod(ctx.r, "price")
+			uid := getFormValueAllMethod(ctx.r, "param")
+			seelog.Infof("Confirm order with orderID %s, total %s, uid %s", payID, totalStr, uid)
+
+			if "" == payID {
+				result.Msg = "Invalid order id"
+				return
+			}
+
+			if "" == totalStr {
+				result.Msg = "Invalid total"
+				return
+			}
+
+			if "" == uid {
+				result.Msg = "Invalid uid"
+				return
+			}
+
+			totalF, err := strconv.ParseFloat(totalStr, 32)
+			if nil != err {
+				result.Msg = err.Error()
+				return
+			}
+			total := int(totalF)
+
+			realMd5 := ""
+			if strings.HasPrefix(payID, "wx") {
+				realMd5 = QuickMD5(fmt.Sprintf("%v%v%v%v", ctx.config.Ppay.ApiKey, payID, uid, total))
+			} else if strings.HasPrefix(payID, "9") {
+				shareutils.LogInfof("Confirm order id %s, apikey %s, uid %d, totalF %v", payID, ctx.config.Ppay.ApiKey, uid, totalF)
+				realMd5 = QuickMD5(fmt.Sprintf("%v%v%v%.2f", ctx.config.Ppay.ApiKey, payID, uid, totalF))
+			} else {
+				realMd5 = QuickMD5(ctx.config.Ppay.ApiKey + payID)
+			}
+
+			err = confirmDonateOrder(uid, payID, realMd5, totalF)
+			if nil != err {
+				result.Msg = err.Error()
+				seelog.Errorf("Confirm failed by remote server, error = %v", err)
+				return
+			}
+			seelog.Infof("Confirm done by remote server, order id = %v", payID)
 
 			autoRender = false
 			ctx.w.Write(successData)

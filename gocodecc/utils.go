@@ -2,6 +2,8 @@ package gocodecc
 
 import (
 	"bytes"
+	"crypto/md5"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -127,6 +129,38 @@ func doGet(reqUrl string, args map[string]string) ([]byte, error) {
 	return result, nil
 }
 
+func doPost(reqUrl string, args map[string]string, body []byte) ([]byte, error) {
+	u, _ := url.Parse(strings.Trim(reqUrl, "/"))
+	q := u.Query()
+	if nil != args {
+		for arg, val := range args {
+			q.Add(arg, val)
+		}
+	}
+	u.RawQuery = q.Encode()
+
+	var res *http.Response
+	var err error
+	if nil != body {
+		ioBody := bytes.NewBuffer(body)
+		res, err = http.Post(u.String(), "application/json;charset=utf-8", ioBody)
+	} else {
+		res, err = http.Post(u.String(), "application/json;charset=utf-8", nil)
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	result, err := ioutil.ReadAll(res.Body)
+	res.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
 func doFormPost(reqURL string, kv url.Values) (int, []byte, error) {
 	rsp, err := http.PostForm(reqURL, kv)
 	if nil != err {
@@ -156,4 +190,11 @@ func rawReadFileData(path string) ([]byte, error) {
 		return nil, errors.New(errMsg)
 	}
 	return fileBytes, nil
+}
+
+func QuickMD5(input string) string {
+	md5Ctx := md5.New()
+	md5Ctx.Write([]byte(input))
+	resultBytes := md5Ctx.Sum(nil)
+	return hex.EncodeToString(resultBytes)
 }

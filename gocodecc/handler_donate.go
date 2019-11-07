@@ -1,12 +1,15 @@
 package gocodecc
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/cihub/seelog"
 	"github.com/gorilla/mux"
@@ -18,13 +21,15 @@ type DonateRsp struct {
 }
 
 type orderCreateInfo struct {
-	OrderID  string
-	ApiID    string
-	ApiKey   string
-	Uid      int
-	Num      int
-	NumFloat float64
-	QRUrl    string
+	OrderID     string
+	PpayOrderID string
+	PpayURL     string
+	ApiID       string
+	ApiKey      string
+	Uid         int
+	Num         int
+	NumFloat    float64
+	QRUrl       string
 	// Config field
 	CallHost   string
 	CallSecret string
@@ -34,6 +39,8 @@ const (
 	payMethodAlipayQR = iota
 	payMethodWxQR
 	payMethodUnion
+	payMethodWxPpay
+	payMethodAliPpay
 )
 
 var (
@@ -113,6 +120,64 @@ func requestForPaymentURL(info *orderCreateInfo, config *AppConfig) (string, err
 	res := string(rspData)
 	res = strings.Trim(res, "\xEF\xBB\xBF")
 	return res, nil
+}
+
+type ppayResp struct {
+	Code    int                    `json:"code"`
+	Message string                 `json:"msg"`
+	Data    map[string]interface{} `json:"data"`
+}
+
+func createDonateOrderPpay(cfg *AppConfig, pm int, order *orderCreateInfo) (string, error) {
+	if "" == cfg.Ppay.PayURL ||
+		"" == cfg.Ppay.PayKey {
+		return "", errors.New("Bad config of ppay")
+	}
+
+	sign := order.OrderID + strconv.Itoa(order.Uid)
+	if pm == payMethodAlipayQR {
+		sign += "2"
+	} else {
+		sign += "1"
+	}
+	sign += cfg.Ppay.PayKey
+
+	payMethod := "1"
+	if pm == payMethodAlipayQR {
+		payMethod = "2"
+	}
+
+	tm := time.Now().UnixNano() / 1e6
+	h := md5.New()
+	h.Write([]byte(sign))
+	sign = hex.EncodeToString(h.Sum(nil))
+
+	requestURL := fmt.Sprintf("%s/createOrder?t=%v&sign=%v&type=%v&payId=%v&price=%.2f&param=%v",
+		cfg.Ppay.PayURL, tm, sign, payMethod, order.OrderID, order.NumFloat, order.Uid)
+	rspData, err := doPost(requestURL, nil, nil)
+	if nil != err {
+		return "", err
+	}
+
+	var rsp ppayResp
+	if err = json.Unmarshal(rspData, &rsp); nil != err {
+		return "", err
+	}
+	if nil == rsp.Data {
+		if "" != rsp.Message {
+			return "", errors.New(rsp.Message)
+		}
+		return "", errors.New("Null data")
+	}
+	oi, ok := rsp.Data["orderId"]
+	if !ok {
+		return "", errors.New("OrderId not found")
+	}
+	orderId, ok := oi.(string)
+	if !ok {
+		return "", errors.New("OrderId not string")
+	}
+	return orderId, nil
 }
 
 func createDonateOrder(user string, num int, pm int, debug bool) (*orderCreateInfo, error) {

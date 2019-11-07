@@ -67,12 +67,13 @@ $(document).ready(function(){
 						var payMethod = $("#id-pay-method").val();
 						var payWindow = $("#alipay_qr_iframe");
 						var paysrc = "";
-						if ("0" == payMethod) {
-							paysrc = "https://api.jsjapp.com/plugin.php?id=add:alipay2&addnum=" + orderInfo.OrderID + "&total=" + orderInfo.NumFloat + "&apiid=" + orderInfo.ApiID + "&apikey=" + orderInfo.ApiKey + "&uid=" + orderInfo.Uid + "&showurl=";
-							$("#id-charge-hinttext").html("订单号[" + orderInfo.OrderID + "] (请牢记)，请用支付宝钱包扫码支付，成功后请不要关闭本页面，直到跳转");
-						} else if ("1" == payMethod) {
-							paysrc = "https://pay.maweiwangluo.com/pay/wx/native.php?addnum=" + orderInfo.OrderID + "&total=" + orderInfo.NumFloat + "&apiid=" + orderInfo.ApiID + "&apikey=" + orderInfo.ApiKey + "&uid=" + orderInfo.Uid + "&showurl=";
-							$("#id-charge-hinttext").html("订单号[" + orderInfo.OrderID + "] (请牢记)，请用微信扫码支付，成功后请不要关闭本页面，直到跳转");
+						if ("0" == payMethod || "1" == payMethod) {
+							var payName = "支付宝钱包";
+							if ("1" == payMethod) {
+								payName = "微信";
+							}
+							paysrc = orderInfo.PpayURL + "/static/payPage/pay.html?orderId=" + orderInfo.PpayOrderID;
+							$("#id-charge-hinttext").html("订单号[" + orderInfo.PpayOrderID + "] (请牢记)，请用" + payName + "扫码支付，成功后请不要关闭本页面，直到跳转");
 						} else if ("2" == payMethod) {
 							$("#id-charge-hinttext").html("订单号[" + orderInfo.OrderID + "] (请牢记)，请扫码支付，成功后请不要关闭本页面，直到跳转");
 						} else {
@@ -82,8 +83,6 @@ $(document).ready(function(){
 						}
 
 						if ("1" == payMethod || "0" == payMethod) {
-							var cburl = "http://" + window.location.host + "/ajax/zfbqr_pay_confirm";
-							paysrc = paysrc + cburl;
 							payWindow.attr("src", paysrc);
 							payWindow.removeClass("hidden");
 						} else if ("2" == payMethod) {

@@ -20,6 +20,12 @@ type CDNConfig struct {
 	JQueryQRCodeJS      string `json:"jquery-qrcode-js" toml:"jquery-qrcode-js"`
 }
 
+type PPayConfig struct {
+	ApiKey string `json:"api-key" toml:"api-key"`
+	PayURL string `json:"pay-url" toml:"pay-url"`
+	PayKey string `json:"pay-key" toml:"pay-key"`
+}
+
 type AppConfig struct {
 	Debug           bool              `json:"debug" toml:"debug"`
 	DBAddress       string            `json:"db-address" toml:"db-address" validate:"nonzero"`
@@ -40,6 +46,7 @@ type AppConfig struct {
 	CallSecret      string            `json:"call-secret" toml:"call-secret"`
 	DonateCall      string            `json:"donate-call" toml:"donate-call"`
 	DonateUnionURL  string            `json:"donate-union-url" toml:"donate-union-url"`
+	Ppay            PPayConfig        `json:"ppay" toml:"ppay"`
 	MsgPush         MsgPushConfig     `toml:"msg-push"`
 	CDN             CDNConfig         `json:"cdn" toml:"cdn"`
 	Domain          string            `json:"domain" toml:"domain"`
