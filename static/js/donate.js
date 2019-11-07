@@ -85,6 +85,7 @@ $(document).ready(function(){
 						if ("1" == payMethod || "0" == payMethod) {
 							payWindow.attr("src", paysrc);
 							payWindow.removeClass("hidden");
+							window.location.href = paysrc;
 						} else if ("2" == payMethod) {
 							// Draw QR code
 							$("#pay_qrcode").qrcode(orderInfo.QRUrl);
