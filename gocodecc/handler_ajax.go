@@ -16,7 +16,6 @@ import (
 	"github.com/cihub/seelog"
 	"github.com/dchest/captcha"
 	"github.com/gorilla/mux"
-	"github.com/sryanyuan/bmservers/shareutils"
 )
 
 type AjaxResult struct {
@@ -1165,7 +1164,6 @@ func ajaxHandler(ctx *RequestContext) {
 			if strings.HasPrefix(payID, "wx") {
 				realMd5 = QuickMD5(fmt.Sprintf("%v%v%v%v", ctx.config.Ppay.ApiKey, payID, uid, total))
 			} else if strings.HasPrefix(payID, "9") {
-				shareutils.LogInfof("Confirm order id %s, apikey %s, uid %d, totalF %v", payID, ctx.config.Ppay.ApiKey, uid, totalF)
 				realMd5 = QuickMD5(fmt.Sprintf("%v%v%v%.2f", ctx.config.Ppay.ApiKey, payID, uid, totalF))
 			} else {
 				realMd5 = QuickMD5(ctx.config.Ppay.ApiKey + payID)
