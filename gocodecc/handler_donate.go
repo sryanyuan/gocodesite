@@ -140,6 +140,7 @@ func createDonateOrderPpay(cfg *AppConfig, pm int, order *orderCreateInfo) (stri
 	} else {
 		sign += "1"
 	}
+	sign += fmt.Sprintf("%.2f", order.NumFloat)
 	sign += cfg.Ppay.PayKey
 
 	payMethod := "1"
