@@ -422,6 +422,12 @@ var routerItems = []RouterItem{
 		Methods:    []string{http.MethodGet},
 	},
 	{
+		Url:        "/donatecb",
+		Permission: kPermission_Guest,
+		Handler:    donateCbHander,
+		Methods:    []string{http.MethodGet},
+	},
+	{
 		Url:        "/donate/{orderid:[a-zA-Z0-9]*}",
 		Permission: kPermission_Guest,
 		Handler:    donateCheckHandler,

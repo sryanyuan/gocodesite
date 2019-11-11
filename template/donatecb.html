@@ -1,0 +1,53 @@
+{{define "Title"}}支付成功{{end}}
+{{define "importcss"}}
+{{end}}
+{{define "importjs"}}
+{{if eq .config.CDN.JQueryPlaceholderJS ""}}
+<script type="text/javascript" src="/static/js/jquery.placeholder.min.js"></script>
+{{else}}
+<script type="text/javascript" src="{{.config.CDN.JQueryPlaceholderJS}}"></script>
+{{end}}
+{{if eq .config.CDN.JQueryQRCodeJS ""}}
+<script type="text/javascript" src="/static/js/jquery.qrcode.min.js"></script>
+{{else}}
+<script type="text/javascript" src="{{.config.CDN.JQueryQRCodeJS}}"></script>
+{{end}}
+<script src="/static/js/donatecb.js"></script>
+<script type="text/javascript">
+$(function(){ $('input, textarea').placeholder(); });
+</script>
+{{end}}
+{{define "content"}}
+<div id="id-content" class="container">
+	<div id="modalAlert" class="modal fade in" role="dialog" aria-hidden="true" style="display: none;">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<a class="close" data-dismiss="modal">×</a>
+					<h3 style="color:#FE2E2E" id="id-modalalert-text">hint</h3>
+				</div>
+				<div class="modal-footer">
+					<button type="button" onclick="pay_next();" data-dismiss="modal" class="bbtn btn-primary">下一步</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-8 col-md-offset-1">
+			<ul class="breadcrumb">
+				<li><a href="/"><i class="fa fa-home"></i> 首页</a></li>
+				<li class="active">捐助</li>
+			</ul>
+			<h2 class="section-title-s3">假如支持本站，您可以选择捐助本站，同时会将贡献点发放入账户中</h2>
+			<div class="shadow-box white-box">
+				<!--div class="panel-heading">关于本站</div-->
+				<div class="panel-body">
+					<div id="id-charge-hint" class="alert alert-danger hidden" role="alert">
+						<strong id="charge-hint-title">错误!</strong><span id="id-charge-hinttext">Nothing</span>
+					  </div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{{end}}

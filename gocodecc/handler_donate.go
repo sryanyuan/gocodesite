@@ -74,6 +74,16 @@ func donateHander(ctx *RequestContext) {
 	ctx.w.Write(dataHTML)
 }
 
+func donateCbHander(ctx *RequestContext) {
+	ctx.r.ParseForm()
+
+	dataCtx := map[string]interface{}{
+		"active": "donate",
+	}
+	dataHTML := renderTemplate(ctx, []string{"template/donatecb.html"}, dataCtx)
+	ctx.w.Write(dataHTML)
+}
+
 func donateCheckHandler(ctx *RequestContext) {
 	var rsp DonateRsp
 	rsp.Result = 1

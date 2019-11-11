@@ -10,14 +10,24 @@ function changeAlertLook(widget, err) {
 	}
 }
 
-function zfbpay(){
-	$("#id-pay-method").val("0");
-	var donateForm = $("#id-form-charge");
-	donateForm.submit();
+function show_pay_tip() {
+	$("#id-modalalert-text").html("特别注意：请输入系统实际需要支付的金额，否则点数将无法到账。比如您捐助10点，但是系统显示的支付金额为9.99，则请支付9.99，不要多付，成功后您的到账将依旧是10点");
+	$("#modalAlert").modal({backdrop:"static"});
 }
 
-function wxpay() {
+$("#id-charge-zfbqr").click(function zfbpay(event){
+	event.preventDefault();
+	$("#id-pay-method").val("0");
+	show_pay_tip();
+});
+
+$("#id-charge-wxqr").click(function wxpay(event) {
+	event.preventDefault();
 	$("#id-pay-method").val("1");
+	show_pay_tip();
+});
+
+function pay_next() {
 	var donateForm = $("#id-form-charge");
 	donateForm.submit();
 }
