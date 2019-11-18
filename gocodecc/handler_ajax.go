@@ -1193,6 +1193,65 @@ func ajaxHandler(ctx *RequestContext) {
 
 			result.Result = 0
 		}
+	case "bmkvadd":
+		{
+			if ctx.r.Method != "POST" {
+				result.Msg = "invalid method"
+				return
+			}
+
+			//	must be superadmin
+			if ctx.user.Permission < kPermission_SuperAdmin {
+				result.Msg = "permission denied"
+				return
+			}
+
+			//	check project name and project describe
+			ctx.r.ParseForm()
+			defer ctx.r.Body.Close()
+
+			var err error
+			key := ctx.r.Form.Get("key")
+			value := ctx.r.Form.Get("value")
+			if "" == key || "" == value {
+				result.Msg = "Invalid key or value"
+				return
+			}
+			if err = modelBmkvUpinsert(key, value); nil != err {
+				result.Msg = err.Error()
+				return
+			}
+			result.Result = 0
+		}
+	case "bmkvdel":
+		{
+			if ctx.r.Method != "POST" {
+				result.Msg = "invalid method"
+				return
+			}
+
+			//	must be superadmin
+			if ctx.user.Permission < kPermission_SuperAdmin {
+				result.Msg = "permission denied"
+				return
+			}
+
+			//	check project name and project describe
+			ctx.r.ParseForm()
+			defer ctx.r.Body.Close()
+
+			var err error
+			key := ctx.r.Form.Get("key")
+			if "" == key {
+				result.Msg = "Invalid key or value"
+				return
+			}
+			if err = modelBmkvDelete(key); nil != err {
+				result.Msg = err.Error()
+				return
+			}
+			result.Result = 0
+		}
 	default:
 		{
 			result.Msg = "invalid ajax request"

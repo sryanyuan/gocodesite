@@ -10,6 +10,7 @@ var managerIndexRenderTpls = []string{
 	"template/manager/layout.html",
 	"template/manager/leftmenu.html",
 	"template/manager/users.html",
+	"template/manager/bmkv.html",
 }
 
 func managerPanelHandler(ctx *RequestContext) {
@@ -21,6 +22,10 @@ func managerPanelHandler(ctx *RequestContext) {
 	case "users":
 		{
 			managerUserHandler(ctx)
+		}
+	case "bmkv":
+		{
+			managerBmkvHandler(ctx)
 		}
 	default:
 		{
@@ -43,6 +48,20 @@ func managerUserHandler(ctx *RequestContext) {
 	tplData := make(map[string]interface{})
 	tplData["active"] = "users"
 	tplData["users"] = users
+	data := renderTemplate(ctx, managerIndexRenderTpls, tplData)
+	ctx.w.Write(data)
+}
+
+func managerBmkvHandler(ctx *RequestContext) {
+	kvs, err := modelBmkvGetAll(0, 0)
+	if nil != err {
+		ctx.RenderMessagePage("错误", err.Error(), false)
+		return
+	}
+
+	tplData := make(map[string]interface{})
+	tplData["active"] = "bmkv"
+	tplData["kvs"] = kvs
 	data := renderTemplate(ctx, managerIndexRenderTpls, tplData)
 	ctx.w.Write(data)
 }

@@ -1,5 +1,7 @@
 {{define "Title"}}管理后台{{end}}
-{{define "importjs"}}{{end}}
+{{define "importjs"}}
+<script src="/static/js/manager.js"></script>
+{{end}}
 {{define "importcss"}}
 <link href="/static/css/manager.css" rel="stylesheet" />
 {{end}}
@@ -12,6 +14,8 @@
         <div class="page-right">
             {{if eq .active "users"}}
             {{template "manager_users" .}}
+            {{else if eq .active "bmkv"}}
+            {{template "manager_bmkv" .}}
             {{else}}
             Undefined page {{.active}}
             {{end}}

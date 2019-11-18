@@ -119,6 +119,17 @@ func (c *RequestContext) WriteResponse(rsp []byte) (int, error) {
 	return c.w.Write(rsp)
 }
 
+func (c *RequestContext) WriteJSONResponse(jobj interface{}) (int, error) {
+	data, err := json.Marshal(jobj)
+	if nil != err {
+		c.w.WriteHeader(http.StatusInternalServerError)
+		c.w.Write([]byte(err.Error()))
+		return 0, nil
+	}
+	c.w.Write(data)
+	return 0, nil
+}
+
 func (c *RequestContext) GetSession(name string) (*sessions.Session, error) {
 	return store.Get(c.r, name)
 }
@@ -536,6 +547,12 @@ var routerItems = []RouterItem{
 		Url:        "/manager",
 		Permission: kPermission_SuperAdmin,
 		Handler:    managerHandler,
+	},
+	{
+		Url:        "/get",
+		Permission: kPermission_Guest,
+		Handler:    bmkvGetHandler,
+		Methods:    []string{http.MethodGet},
 	},
 }
 

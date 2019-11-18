@@ -2,8 +2,13 @@
 <ul class="menu" id="manager-menu">
     <li {{if eq .active "users"}}class="active" {{end}}>
         <a href="/manager/users" class="item">
-                    <i class="fa fa-users" aria-hidden="true"></i>用户管理
-                </a>
+            <i class="fa fa-users" aria-hidden="true"></i>用户管理
+        </a>
+    </li>
+    <li {{if eq .active "bmkv"}}class="active" {{end}}>
+        <a href="/manager/bmkv" class="item">
+            <i class="fa fa-users" aria-hidden="true"></i>BM配置管理
+        </a>
     </li>
 </ul>
 {{end}}

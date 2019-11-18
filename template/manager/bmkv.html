@@ -1,0 +1,125 @@
+{{define "manager_bmkv"}}
+<div id="modalAlert" class="modal fade in" role="dialog" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <a class="close" data-dismiss="modal">×</a>
+                <h3 style="color:#FE2E2E" id="id-modalalert-text">hint</h3>
+            </div>
+            <div class="modal-footer">
+                <a href="#" class="btn" data-dismiss="modal">关闭</a>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="modalKvAdd" class="modal fade in" role="dialog" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <a class="close" data-dismiss="modal">×</a>
+                <h3>添加配置</h3>
+            </div>
+            <div class="modal-body">
+                <form id="id-form-kvadd" class="form" novalidate="novalidate" action="/ajax/bmkvadd"
+                    accept-charset="UTF-8" method="post">
+                    <div class="form-group">
+                        <input type="input" class="form-control input-lg" placeholder="键名" name="key"
+                            id="newproject_name" />
+                    </div>
+                    <div class="form-group">
+                        <input type="input" class="form-control input-lg" placeholder="键值" name="value"
+                            id="newproject_describe" />
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <a href="#" onclick="submitBmkvAdd(this)" class="btn btn-success">添加</a>
+                <a href="#" class="btn" data-dismiss="modal">关闭</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="modalKvUpdate" class="modal fade in" role="dialog" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <a class="close" data-dismiss="modal">×</a>
+                <h3>更新配置</h3>
+            </div>
+            <div class="modal-body">
+                <form id="id-form-kvupdate" class="form" novalidate="novalidate" action="/ajax/bmkvadd"
+                    accept-charset="UTF-8" method="post">
+                    <div class="form-group">
+                        <input type="input" class="form-control input-lg" readonly placeholder="键名" name="key"
+                            id="bmkvupdate-key" />
+                    </div>
+                    <div class="form-group">
+                        <input type="input" class="form-control input-lg" placeholder="键值" name="value"
+                            id="bmkvupdate-value" />
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <a href="#" onclick="submitBmkvUpdate(this)" class="btn btn-success">更新</a>
+                <a href="#" class="btn" data-dismiss="modal">关闭</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="modalKvDelete" class="modal fade in" role="dialog" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <a class="close" data-dismiss="modal">×</a>
+                <h3>删除配置</h3>
+            </div>
+            <div class="modal-body">
+                <form id="id-form-kvdelete" class="form" novalidate="novalidate" action="/ajax/bmkvdel"
+                    accept-charset="UTF-8" method="post">
+                    <div class="form-group">
+                        <input type="input" class="form-control input-lg" readonly placeholder="键名" name="key"
+                            id="bmkvdel-key" />
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <a href="#" onclick="submitBmkvDelete(this)" class="btn btn-success">删除</a>
+                <a href="#" class="btn" data-dismiss="modal">关闭</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="m-box">
+    <div class="box-head">
+        <strong class="box-title">BM配置管理</strong>
+        <button id="bmkv-add" type="button" class="btn btn-xs btn-info">添加</button>
+    </div>
+    <div class="box-body">
+        <div class="bmkv-list">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>键名</th>
+                        <th>键值</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{range .kvs}}
+                    <tr>
+                        <td id="kv-key">{{.Key}}</td>
+                        <td id="kv-value">{{.Value}}</td>
+                        <td><button id="bmkv-update" type="button" onclick="bmkvupdate(this)"
+                                class="btn btn-xs btn-warning">更新</button></td>
+                        <td><button id="bmkv-delete" type="button" onclick="bmkvdelete(this)"
+                                class="btn btn-xs btn-danger">删除</button></td>
+                    </tr>
+                    {{end}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{{end}}
